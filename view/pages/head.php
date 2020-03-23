@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="view/bower_components/Ionicons/css/ionicons.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="view/dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="view/dist/css/jquery-ui.css">
   <!-- AdminLTE Skins. Choose a skin from the css/skins
        folder instead of downloading all of them to reduce the load. -->
   <link rel="stylesheet" href="view/dist/css/skins/_all-skins.min.css">
@@ -32,6 +33,7 @@
   <link rel="stylesheet" href="view/bower_components/select2/dist/css/select2.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="view/dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap.min.css">
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -42,4 +44,4 @@
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
-<body class="hold-transition sidebar-mini skin-black-light">
+<body class="fixed hold-transition sidebar-mini skin-black-light" >

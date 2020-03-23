@@ -7,8 +7,9 @@
                     <h3 class="box-title">Reportes</h3>
                 </div>
                 <div class="box-body">
+                	<div id="alert_reporte"></div>
                 	<form id="frm_reportes" action="#" method="post">
-                		<input type="hidden" id="option" name="option" value="">
+                		<input type="hidden" id="option" name="option" value="29">
                 		<div class="row">
 							<div class="col-md-3">
 								<div class="form-group">
@@ -45,7 +46,7 @@
 						        <div class="col-md-4">
 						            <div class="form-group">
 						                <label>Tipo</label>
-						                <select id="t_ref" name="t_ref" class="form-control" required>
+						                <select id="t_ref" name="t_ref" class="form-control" >
 						                    <option value="">...</option>
 						                </select>
 						            </div>
@@ -58,15 +59,17 @@
 						        <div class="col-md-2">
 						            <div class="form-group">
 						                <label>Prioridad</label>
-						                <select id="prioridad" name="prioridad" class="form-control" required>
+						                <select id="prioridad" name="prioridad" class="form-control" >
 						                    <option value="">...</option>
+						                    <option value="1">Normal</option>
+						                    <option value="2">Urgente</option>
 						                </select>
 						            </div>
 						        </div>
 						        <div class="col-md-2">
 						            <div class="form-group">
 						                <label for="estado">Estado guarda</label>
-						                <select id="estado" name="estado" class="form-control" required>
+						                <select id="estado" name="estado" class="form-control" >
 						                    <option value="">...</option>
 						                </select>
 						            </div>
@@ -74,8 +77,12 @@
 						        <div class="col-md-2">
 						            <div class="form-group">
 						                <label for="evidencia">Evidencia</label>
-						                <select id="evidencia" name="evidencia" class="form-control" required>
+						                <select id="evidencia" name="evidencia" class="form-control" >
 						                    <option value="">...</option>
+						                    <option value="1">CD/DVD</option>
+						                    <option value="2">MEMORIA USB</option>
+						                    <option value="3">FOTOGRAFÍAS</option>
+						                    <option value="4">DOCUMENTOS</option>
 						                </select>
 						            </div>
 						        </div>
@@ -83,7 +90,7 @@
 						        <div class="col-md-2">
 						            <div class="form-group">
 						                <label for="procedencia">Procedencia</label>
-						                <select id="procedencia" name="procedencia" class="form-control" required>
+						                <select id="procedencia" name="procedencia" class="form-control" >
 						                    <option value="">...</option>
 						                </select>
 						            </div>
@@ -94,7 +101,7 @@
 						        <div class="col-md-2">
 						            <div class="form-group">
 						                <label>Tipo de trámite</label>
-						                <select id="t_tra" name="t_tra" class="form-control" required>
+						                <select id="t_tra" name="t_tra" class="form-control" >
 						                    <option value="">...</option>
 						                </select>
 						            </div>
@@ -104,7 +111,7 @@
 						        <div class="col-md-2">
 						            <div class="form-group">
 						                <label for="genero">Género</label>
-						                <select id="genero" name="genero" class="form-control" required="">
+						                <select id="genero" name="genero" class="form-control" >
 						                    <option value="">...</option>
 						                    <option value="1">MASCULINO</option>
 						                    <option value="2">FEMENINO</option>
@@ -114,7 +121,7 @@
 						        <div class="col-md-3">
 						            <div class="form-group">
 						                <label for="t_afecta">Tipo de afectado</label>
-						                <select id="t_afecta" name="t_afecta" class="form-control" required="">
+						                <select id="t_afecta" name="t_afecta" class="form-control" >
 						                    <option value="">...</option>
 						                    <option value="1">QUEJOSO</option>
 						                    <option value="2">DENUNCIANTE</option>
@@ -125,7 +132,7 @@
 						        <div class="col-md-3">
 						            <div class="form-group">
 						                <label for="categoria">Categoria</label>
-						                <select id="categoria" name="categoria" class="form-control" required="">
+						                <select id="categoria" name="categoria" class="form-control" >
 						                    <option value="">...</option>
 						                    <option value="1">CIUDADANO</option>
 						                    <option value="2">SERVIDOR PÚBLICO</option>
@@ -148,16 +155,16 @@
 						    <div class="row">
 						        <div class="col-md-4">
 						            <div class="form-group">
-						                <label id="t_ley">Tipo de ley</label>
-						                <select id="t_ley" name="t_ley" class="form-control" required>
+						                <label for="t_ley">Tipo de ley</label>
+						                <select id="t_ley" name="t_ley" class="form-control" >
 						                    <option value="">...</option>
 						                </select>
 						            </div>
 						        </div>
 						        <div class="col-md-8">
 						            <div class="form-group">
-						                <label id="t_ley">Presunta conducta</label>
-						                <select id="t_ley" name="t_ley" class="form-control select2" multiple="multiple" data-placeholder="Selecciona uno o más conductas" required>
+						                <label for="conductas">Presunta conducta</label>
+						                <select id="conductas" name="conductas[]" class="form-control select2" multiple="multiple" data-placeholder="Selecciona uno o más conductas" >
 						                    <option value="">...</option>
 						                </select>
 						            </div>
@@ -167,7 +174,7 @@
 						        <div class="col-md-12">
 						            <div class="form-group">
 						                <label>Vias de recepción</label>
-						                <select id="vias_r" name="vias_r" class="form-control" required>
+						                <select id="vias_r" name="vias_r[]" class="form-control select2"  multiple>
 						                    <option value="">...</option>
 						                </select>
 						            </div>
@@ -180,7 +187,7 @@
 						        <div class="col-md-4">
 						            <div class="form-group">
 						                <label for="municipio">Municipio</label>
-						                <select id="municipio" name="municipio" class="form-control" required>
+						                <select id="municipio" name="municipio" class="form-control" >
 						                    <option value="">...</option>
 						                </select>
 						            </div>
@@ -193,7 +200,7 @@
 					            <div class="form-group">
 					                <label for="municipio">Buscar palabras clave </label>
 					                <small class="label pull-right bg-green" title="EFICIENTE E INTELIGENTE" data-toggle="popover" data-trigger="hover" data-content="El nuevo buscador de decripción de hechos ahora es más eficiente e inteligente, pues permite encontrar mayor cantidad de coincidencias con menor cantidad de palabras.">Buscardor mejorado</small>
-					                <textarea name="" class="form-control" placeholder="Escriba una fase o palabras clave " style="resize: vertical;max-height: 300px;"></textarea>
+					                <textarea name="descripcion" class="form-control" placeholder="Escriba una fase o palabras clave " style="resize: vertical;max-height: 300px;"></textarea>
 					            </div>
 					        </div>
 						    <div class="col-md-6"></div>
@@ -270,5 +277,37 @@
 </section>
 
 
-
-
+<section class="content container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Resultado de la búsqueda</h3>
+                </div>
+				<div class="box-body">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="table-responsive">
+								<table id="reporte" class="table table-bordered table-stripped table-hover ">
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>No. Folio</th>
+											<th>No. Expediente</th>
+											<th>Estado</th>
+											<th>Fecha/Hora de hechos</th>
+											<th>Infraccion(es)</th>
+											<th>Municipio</th>
+											<th>Procedencia</th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+        </div>
+    </div>
+</section>

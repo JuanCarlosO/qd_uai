@@ -62,7 +62,7 @@
 								<div class="box-body">
 									<div class="row">
 										<div class="col-md-4 pull-right">
-											<button class="btn btn-info btn-flat btn-block ">
+											<button class="btn btn-info btn-flat btn-block "  data-toggle="modal" data-target="#modal_add_vehiculo">
 												<i class="fa fa-plus"></i> Agregar vehiculo
 											</button>
 										</div>
@@ -82,7 +82,7 @@
 								<div class="box-body">
 									<div class="row">
 										<div class="col-md-4 pull-right">
-											<button class="btn btn-info btn-flat btn-block ">
+											<button class="btn btn-info btn-flat btn-block " data-toggle="modal" data-target="#modal_add_animal">
 												<i class="fa fa-plus"></i> Agregar animal
 											</button>
 										</div>
@@ -104,7 +104,7 @@
 								<div class="box-body">
 									<div class="row">
 										<div class="col-md-4 pull-right">
-											<button class="btn btn-info btn-flat btn-block ">
+											<button class="btn btn-info btn-flat btn-block " data-toggle="modal" data-target="#modal_add_arma">
 												<i class="fa fa-plus"></i> Agregar armas
 											</button>
 										</div>
@@ -124,7 +124,7 @@
 								<div class="box-body">
 									<div class="row">
 										<div class="col-md-4 pull-right">
-											<button class="btn btn-info btn-flat btn-block ">
+											<button class="btn btn-info btn-flat btn-block " data-toggle="modal" data-target="#modal_add_archivo">
 												<i class="fa fa-plus"></i> Adjuntar doc.
 											</button>
 										</div>
@@ -146,7 +146,7 @@
 								<div class="box-body">
 									<div class="row">
 										<div class="col-md-4 pull-right">
-											<button class="btn btn-info btn-flat btn-block ">
+											<button class="btn btn-info btn-flat btn-block " data-toggle="modal" data-target="#modal_add_turno">
 												<i class="fa fa-plus"></i> Generar un turnado
 											</button>
 										</div>

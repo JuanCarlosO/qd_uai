@@ -51,7 +51,7 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
 					<button type="button" class="btn btn-primary">
 						<i class="fa fa-floppy-o"></i> Guardar datos
 					</button>

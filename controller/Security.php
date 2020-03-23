@@ -45,17 +45,23 @@ class Security
 	public function search_data_login($user, $password)
 	{
 		try {
-			$sql = "SELECT * FROM usuario WHERE  nick = ?  LIMIT 1";
+			$sql = "SELECT u.*,p.nombre AS name, CONCAT(p.nombre, ' ',p.ap_pat,' ',p.ap_mat) AS n_completo, a.nombre AS n_area, a.id AS area_id FROM usuarios AS u 
+			INNER JOIN personal AS p ON p.id = u.person_id
+			INNER JOIN areas AS a ON a.id = p.area_id
+			WHERE  u.nick = ? AND u.estado = 1 LIMIT 1";
 			$stmt = $this->pdo->prepare($sql);
 			$stmt->bindParam(1,$user);
 			$stmt->execute();
 			$res = $stmt->fetch( PDO::FETCH_OBJ );
-			
+			if (empty($res)) {
+				throw new Exception("Error: El nombre de usuario no existe.", 1);				
+			}
 			$pass_decrypt = $this->decrypt_pass($res->pass);
 			
-			if ( is_object($res) AND count($res) > 0 ) 
+			if ( is_object($res) AND isset($res->pass)  ) 
 			{
 				if ( $pass_decrypt == $password ) {
+
 					return $res;
 				} else {
 					throw new Exception("Error: La contraseña no coincide.");
@@ -68,7 +74,7 @@ class Security
 		} 
 		catch (Exception $e) 
 		{
-			return $e->getMessage();
+			return  array('status'=>'error','message'=>$e->getMessage());
 		}
 	}
 

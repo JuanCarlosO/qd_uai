@@ -1,3 +1,4 @@
+var rescate;
 $(document).ready(function() {
 	console.log('Bienvenido a Sistema de Registro de Actas.');
 	var url = window.location.search;
@@ -8,7 +9,7 @@ $(document).ready(function() {
 	$('.select2').select2({
 		language: {
 			noResults: function() {
-		      return "No hay elementos para seleccionar";        
+		     	return "No hay elementos para seleccionar";        
 		    }
 		}
 	});
@@ -21,12 +22,20 @@ function getURL(url) {
 	if ( url == '?menu=general' ) {
 		$('#option_1').addClass('active');
 		$('#option_1_1').addClass('active');
+		autocomplete_input('area','area_h',2);
+		autocomplete_input('orden_i','orden_h',5);
+		autocomplete_input('personal','',3);
+		autocomplete_input('personal_a','',3);
+		load_catalogo('municipio','select',10);
 		question();
+		frm_add_acta();
+		frm_edit_acta();
 	}
 	if ( url == '?menu=list_acta' ) {
 		$('#option_1').addClass('active');
 		$('#option_1_2').addClass('active');
 		getActas();
+		frm_upload_file();
 	}
 	if ( url == '?menu=ordenes' ) {
 		$('#option_2').addClass('active');
@@ -42,7 +51,7 @@ function getURL(url) {
 		$('#option_5').addClass('active');
 	}
 	if ( url == '?menu=seguimiento' ) {
-		console.log('Modulo de presuntos responsables');
+		frm_add_pr();//FORMUALRIO DEL PRESUNTO RESPONSABLE
 	}
 	return false; 
 }
@@ -87,16 +96,14 @@ function getOrdenes() {
 	                        target: '_blank',
 	                        id: 'editar-' + obj.id,
 	                        data: [
-	                            { href: '#', contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento' },
-	                            { href: '#', contenido: '<i class="glyphicon glyphicon-comment"></i>Agregar observaciones' },
-	                            { href: '#', contenido: '<i class="glyphicon glyphicon-eye-open"></i>Ver detalle' },
-	                            { href: '#', contenido: '<i class="glyphicon glyphicon-bullhorn"></i>Ver conversación' }
+	                            { href: "javascript:open_modal('modal_ot_upload');", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento' },
+	                            { href: "javascript:open_modal('modal_add_obs');", contenido: '<i class="glyphicon glyphicon-comment"></i>Agregar observaciones' },
+	                            { href: 'index.php?menu=detalle&ot='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i>Ver detalle' },
 	                        ]
 	                    });
 	    	        }},
 	        { propiedad: 'id' },
 	        { propiedad: 'clave' },
-	        
 	        { propiedad: 'fecha' },
 	        { propiedad: 'estado', class: '', },
 	        { propiedad: 'participantes', class: '', },
@@ -113,17 +120,47 @@ function getOrdenes() {
 
 /*LISTADO DE ACTAS*/
 function getActas() {
+	load_catalogo('','json',10);
+	
+	var aux = [{'valor': '','contenido':'TODOS'}];
+	$.each(rescate, function(i, val) {
+		aux.push({'valor': val.id,'contenido':val.nombre});
+	});
 	var tabla = $("#lista_actas").anexGrid({
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	    	{ class:'text-center', leyenda: 'Acciones', style: 'width:30px;', columna: 'Sueldo' },
 	    	{ class:'text-center', leyenda: 'ID', style:'width:20px;'},
-	    	{ class:'text-center', leyenda: 'Clave', style: 'width:100px;', columna: 'clave'},
-	        { class:'text-center', leyenda: 'Tipo acta', style: 'width:100px;', columna: 'clave'},
+	    	{ class:'text-center', leyenda: 'Clave', style: 'width:100px;', columna: 'a.clave',filtro:true},
+	        { class:'text-center', leyenda: 'Tipo acta', style: 'width:100px;',
+	        columna: 'a.t_actuacion',filtro:function(){
+    	        return anexGrid_select({
+    	            data: [
+    	                    { valor: '', contenido: 'Todos' },
+    	                    { valor: '1', contenido: 'INSPECCION' },
+    	                    { valor: '2', contenido: 'VERIFICACION' },
+    	                    { valor: '3', contenido: 'SUPERVISIÓN' },
+    	                ]
+    	            });
+    	        }
+	    	},
 	        { class:'text-center', leyenda: 'Fecha',style: 'width:50px;', columna: 'fecha', filtro: false },
-	        { class:'text-center', leyenda: 'Procedencia', style: 'width:100px;', columna: 'Correo' },
-	        { class:'text-center', leyenda: 'Municipio', style: 'width:100px;', columna: ''},
-	        { class:'text-center', leyenda: 'Descripcion', style: 'width:300px;', columna: 'clave',filtro:true},
+	        { class:'text-center', leyenda: 'Procedencia', style: 'width:100px;', columna: 'a.procedencia',filtro:function(){
+	        	return anexGrid_select({
+	                data: [
+	                    { valor: '', contenido: 'Todos' },
+	                    { valor: '1', contenido: 'SS' },
+	                    { valor: '2', contenido: 'CPRS' },
+	                ]
+	            });
+	        } },
+	        { class:'ext-center', leyenda: 'Municipio', style: 'width:100px;', columna:'m.id',ordenable:false,filtro:function(){
+	        	return anexGrid_select({
+	        		//class:'select2',
+    	            data: aux
+    	        });
+	        }},
+	        { class:'text-center', leyenda: 'Descripcion', style: 'width:300px;', columna: 'a.comentarios',filtro:true},
 	        
 	    ],
 	    modelo: [
@@ -132,30 +169,27 @@ function getActas() {
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
                     class: 'btn btn-primary ',
                     target: '_blank',
-                    id: 'editar-' + obj.id,
+                    id: obj.id,
                     data: [
                         { href: 'index.php?menu=seguimiento&acta=1', contenido: '<i class="glyphicon glyphicon-road"></i> Dar seguimiento' },
-                        { href: 'index.php?menu=general&acta=1', contenido: '<i class="glyphicon glyphicon-pencil"></i> Editar' },
-                        { href: 'index.php?menu=cedula&acta=1', contenido: '<i class="glyphicon glyphicon-eye-open"></i> Ver cedula' },
-                        { href: 'index.php?menu=adjuntar&acta=1', 
+                        { href: 'index.php?menu=general&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-pencil"></i> Editar' },
+                        { href: 'index.php?menu=cedula&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i> Ver cedula' },
+                        { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", 
                           contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento',
-                          attr:[
-                          	'data-toggle="modal" data-target="#modal_adjuntar_"'
-                          ]
                         }
                     ]
                 });
 	        }},
 	        { propiedad: 'id' },
-	        { propiedad: 'no_acta' },
-	        { propiedad: 't_acta' },
+	        { propiedad: 'clave' },
+	        { propiedad: 't_actuacion' },
 	        { propiedad: 'fecha' },
 	        { propiedad: 'procedencia', class: '', },
-	        { propiedad: 'municipio', class: '', },
-	        { class:'text-justify', propiedad: 'descripcion',  },
+	        { propiedad: 'n_municipio', class: '', },
+	        { class:'text-justify', propiedad: 'comentarios',  },
 	        
 	    ],
-	    url: 'controller/puente.php?option=2',
+	    url: 'controller/puente.php?option=6',
 	    filtrable: true,
 	    columna: 'id',
 	    columna_orden: 'DESC'
@@ -163,3 +197,209 @@ function getActas() {
 	return tabla;
 }
 
+function open_modal(modal,id) {
+	$('#'+modal).modal('show');
+	//agregar el ID del acta al modal
+	$('[name="acta_id"]').val(id);
+	return false;
+}
+//Autocompletado de informacion 
+function autocomplete_input(input,hidden,option){
+	//2.- areas, 3.- personal, 5.- oins
+	$('#'+input).autocomplete({
+		source: "controller/puente.php?option="+option,
+		select:function(event,ui){
+			if ( (input == 'personal' || input == 'personal_a') && hidden == '' ) {
+				$("#"+input).val("");
+				var lista;
+				if ( input == 'personal' ) { lista = 'investigadores'; } 
+				if ( input == 'personal_a' ) { lista = 'apoyo'; }
+				$('#'+lista).append(
+					'<li id="'+ui.item.id+'">'+
+					    ui.item.value+
+					    '<input type="hidden" name="'+lista+'[]" value="'+ui.item.id+'">'+
+					    '<button type="button" class="btn btn-flat btn-danger btn-sm" onclick="remover_persona('+ui.item.id+','+"'investigadores')"+'">'+
+					        '<i class="fa fa-minus"></i>'+
+					    '</button> '+
+					'</li>'
+				);
+			}else{
+				$('#'+input).val(ui.item.value);
+				$('#'+hidden).val(ui.item.id);
+			}
+			return false;
+		}
+	});
+	return false;
+}
+//Creador de alertas automatico
+function alerta(div,estado,mensaje,modal)
+{
+	var clase,icono,msj,edo;
+	if ( estado == 'error' ) {
+		icono = "fa-times";
+		clase = "alert-danger";
+		msj = mensaje;
+		edo = "Error!";
+		time = 5000;
+	}
+	if ( estado == 'success') {
+		icono = "fa-check";
+		clase = "alert-success";
+		msj = mensaje;
+		edo = "Éxito!";
+		time = 3000;
+	}
+	var contenedor = 
+	'<div class="row">'+
+		'<div class="col-md-12">'+
+			'<div class="alert '+clase+' ">'+
+				'<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'+
+				'<h4><i class="icon fa '+icono+'"></i> '+edo+'</h4>'+
+				'<p> '+msj+' </p>'+
+			'</div>'+
+		'</div>'+
+	'</div>';
+	$('#'+div).html(contenedor);
+	location.href = "#"+div;
+	setTimeout(function() {
+		$('#'+div).html("");
+		if ( modal != '' ) {
+			$('#'+modal).modal('hide');
+		}
+	},time);
+	return false;
+}
+//Formulario de alta de acta 
+function frm_add_acta() {
+	$('#frm_add_acta').submit(function(e){
+		e.preventDefault();
+		var dataForm = $(this).serializeArray();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('div_alert',response.status,response.message,'');
+			if(response.status == 'success'){
+				setTimeout(function(){
+					document.location.href = "index.php?menu=list_acta";
+				},5000);
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('div_alert','error',jqXHR.responseText,'');
+		});
+		
+	});
+	return false;
+}
+function load_catalogo(element,type,option){
+	var result;
+	if ( element != '' ) {
+		$('#'+element).html('');
+	}
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: option},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		if ( type == 'select') {
+			$('#'+element).append('<option value="" >...</option>');
+			$.each(response, function(index, val) {
+				$('#'+element).append('<option value="'+val.id+'">'+val.nombre+'</option>');
+			});
+			result = false;
+		}else{
+			result = response;
+			setInfo(result);
+		}
+	})
+	.fail(function() {
+		alert('Ocurrio un error al cargar el catalogo de opcion: '+option);
+	});		
+}
+// Setear un array de municipios 
+function setInfo( json ) { rescate = json; }
+//
+function frm_upload_file() {
+	$('#frm_upload_file').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_upload_file"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			processData: false,
+            contentType: false,
+		})
+		.done(function(response) {
+			alerta('upload_file',response.status,response.message,'modal_upload_file');
+			setTimeout( function(){
+				document.getElementById('frm_upload_file').reset();
+			},5000 );
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('upload_file','error',jqXHR.responseText,'modal_upload_file');
+		});
+	});
+	return false;
+}
+function frm_edit_acta() {
+	$('#frm_edit_acta').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serializeArray();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('div_alert',response.status,response.message,'');
+			if(response.status == 'success'){
+				setTimeout(function(){
+					document.location.href = "index.php?menu=list_acta";
+				},5000);
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('div_alert','error',jqXHR.responseText,'');
+		});
+	});
+}
+function frm_add_pr() {//FORMUALRIO DEL PRESUNTO RESPONSABLE
+	$('#frm_add_pr').submit( function(e){
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('alert_pr',response.status,reponse.message,'');
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('alert_pr',response.status,reponse.message,'');
+		});
+		
+	} );
+	return false;
+}

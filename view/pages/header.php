@@ -1,6 +1,6 @@
 <header class="main-header">
     <!-- Logo -->
-    <a href="index2.html" class="logo">
+    <a href="index.php?menu=general" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>SIQD</b></span>
       <!-- logo for regular state and mobile devices -->
@@ -19,7 +19,7 @@
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <img src="view/dist/img/avatar5.png" class="user-image" alt="User Image">
-              <span class="hidden-xs name-person">Alexander de la Cruz Marin</span>
+              <span class="hidden-xs name-person"> <?=$_SESSION['name'];?> </span>
             </a>
             <ul class="dropdown-menu">
               <!-- User image -->
@@ -27,8 +27,8 @@
                 <img src="view/dist/img/avatar5.png" class="img-circle" alt="User Image">
 
                 <p>
-                  <label class="name-person"></label>
-                  <small>Member since Nov. 2012</small>
+                  <label class="name-person"> <?=$_SESSION['n_completo']?> </label>
+                  <small>Perfil: <?=mb_strtoupper($_SESSION['perfil'],'utf-8');?></small>
                 </p>
               </li>
               <li class="user-footer">

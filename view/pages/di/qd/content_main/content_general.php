@@ -1,3 +1,7 @@
+<?php
+if ( $_SESSION['perfil'] == 'QDP' ) { $t_as = 1; }
+if ( $_SESSION['perfil'] == 'QDNP' ) { $t_as = 2; }
+?>
 <!-- Main content -->
     <section class="content container-fluid">
         <div class="row">
@@ -5,29 +9,29 @@
                 <div class="box">
                     <div class="box-header with-border">
                         <h3 class="box-title">Formulario de Alta de Queja o Denuncia</h3>
+                        (<label>NOTA: </label>Los campos obligatorios se encuentran marcados con un asterisco "<i class="fa fa-asterisk"></i>" )
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <div class="row">
-                                <div id="div_alert" class="col-md-12">
-                                    <div id="alerta" class="alert alert-success alert-dismissible ">
-                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                        <h4><i id="icono" class="icon fa fa-info"></i> <label id="estado"> Mi estado </label> </h4>
-                                        <p id="message">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod</p>
-                                    </div>
-                                </div>
-                            </div>
-                    	<form id="frm_add_car" method="post" action="#">
-                    		<input type="hidden" id="option" name="option" value="">
+                        <div id="div_alert"></div>
+                    	<form id="frm_add_queja" method="post" action="#">
+                    		<input type="hidden" id="option" name="option" value="11">
+                            
                     		<div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Tipo de asunto</label>
-                                        <select id="t_asunto" name="t_asunto" class="form-control" required autofocus>
-                                            <option value="">...</option>
-                                            <option value="1">POLICIAL</option>
-                                            <option value="2">NO POLICIAL</option>
-                                        </select>
+                                        <?php if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'QDNP' ): ?>
+                                            <input type="hidden" name="t_asunto" value="<?=$t_as?>">
+                                        <?php else: ?>
+                                            <label>Tipo de asunto <i class="fa fa-asterisk"></i> </label>
+                                            <select id="t_asunto" name="t_asunto" class="form-control" required autofocus>
+                                                <option value="">...</option>
+                                                <option value="1">POLICIAL</option>
+                                                <option value="2">NO POLICIAL</option>
+                                            </select>
+                                        <?php endif ?>
+                                        
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -36,22 +40,33 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Tipo</label>
-                                            <select id="t_ref" name="t_ref" class="form-control" required>
-                                                <option value="">...</option>
-                                            </select>
+                                            <label>Tipo de referencia</label>
+                                            
+                                            <div class="input-group input-group-md">
+                                                <select id="t_ref" name="t_ref" class="form-control">
+                                                    <option value="">...</option>
+                                                </select>
+                                                <span class="input-group-btn">
+                                                  <button type="button" class="btn btn-success btn-flat" data-toggle="modal" data-target="#modal_add_referencia">
+                                                      <i class="fa fa-plus"></i>
+                                                  </button>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Clave</label>
-                                            <input type="text" id="cve_ref" name="cve_ref" value="" placeholder="Escriba la clave de referencia" class="form-control">
+                                    
+                                    <div id="elements_tr" class="hidden">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Clave</label>
+                                                <input type="text" id="cve_ref" name="cve_ref" value="" placeholder="Escriba la clave de referencia" class="form-control">
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Número de turno</label>
-                                            <input type="text" id="n_turno" name="n_turno" value="" placeholder="Escriba el número de turno" class="form-control" autocomplete="off">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Número de turno</label>
+                                                <input type="text" id="n_turno" name="n_turno" value="" placeholder="Escriba el número de turno" class="form-control" autocomplete="off">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -61,15 +76,16 @@
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div class="form-group">
-                                            <label>Prioridad</label>
+                                            <label>Prioridad <i class="fa fa-asterisk"></i></label>
                                             <select id="prioridad" name="prioridad" class="form-control" required>
-                                                <option value="">...</option>
+                                                <option value="1" selected>Normal</option>
+                                                <option value="2">Urgente</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
-                                            <label for="estado">Estado guarda</label>
+                                            <label for="estado">Estado guarda <i class="fa fa-asterisk"></i></label>
                                             <select id="estado" name="estado" class="form-control" required>
                                                 <option value="">...</option>
                                             </select>
@@ -78,21 +94,25 @@
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="evidencia">Evidencia</label>
-                                            <select id="evidencia" name="evidencia" class="form-control" required>
+                                            <select id="evidencia" name="evidencia" class="form-control">
                                                 <option value="">...</option>
+                                                <option value="1">CD/DVD</option>
+                                                <option value="2">MEMORIA USB</option>
+                                                <option value="3">FOTOGRAFÍAS</option>
+                                                <option value="4">DOCUMENTOS</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="fojas">Número de fojas</label>
-                                            <input type="number" name="fojas" value="" placeholder="" class="form-control" autocomplete="off">
+                                            <input type="number" name="fojas" value="0" placeholder="" class="form-control" autocomplete="off" min="0">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="procedencia">Procedencia</label>
-                                            <select id="procedencia" name="procedencia" class="form-control" required>
+                                            <select id="procedencia" name="procedencia" class="form-control">
                                                 <option value="">...</option>
                                             </select>
                                         </div>
@@ -102,18 +122,13 @@
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div class="form-group">
-                                            <label>Tipo de trámite</label>
+                                            <label>Tipo de trámite <i class="fa fa-asterisk"></i></label>
                                             <select id="t_tra" name="t_tra" class="form-control" required>
                                                 <option value="">...</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label>Número para el expediente</label>
-                                            <input type="text" id="n_exp" name="n_exp" value="" placeholder="Solo se admiten numeros" class="form-control" autocomplete="off" onkeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;">
-                                        </div>
-                                    </div>
+                                    
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Clave del expediente</label>
@@ -137,8 +152,8 @@
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div class="form-group">
-                                            <label for="genero">Género</label>
-                                            <select id="genero" name="genero" class="form-control" required="">
+                                            <label for="genero">Género <i class="fa fa-asterisk"></i></label>
+                                            <select id="genero" name="genero" class="form-control" required>
                                                 <option value="">...</option>
                                                 <option value="1">MASCULINO</option>
                                                 <option value="2">FEMENINO</option>
@@ -147,8 +162,8 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="t_afecta">Tipo de afectado</label>
-                                            <select id="t_afecta" name="t_afecta" class="form-control" required="">
+                                            <label for="t_afecta">Tipo de afectado <i class="fa fa-asterisk"></i></label>
+                                            <select id="t_afecta" name="t_afecta" class="form-control" required>
                                                 <option value="">...</option>
                                                 <option value="1">QUEJOSO</option>
                                                 <option value="2">DENUNCIANTE</option>
@@ -158,8 +173,8 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="categoria">Categoria</label>
-                                            <select id="categoria" name="categoria" class="form-control" required="">
+                                            <label for="categoria">Categoria <i class="fa fa-asterisk"></i></label>
+                                            <select id="categoria" name="categoria" class="form-control" required>
                                                 <option value="">...</option>
                                                 <option value="1">CIUDADANO</option>
                                                 <option value="2">SERVIDOR PÚBLICO</option>
@@ -171,7 +186,7 @@
                                         <div class="form-group" style="margin-top: 25px;">
                                             
                                             <big>
-                                                <label style="text-decoration: underline black;">¿ES DENUNCIA ANÓNIMA?</label>
+                                                <label style="text-decoration: underline black;" for="d_ano">¿ES DENUNCIA ANÓNIMA?</label>
                                                 <big class="pull-right">
                                                     <label for="d_ano">SI</label> <input type="checkbox" id="d_ano" name="d_ano" value="1" style="font-size: 110%; display: inline;">
                                                 </big>
@@ -182,26 +197,26 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label id="t_ley">Tipo de ley</label>
+                                            <label for="t_ley">Tipo de ley <i class="fa fa-asterisk"></i></label>
                                             <select id="t_ley" name="t_ley" class="form-control" required>
                                                 <option value="">...</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-8">
+                                    <div class="col-md-7">
                                         <div class="form-group">
-                                            <label id="t_ley">Presunta conducta</label>
-                                            <select id="t_ley" name="t_ley" class="form-control select2" multiple="multiple" data-placeholder="Selecciona uno o más conductas" required>
+                                            <label for="conductas">Presunta conducta <i class="fa fa-asterisk"></i></label>
+                                            <select id="conductas" name="conductas[]" class="form-control select2" multiple="multiple" data-placeholder="Selecciona uno o más conductas" required>
                                                 <option value="">...</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-11">
                                         <div class="form-group">
-                                            <label>Vias de recepción</label>
-                                            <select id="vias_r" name="vias_r" class="form-control" required>
+                                            <label>Via de recepción <i class="fa fa-asterisk"></i></label>
+                                            <select id="vias_r" name="vias_r[]" class="form-control select2" required multiple>
                                                 <option value="">...</option>
                                             </select>
                                         </div>
@@ -219,7 +234,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="descripcion">Descripción completa de los hechos </label>
-                                            <textarea id="descripcion" name="descripcion" class="form-control" style="resize: vertical;" rows="5"></textarea>
+                                            <textarea id="descripcion" name="descripcion" class="form-control" style="resize: vertical; max-height: 500px;" rows="5"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -289,8 +304,8 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="municipio">Municipio</label>
-                                            <select id="municipio" name="municipio" class="form-control" required>
+                                            <label for="municipios">Municipio <i class="fa fa-asterisk"></i></label>
+                                            <select id="municipios" name="municipios" class="form-control" required>
                                                 <option value="">...</option>
                                             </select>
                                         </div>
@@ -335,10 +350,23 @@
                                     
                                 </div>
                             </fieldset>
+                            <fieldset>
+                                <legend>DATOS DEL TURNADO</legend>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Turnar a <i class="fa fa-asterisk"></i></label>
+                                        <input type="text" id="sp" name="sp" value="" placeholder="Ej: Armando Jimenez" required class="form-control">
+                                        <input type="hidden" id="sp_id" name="sp_id" value="">
+                                    </div>
+                                </div>
+                                
+                            </fieldset>
+                            <br>
                             <div class="row">
                                 <div class="col-md-4"></div>
                                 <div class="col-md-4">
                                     <button type="submit" class="btn btn-flat btn-success btn-block">
+                                        <i class="fa fa-floppy-o"></i>
                                         Guardar información
                                     </button>
                                 </div>

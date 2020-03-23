@@ -1,3 +1,4 @@
+
 <aside class="main-sidebar">
 	<section class="sidebar">
 		<div class="user-panel">
@@ -11,7 +12,7 @@
 		</div>
 		<ul class="sidebar-menu" data-widget="tree">
 			<li class="header">PERFIL: <?=mb_strtoupper($_SESSION['perfil'],'utf-8')?></li>
-			<?php if ( $_SESSION['perfil'] == 'investigacion' ): ?>
+			<?php if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'QDNP' ): ?>
 				<li id="option_1" class=" treeview">
 					<a href="#">
 						<i class="fa fa-dashboard"></i> <span>Quejas y Denuncias</span>
@@ -26,24 +27,37 @@
 				</li>
 				<li id="option_2" class="">
 					<a href="index.php?menu=reports">
-						<i class="fa fa-line-chart"></i> <span>Reportes</span>
+						<i class="fa fa-file-excel-o"></i> <span>Reportes</span>
+						<span class="pull-right-container">
+							<small class="label pull-right bg-green">Mejorado</small>
+						</span>
+					</a>
+				</li>
+				<li id="option_3" class="">
+					<a href="index.php?menu=devoluciones">
+						<i class="fa fa-reply"></i> <span>Devoluciones</span>
 						<span class="pull-right-container">
 							<small class="label pull-right bg-green">Nuevo</small>
 						</span>
 					</a>
 				</li>
-				<li id="option_3" class="">
+				<li id="option_4" class="">
+					<a href="index.php?menu=abogados">
+						<i class="fa fa-user-secret"></i> <span>Abogados</span>
+					</a>
+				</li>
+				<li id="option_5" class="">
 					<a href="index.php?menu=aviso">
 						<i class="fa fa-file-pdf-o"></i> <span>Aviso de privacidad</span>
 					</a>
 				</li>
-				<li id="option_4" class="">
+				<li id="option_6" class="">
 					<a href="index.php?menu=manual">
 						<i class="fa fa-file-pdf-o"></i> <span>Manual de usuario</span>
 					</a>
 				</li>
 				
-			<?php elseif ($_SESSION['perfil'] == 'sira'): ?>
+			<?php elseif ($_SESSION['perfil'] == 'SIRA'): ?>
 				<li id="option_1" class=" treeview">
 					<a href="#">
 						<i class="fa fa-dashboard"></i> <span>Registro de Actas</span>

@@ -1,6 +1,7 @@
 <?php
 session_start();
 session_destroy();
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -31,14 +32,27 @@ session_destroy();
   </div>
   <div class="login-box-body">
     <p class="login-box-msg">Ingrese su nombre de usuario y contraseña.</p>
+    <?php if ( isset($_GET['edo']) ): ?>
+      <?php if ($_GET['edo'] == 'error'): ?>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true" onclick="tryAgain();">&times;</button>
+                    <h4><i class="icon fa fa-ban"></i> Error! </h4>
+                    <?=mb_strtoupper($_GET['e_message'],'utf-8')?>
+                </div>
+          </div>
+        </div>
+      <?php endif ?>
+    <?php endif ?>
     <form action="controller/puente.php" method="post">
       <input type="hidden" name="option" value="1">
       <div class="form-group has-feedback">
-        <input type="text" class="form-control" placeholder="Email">
+        <input type="text" class="form-control" placeholder="Email" name="username">
         <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
       </div>
       <div class="form-group has-feedback">
-        <input type="password" class="form-control" placeholder="Password">
+        <input type="password" class="form-control" placeholder="Password" name="pass">
         <span class="glyphicon glyphicon-lock form-control-feedback"></span>
       </div>
       <div class="row">
@@ -57,5 +71,6 @@ session_destroy();
 <script src="view/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- iCheck -->
 <script src="view/plugins/iCheck/icheck.min.js"></script>
+<script src="view/dist/js/main.login.js"></script>
 </body>
 </html>
