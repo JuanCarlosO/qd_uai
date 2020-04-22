@@ -112,6 +112,28 @@ class UAIModel extends Connection
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
-	
+	public function getCoincidencias()
+	{
+		try {	
+			$wh = " 1=1 ";
+			$p = "%".$_POST['palabra']."%";
+			if ( !empty($p) ) {
+				$wh .= " AND q.descripcion LIKE '$p'";
+			}
+			#echo $wh;exit;
+			$this->sql = "SELECT q.*,t.nombre AS n_tramite, e.nombre AS n_estado,p.nombre AS n_procedencia 
+			FROM quejas AS q
+			LEFT JOIN tipos_tramite AS t ON t.id = q.t_tramite
+			LEFT JOIN estado_guarda AS e ON e.id = q.estado
+			LEFT JOIN procedencias AS p ON p.id = q.procedencia
+			WHERE $wh";
+			$this->stmt = $this->pdo->prepare( $this->sql );
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
 }
 ?>

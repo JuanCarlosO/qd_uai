@@ -257,6 +257,10 @@ if ( isset($_POST['option']) ) {
 		case '74':
 			echo $uai->getActasTipo();
 			break;
+		case '75':
+			echo $uai->getCoincidencias();
+			break;
+			
 	}
 }elseif ( isset($_GET['option']) ) {
 	$o = $_GET['option'];	

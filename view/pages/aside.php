@@ -145,11 +145,6 @@
 						<i class="fa fa-list"></i> <span>Listado de exp.</span>
 					</a>
 				</li>
-				<li id="option_2" class="">
-					<a href="index.php?menu=reportes">
-						<i class="fa fa-line-chart"></i> <span>Reportes</span>
-					</a>
-				</li>
 			<?php endif ?>
 		</ul>
 	</section>

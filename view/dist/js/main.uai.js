@@ -17,6 +17,7 @@ function getURL(url) {
 		dashboard('');
 		dashboard_a('');
 		autocomplete_input('clave','clave_id',12);
+		frm_coincidencias();
 	}
 	if ( url == '?menu=reportes' ) {
 		$('#option_2').addClass('active');
@@ -205,4 +206,52 @@ function getListadoAcutaciones(actuacion) {
 	.fail(function(jqXHR,textStatus,errorThrow) {
 		console.log("error");
 	});	
+}
+//
+function frm_coincidencias() {
+	$('#frm_coincidencias').submit(function(e) {
+		e.preventDefault();
+		$('#actas').addClass('hidden');
+		$('#qd_estado').removeClass('hidden');
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			if ( ! $.fn.DataTable.isDataTable( '#tbl_ee' ) ) 
+			{
+				tbl = applyDataTables('tbl_ee');
+			}
+			else
+			{
+				tbl.rows().remove().draw();
+			}
+			$.each(response, function(i, val) {
+				var fila = "";
+				fila += "<ul>";
+					fila += "<li><label>Fecha:</label>"+val.f_hechos+"</li>";
+					fila += "<li><label>Hora: </label>"+val.h_hechos+"</li>";
+				fila += "</ul>";
+				var cve_link = '<a href="index.php?menu=cedula&exp_id='+val.id+'">'+val.cve_exp+'</a>';
+				tbl.row.add( [
+		            (++i),
+		            cve_link,
+		            val.t_asunto,
+		            val.n_tramite ,
+		            val.n_procedencia,
+		            fila
+		        ] ).draw( false );
+			});			
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			console.log("Error:"+jqXHR.responseText);
+		});
+		
+	});
+	return false;
 }

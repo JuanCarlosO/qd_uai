@@ -30,6 +30,10 @@ class UAIController
 	{
 		return $this->model->getActasTipo();
 	}
+	public function getCoincidencias()
+	{
+		return $this->model->getCoincidencias();
+	}
 	
 }
 ?>

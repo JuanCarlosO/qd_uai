@@ -375,72 +375,62 @@ if(!empty($_GET['exp_id'])){
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h1> <center>Expedientes acumulados</center> </h1>
-                                    </div>
-                                </div>
+                                
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="table-responsive">
-                                            <table class="table table-condesed table-hover">
-                                        <thead>
-                                            <tr class="bg-info">
-                                                <th>#</th>
-                                                <th>Expediente</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                             <?php $i = 1; foreach ($data['acumuladas'] as   $key => $acumulado): ?>
-                                                <tr class="bg-gray">
-                                                    <td> <?=$i;$i++;?> </td>
-                                                    <td>
-                                                        <a href="index.php?menu=cedula&exp_id=<?=$acumulado->acumulado_id?>" target="_blank">
-                                                            <?=$acumulado->acumulado?>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach ?>
-                                        </tbody>
-                                    </table>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <h1> <center>Documentos del expediente</center> </h1>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover table-condensed table-bordered">
-                                                <thead>
+                                            <table class="table table-bordered table-hover">
+                                                <caption class="bg-gray text-center">
+                                                    Expedientes acumulados
+                                                </caption>
+                                                <thead class="bg-gray">
                                                     <tr>
-                                                        <th width="30%">Nombre de documento</th>
-                                                        <th width="60%">Descripcion del documento</th>
+                                                        <th>#</th>
+                                                        <th>Expediente</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                <?php foreach ($data['documentos'] as $file): ?>
-                                                    <tr id="file_<?=$file->id?>" class="bg-gray">
-                                                        <td>
-                                                            <a href="controller/puente.php?option=4&file=<?=$file->id?>" target="__blank">
-                                                                <?=$file->nombre?>  
-                                                            </a>
-                                                        </td>
-                                                        <td>
-                                                            <?=$file->descripcion?>
-                                                        </td>
-                                                    </tr>
-                                                    
-                                                <?php endforeach ?>
+                                                    <?php $i = 1; foreach ($data['acumuladas'] as   $key => $acumulado): ?>
+                                                        <tr class="">
+                                                            <td> <?=$i;$i++;?> </td>
+                                                            <td>
+                                                                <a href="index.php?menu=cedula&exp_id=<?=$acumulado->acumulado_id?>" target="_blank">
+                                                                    <?=$acumulado->acumulado?>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach ?>
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <ol>
-                                            
-                                        </ol>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table table-hover table-bordered"> 
+                                            <caption class="bg-gray text-center">
+                                                Listado de Documentos 
+                                            </caption>
+                                            <thead>
+                                                <tr class="bg-gray">
+                                                    <th width="30%">Nombre de documento</th>
+                                                    <th width="60%">Descripcion del documento</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php foreach ($data['documentos'] as $file): ?>
+                                                <tr id="file_<?=$file->id?>">
+                                                    <td>
+                                                        <a href="controller/puente.php?option=4&file=<?=$file->id?>" target="__blank">
+                                                            <?=$file->nombre?>  
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <?=$file->descripcion?>
+                                                    </td>
+                                                </tr>
+                                                
+                                            <?php endforeach ?>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
