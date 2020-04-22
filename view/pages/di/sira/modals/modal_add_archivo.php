@@ -1,4 +1,5 @@
 <form action="#" id="frm_add_archivo" method="post" >
+	
 	<div class="modal fade" id="modal_add_archivo">
 		<div class="modal-dialog">
 			<div class="modal-content">

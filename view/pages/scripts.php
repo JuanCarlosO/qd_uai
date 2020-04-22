@@ -54,8 +54,12 @@ if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'QDNP' ) {
 	echo '<script src="view/dist/js/main.qd.js"></script>';
 }elseif ( $_SESSION['perfil'] == 'SIRA' ) {
 	echo '<script src="view/dist/js/main.sira.js"></script>';
-}elseif ( $_SESSION['perfil'] == 'dr' ) {
+}elseif ( $_SESSION['perfil'] == 'DR' ) {
 	echo '<script src="view/dist/js/main.dr.js"></script>';
+}elseif ( $_SESSION['perfil'] == 'SC' ) {
+	echo '<script src="view/dist/js/main.sc.js"></script>';
+}elseif ( $_SESSION['perfil'] == 'TITULAR' ) {
+	echo '<script src="view/dist/js/main.uai.js"></script>';
 }elseif ( $_SESSION['perfil'] == 'sys' ) {
 	echo '<script src="view/dist/js/main.sys.js"></script>';
 }

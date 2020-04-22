@@ -58,7 +58,7 @@ if ( isset($_GET['acta']) ) {
                             <?php else: ?>
                                 Formulario de registro de actas
                             <?php endif ?>
-                            (<label>NOTA: </label>Los campos obligatorios se encuentran marcados con un asterisco "<i class="fa fa-asterisk"></i>" )
+                            (<label>NOTA: </label>Los campos obligatorios se encuentran marcados con un asterisco "<i class="fa fa-asterisk text-red"></i>" )
                         </h3>
                     </div>
                     <!-- /.box-header -->
@@ -74,7 +74,7 @@ if ( isset($_GET['acta']) ) {
                     		<div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label>Área que genera <i class="fa fa-asterisk"></i></label>
+                                        <label>Área que genera <i class="fa fa-asterisk text-red"></i></label>
                                         <input type="text" id="area" name="area" value="<?=$n_area?>" placeholder="Escriba un indicio del área y seleccione alguna de las coincidencias" class="form-control" required="">
                                         <input type="hidden" id="area_h" name="area_h" value="<?=$area_h?>">
                                     </div>
@@ -83,14 +83,14 @@ if ( isset($_GET['acta']) ) {
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Fecha del acta <i class="fa fa-asterisk"></i></label>
+                                        <label>Fecha del acta <i class="fa fa-asterisk text-red"></i></label>
                                         <input type="date" id="f_acta" name="f_acta" value="<?=$f_acta?>" class="form-control" required="">
                                     </div>
                                 </div>
                                 <input type="hidden" name="t_actuacion" value="<?=$t_actuacion?>">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Procedencia <i class="fa fa-asterisk"></i></label>
+                                        <label>Procedencia <i class="fa fa-asterisk text-red"></i></label>
                                         <select id="procedencia" name="procedencia" class="form-control" required>
                                             <option value="">...</option>
                                             <option value="1"<?=( $procedencia == 'SECRETARIA DE SEGURIDAD' ) ? 'selected' : '' ;?>>Secretaría de Seguridad</option>
@@ -100,7 +100,7 @@ if ( isset($_GET['acta']) ) {
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Municipio <i class="fa fa-asterisk"></i></label>
+                                        <label>Municipio <i class="fa fa-asterisk text-red"></i></label>
                                         <select <?=$input_id_mun?> name="municipio" class="form-control" required>
                                             <option value="">...</option>
                                         <?php if ( isset($_GET['acta']) ): ?>
@@ -127,7 +127,7 @@ if ( isset($_GET['acta']) ) {
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label>Accion(es) realizadas <i class="fa fa-asterisk"></i></label>
+                                        <label>Accion(es) realizadas <i class="fa fa-asterisk text-red"></i></label>
                                         <textarea name="accion" id="accion" class="form-control" required style="resize: vertical;max-height: 300px;"><?=$accion?></textarea>
                                     </div>
                                 </div>

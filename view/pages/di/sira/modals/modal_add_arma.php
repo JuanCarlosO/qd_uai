@@ -1,4 +1,6 @@
 <form action="#" id="frm_add_arma" method="post" >
+	<input type="hidden" name="option" value="47">
+	<input type="hidden" name="acta_id" value="<?=$_GET['acta'];?>">
 	<div class="modal fade" id="modal_add_arma">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -9,21 +11,21 @@
 					<h4 class="modal-title">Agregar un arma implicada</h4>
 				</div>
 				<div class="modal-body">
+					<div id="div_armas"></div>
 					<div class="row">
 						<div class="col-md-4">
-							<label>Tipo</label>
+							<label>Tipo de arma</label>
 							<select id="t_arma" name="t_arma" class="form-control">
 								<option value="">...</option>
 								<option value="1">FUEGO</option>
 								<option value="2">BLANCA</option>
-								<option value="3">OTRO(A)</option>
 							</select>
 						</div>
 					</div>
-					<div id="a_fuego">
+					<div id="a_fuego" class="hidden">
 						<div class="row">
 							<div class="col-md-6">
-								<label>Tipo</label>
+								<label>Tamaño de arma</label>
 								<select id="animal" name="animal" class="form-control">
 									<option value="">...</option>
 									<option value="1">Larga</option>
@@ -52,15 +54,10 @@
 								<label>Calibre</label>
 								<input type="text" id="cal" name="cal" class="form-control">
 							</div>
-							<div class="col-md-4">
-								<label>Color</label>
-								<select id="color" name="color" class="form-control" c>
-									<option value="">...</option>
-								</select>
-							</div>
+							
 						</div>
 					</div>
-					<div class="a_blanca">
+					<div class="a_blanca hidden" >
 						<div class="row">
 							<div class="col-md-6">
 								<label>Tipo de arma</label>
@@ -68,30 +65,40 @@
 									<option value="">...</option>
 								</select>
 							</div>
-							<div class="col-md-6">
-								<label>Color</label>
-								<select class="form-control" id="color" name="color">
-									<option value="">...</option>
-								</select>
-							</div>
+							
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-6">
 							<div class="form-group">
 								<label> Matrícula </label>
+								<input type="text" name="matricula" value=""  class="form-control
+								">
 							</div>
 						</div>
 						<div class="col-md-6">
 							<div class="form-group">
 								<label> Inventario </label>
+								<input type="text" name="inv" value="" class="form-control">
 							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<label>Color</label>
+							<input type="text" name="color" value="" class="form-control">
+						</div>
+						<div class="col-md-6">
+							<label>Corporacion</label>
+							<select name="corp" class="form-control">
+								<option value="">...</option>
+							</select>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
-					<button type="button" class="btn btn-primary">
+					<button type="submit" class="btn btn-primary">
 						<i class="fa fa-floppy-o"></i> Guardar datos
 					</button>
 				</div>

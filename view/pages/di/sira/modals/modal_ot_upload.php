@@ -1,4 +1,6 @@
 <form action="#" id="frm_ot_upload" method="post" >
+	<input type="hidden" name="option" value="53">
+	<input type="hidden" name="oin_id" value="">
 	<div class="modal fade" id="modal_ot_upload">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -9,6 +11,7 @@
 					<h4 class="modal-title">Adjuntar Documento a la Orden de trabajo</h4>
 				</div>
 				<div class="modal-body">
+					<div id="div_doc_oin"></div>
 					<div class="row">
 						<div class="col-md-6">
 							<label>Nombre del archivo</label>
@@ -32,7 +35,7 @@
 
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancelar</button>
-					<button type="button" class="btn btn-primary">
+					<button type="submit" class="btn btn-primary">
 						<i class="fa fa-floppy-o"></i> Guardar datos
 					</button>
 				</div>

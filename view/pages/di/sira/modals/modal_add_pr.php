@@ -11,7 +11,7 @@
 					<h4 class="modal-title">Agregar un presunto responsable</h4>
 				</div>
 				<div class="modal-body">
-					<div id="alert_pr"></div>
+					<div id="div_pr"></div>
 					<div class="row">
 						<div class="col-md-4">
 							<div class="form-group">
@@ -69,7 +69,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cerrar</button>
-					<button type="button" class="btn btn-primary">
+					<button type="submit" class="btn btn-primary btn-flat">
 						<i class="fa fa-floppy-o"></i> Guardar datos
 					</button>
 				</div>

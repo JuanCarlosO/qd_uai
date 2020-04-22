@@ -6,7 +6,7 @@ if ( isset($_GET['acta']) ) {
         $acta = $_GET['acta'];
         $a = new SiraModel;
         $r = $a->getOnlyActa($acta);
-        echo "<pre>";print_r($r);echo "</pre>";
+        #echo "<pre>";print_r($r['pr']);echo "</pre>";
         $n_area = $r['actas']->n_area;
         $area_h = $r['actas']->area_id;
         $f_acta = $r['actas']->fecha;    
@@ -91,58 +91,72 @@ if ( isset($_GET['acta']) ) {
                     </div>      
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos del quejoso</center> </h1>
+                            <h1> <center>Datos del quejoso(s)</center> </h1>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <dl class="dl-horizontal">
-                                <dt>Nombre completo</dt>
-                                <dd> Juan Carlos Diaz Bernal </dd>
-                                <dt>Teléfono</dt>
-                                <dd>1234567890</dd>
-                                <dt>Medios de Localización</dt>
-                                <dd><a href="mailto:webmaster@example.com">micorreo@mail.com</a></dd>
-                                <dd><a href="mailto:webmaster@example.com">facebook.com/miperfil/</a></dd>
-                                <dt>Dirección</dt>
-                                <dd> <p >Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                                tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                                consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-                                cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-                                proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p> </dd>
-                                
-                            </dl>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-condesed">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nombre completo</th>
+                                            <th>Género</th>
+                                            <th>Teléfono</th>
+                                            <th>Correo</th>
+                                            <th>Dirección</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($r['quejosos'] as $key => $quejoso): ?>
+                                        <tr class="text-center">
+                                            <td><?=(++$key)?></td>
+                                            <td><?=$quejoso->nombre;?> <?=$quejoso->ap_pat;?> <?=$quejoso->ap_mat;?></td>
+                                            <td><?=$quejoso->genero?></td>
+                                            <td><?=$quejoso->phone?></td>
+                                            <td><?=$quejoso->email?></td>
+                                            <td><?=$quejoso->direccion?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos del presunto infractor</center> </h1>
+                            <h1> <center>Datos del presunto(s) infractor(es)</center> </h1>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <dl class="dl-horizontal">
-                                <dt>Nombre completo</dt>
-                                <dd> Juan Carlos Diaz Bernal </dd>
-                                <dt>Género</dt>
-                                <dd>Masculino</dd>
-                                <dt>Procedencia</dt>
-                                <dd>Unidad de Asuntos Internos</dd>  
-                                <dt>Adscripcion</dt>
-                                <dd>Dirección de Investigacion</dd>   
-                                <dt>Subdirección/Fiscalía</dt>
-                                <dd>Unidad de Quejas y Denuncias</dd>   
-                                <dt>Región/Mesa </dt>
-                                <dd>Region II</dd>   
-                                <dt>Agrupamiento/Turno </dt>
-                                <dd>Region II</dd>   
-                                <dt>Cargo </dt>
-                                <dd>Policia RIII</dd>   
-                                <dt>Media Filiación </dt>
-                                <dd>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa, enim tempore quo aspernatur eligendi voluptatem earum consequuntur veniam sequi soluta, in culpa distinctio! Rem optio repellendus, ratione voluptas illum! Blanditiis?</dd>   
-                                                 
-                            </dl>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-condesed">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nombre completo</th>
+                                            <th>Género</th>
+                                            <th>Cargo</th>
+                                            <th>Procedencia</th>
+                                            <th>Media filiacion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($r['pr'] as $key => $quejoso): ?>
+                                        <tr class="text-center">
+                                            <td><?=(++$key)?></td>
+                                            <td><?=$quejoso->nombre;?> <?=$quejoso->ap_pat;?> <?=$quejoso->ap_mat;?></td>
+                                            <td><?=$quejoso->genero?></td>
+                                            <td><?=$quejoso->cargo_id?></td>
+                                            <td><?=$quejoso->procedencia?></td>
+                                            <td><?=$quejoso->media_f?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -152,26 +166,43 @@ if ( isset($_GET['acta']) ) {
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <dl class="dl-horizontal">
-                                <dt>Marca</dt>
-                                <dd> Dodge </dd>
-                                <dt>Submarca</dt>
-                                <dd> Stratus </dd>
-                                <dt>Tipo</dt>
-                                <dd> Sedan  </dd>
-                                <dt>Año</dt>
-                                <dd> 2010 </dd>
-                                <dt>Color</dt>
-                                <dd>Rojo volcanico </dd>
-                                <dt>Placa</dt>
-                                <dd> lxp8690 </dd>                            
-                                <dt>Serie</dt>
-                                <dd> 123456789l </dd>
-                                <dt>Inventario</dt>
-                                <dd> 123456789 </dd>
-                                <dt>Corporación</dt>
-                                <dd> Secretaria de Seguridad </dd>          
-                            </dl>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-condesed">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Caracteristicas</th>
+                                            <th>Información</th>
+                                            <th>Corporación</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($r['unidades'] as $key => $u): ?>
+                                        <tr class="text-center">
+                                            <td><?=(++$key)?></td>
+                                            <td>
+                                                <ol>
+                                                    <li>MARCA: <?=$u->marca?></li>
+                                                    <li>SUBMARCA: <?=$u->submarca?></li>
+                                                    <li>TIPO DE AUTO: <?=$u->t_auto?></li>
+                                                    <li>COLOR: <?=$u->color?></li>
+                                                    <li>MODELO: <?=$u->modelo?></li>
+                                                </ol>
+                                            </td>
+                                            <td>
+                                                <ol>
+                                                    <li>PLACAS: <?=$u->marca?></li>
+                                                    <li>NIV: <?=$u->submarca?></li>
+                                                    <li>INVENTARIO: <?=$u->t_auto?></li>
+                                                </ol>
+                                            </td>
+                                            <td><?=$u->corporacion?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>   
                     <div class="row">
@@ -181,21 +212,36 @@ if ( isset($_GET['acta']) ) {
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <dl class="dl-horizontal">
-                                <dt>Tipo de animal</dt>
-                                <dd> Perro </dd>
-                                <dt>Raza del animal</dt>
-                                <dd> Pastor Malinoins Belga </dd>
-                                <dt>Nombre del animal</dt>
-                                <dd> Rambo </dd>
-                                <dt>Edad del animal</dt>
-                                <dd> 3 años </dd>
-                                <dt>Color del animal</dt>
-                                <dd> Café </dd>
-                                <dt>Número de Inventario</dt>
-                                <dd> rambo3ss </dd>                            
-                                         
-                            </dl>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-condesed">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Tipo</th>
+                                            <th>Raza</th>
+                                            <th>Nombre</th>
+                                            <th>Edad</th>
+                                            <th>Color</th>
+                                            <th>Inventario</th>
+                                            <th>Corporación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($r['animales'] as $key => $a): ?>
+                                        <tr class="text-center">
+                                            <td><?=(++$key)?></td>
+                                            <td><?=$a->tipo?></td>
+                                            <td><?=$a->raza?></td>
+                                            <td><?=$a->nombre?></td>
+                                            <td><?=$a->edad?></td>
+                                            <td><?=$a->color?></td>
+                                            <td><?=$a->inv?></td>
+                                            <td><?=$a->corporacion?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -205,24 +251,30 @@ if ( isset($_GET['acta']) ) {
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <dl class="dl-horizontal">
-                                <dt>Arma</dt>
-                                <dd> Fuego </dd>
-                                <dt>Tipo</dt>
-                                <dd> Pistola </dd>
-                                <dt>Subtipo</dt>
-                                <dd> Revólver </dd>
-                                <dt>Marca</dt>
-                                <dd> EcuRed </dd>
-                                <dt>Calibre</dt>
-                                <dd> .16 </dd>
-                                <dt>Color</dt>
-                                <dd> Negro </dd>                            
-                                <dt>Inventario</dt>
-                                <dd> 12l22 </dd>
-                                <dt>Matrícula</dt>
-                                <dd> 1314INI069 </dd>       
-                            </dl>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-condesed">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Tipo</th>
+                                            <th>Matricula</th>
+                                            <th>Inventario</th>
+                                            <th>Corporación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($r['armas'] as $key => $a): ?>
+                                        <tr class="text-center">
+                                            <td><?=(++$key)?></td>
+                                            <td><?=$a->tipo?></td>
+                                            <td><?=$a->matricula?></td>
+                                            <td><?=$a->inv?></td>
+                                            <td><?=$a->corporacion?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>           	
                 </div>

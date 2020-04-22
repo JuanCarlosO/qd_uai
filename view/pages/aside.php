@@ -21,6 +21,27 @@
 						</span>
 					</a>
 					<ul class="treeview-menu">
+						<li id="option_1_1" class=""><a href="index.php?menu=general"><i class="fa fa-circle-o"></i> Alta  </a></li>
+						<li id="option_1_2"><a href="index.php?menu=list_queja"><i class="fa fa-circle-o"></i> Listado </a></li>
+					</ul>
+				</li>
+				<li id="option_2" class="">
+					<a href="index.php?menu=reports">
+						<i class="fa fa-file-excel-o"></i> <span>Reportes</span>
+						<span class="pull-right-container">
+							<small class="label pull-right bg-green">Mejorado</small>
+						</span>
+					</a>
+				</li>
+			<?php elseif ( $_SESSION['perfil'] == 'DI'): ?>
+				<li id="option_1" class=" treeview">
+					<a href="#">
+						<i class="fa fa-dashboard"></i> <span>Quejas y Denuncias</span>
+						<span class="pull-right-container">
+							<i class="fa fa-angle-left pull-right"></i>
+						</span>
+					</a>
+					<ul class="treeview-menu">
 						<li id="option_1_1" class=""><a href="index.php?menu=general"><i class="fa fa-circle-o"></i> Alta </a></li>
 						<li id="option_1_2"><a href="index.php?menu=list_queja"><i class="fa fa-circle-o"></i> Listado </a></li>
 					</ul>
@@ -94,6 +115,39 @@
 				<li id="option_5" class="">
 					<a href="index.php?menu=manual">
 						<i class="fa fa-file-pdf-o"></i> <span>Manual de usuario</span>
+					</a>
+				</li>
+			<?php elseif ($_SESSION['perfil'] == 'DR'): ?>
+				<li id="option_1" class="">
+					<a href="index.php?menu=general">
+						<i class="fa fa-list"></i> <span>Listado de exp.</span>
+					</a>
+				</li>
+				<li id="option_2" class="">
+					<a href="index.php?menu=estadistica">
+						<i class="fa fa-line-chart"></i> <span>Estadistica </span>
+					</a>
+				</li>
+			<?php elseif ($_SESSION['perfil'] == 'SC'): ?>
+				<li id="option_1" class="">
+					<a href="index.php?menu=general">
+						<i class="fa fa-list"></i> <span>Listado de exp.</span>
+					</a>
+				</li>
+				<li id="option_2" class="">
+					<a href="index.php?menu=reportes">
+						<i class="fa fa-line-chart"></i> <span>Reportes</span>
+					</a>
+				</li>
+			<?php elseif ($_SESSION['perfil'] == 'TITULAR'): ?>
+				<li id="option_1" class="">
+					<a href="index.php?menu=general">
+						<i class="fa fa-list"></i> <span>Listado de exp.</span>
+					</a>
+				</li>
+				<li id="option_2" class="">
+					<a href="index.php?menu=reportes">
+						<i class="fa fa-line-chart"></i> <span>Reportes</span>
 					</a>
 				</li>
 			<?php endif ?>

@@ -1,4 +1,4 @@
-	<?php
+<?php
 #recuperar el perfil al que pertenece
 $perfil = $_SESSION['perfil'];
 
@@ -6,12 +6,19 @@ if ( isset($_GET['menu']) ) {
 	$menu = $_GET['menu'];
 
 	switch ($perfil) {
+		case 'DI';
 		case 'QDP';
 		case 'QDNP':
 			switch ($menu) {
 				case 'general':#formulario de alta de queja
-					include 'view/pages/di/qd/content_header/header_general.php';
-					include 'view/pages/di/qd/content_main/content_general.php';
+					
+					if ( $_SESSION['nivel'] == 'ANALISTA' ) {
+						include 'view/pages/di/qd/content_header/header_list.php';
+						include 'view/pages/di/qd/content_main/content_list.php';
+					}else{
+						include 'view/pages/di/qd/content_header/header_general.php';
+						include 'view/pages/di/qd/content_main/content_general.php';
+					}
 					#Inclución de los modales
 					include 'view/pages/di/qd/modals/modal_add_referencia.php';
 
@@ -57,6 +64,10 @@ if ( isset($_GET['menu']) ) {
 				case 'expedientes':
 					include 'view/pages/di/qd/content_header/header_exp_abogado.php';
 					include 'view/pages/di/qd/content_main/content_exp_abogado.php';
+					break;
+				case 'turnar':
+					include 'view/pages/di/qd/content_header/header_turnar.php';
+					include 'view/pages/di/qd/content_main/content_turnar.php';
 					break;
 				default:
 					header("Location: ../../login.php");
@@ -119,14 +130,97 @@ if ( isset($_GET['menu']) ) {
 					break;
 			}
 			break;
-		case 'respo':
+		case 'DR':
 			switch ($menu) {
 				case 'general':
-					# code...
+					include 'view/pages/dr/hinojosa/content_header/header_general.php';
+					include 'view/pages/dr/hinojosa/content_main/content_general.php';
+					#Importacion de modales
+					include 'view/pages/dr/hinojosa/modals/modal_add_turno.php';
+					include 'view/pages/dr/hinojosa/modals/modal_add_seguimiento.php';
+					break;
+				case 'e_procesal':
+					include 'view/pages/dr/hinojosa/content_header/header_e_procesal.php';
+					include 'view/pages/dr/hinojosa/content_main/content_e_procesal.php';
+					break;
+				case 'cedula':
+					include 'view/pages/dr/hinojosa/content_header/header_cedula.php';
+					include 'view/pages/dr/hinojosa/content_main/content_cedula.php';
+					break;
+				case 'e_e_procesal':
+					include 'view/pages/dr/hinojosa/content_header/header_edit_e_procesal.php';
+					include 'view/pages/dr/hinojosa/content_main/content_edit_e_procesal.php';
+					break;
+				case 'estadistica':
+					include 'view/pages/dr/hinojosa/content_header/header_estadisticas.php';
+					include 'view/pages/dr/hinojosa/content_main/content_estadisticas.php';
 					break;
 				
 				default:
 					header("Location: ../../login.php");
+					break;
+			}
+			break;
+		case 'SC':#SUBDIRECCION DE LO CONTENCIOSO (REYES)
+			switch ($menu) {
+				case 'general':
+					include 'view/pages/dr/reyes/content_header/header_general.php';
+					include 'view/pages/dr/reyes/content_main/content_general.php';
+					#Seccion de modales
+					include 'view/pages/dr/reyes/modals/modal_add_responsable.php';
+					break;
+				case 'resolver':
+					include 'view/pages/dr/reyes/content_header/header_resolucion.php';
+					include 'view/pages/dr/reyes/content_main/content_resolucion.php';
+					break;
+				case 'demandar':
+					include 'view/pages/dr/reyes/content_header/header_demanda.php';
+					include 'view/pages/dr/reyes/content_main/content_demanda.php';
+					break;
+				case 'list_demandas':
+					include 'view/pages/dr/reyes/content_header/header_ldemanda.php';
+					include 'view/pages/dr/reyes/content_main/content_ldemanda.php';
+					#Seccion de modales
+					include 'view/pages/dr/reyes/modals/modal_resolver_demanda.php';
+					break;
+				case 'cedula':
+					include 'view/pages/dr/reyes/content_header/header_cedula.php';
+					include 'view/pages/dr/reyes/content_main/content_cedula.php';
+					break;
+				case 'improcedencia':
+					include 'view/pages/dr/reyes/content_header/header_a_improcedencia.php';
+					include 'view/pages/dr/reyes/content_main/content_a_improcedencia.php';
+					break;
+				case 'reserva':
+					include 'view/pages/dr/reyes/content_header/header_reserva.php';
+					include 'view/pages/dr/reyes/content_main/content_reserva.php';
+					break;
+				case 'list_reservas':
+					include 'view/pages/dr/reyes/content_header/header_list_reserva.php';
+					include 'view/pages/dr/reyes/content_main/content_list_reserva.php';
+					#Seccion de modales
+					include 'view/pages/dr/reyes/modals/modal_regresar_exp.php';
+					include 'view/pages/dr/reyes/modals/modal_add_improcedencia.php';
+					break;
+				case 'reportes':
+					include 'view/pages/dr/reyes/content_header/header_reportes.php';
+					include 'view/pages/dr/reyes/content_main/content_reportes.php';
+					break;	
+			}
+			break;
+			case 'TITULAR':#TITULAR
+			switch ($menu) {
+				case 'general':
+					include 'view/pages/uai/content_header/header_general.php';
+					include 'view/pages/uai/content_main/content_general.php';
+					break;
+				case 'reportes':
+					include 'view/pages/uai/content_header/header_reportes.php';
+					include 'view/pages/uai/content_main/content_reportes.php';
+					break;
+				case 'cedula':
+					include 'view/pages/uai/content_header/header_cedula.php';
+					include 'view/pages/uai/content_main/content_cedula.php';
 					break;
 			}
 			break;

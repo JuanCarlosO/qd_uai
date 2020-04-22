@@ -1,6 +1,7 @@
 var rescate;
 $(document).ready(function() {
 	console.log('Bienvenido a Sistema de Registro de Actas.');
+	$('[data-mask]').inputmask();
 	var url = window.location.search;
 	url = url .split('&');
 	url = url[0];
@@ -30,19 +31,25 @@ function getURL(url) {
 		question();
 		frm_add_acta();
 		frm_edit_acta();
+		
 	}
 	if ( url == '?menu=list_acta' ) {
 		$('#option_1').addClass('active');
 		$('#option_1_2').addClass('active');
 		getActas();
 		frm_upload_file();
+		getDashboard();
 	}
 	if ( url == '?menu=ordenes' ) {
 		$('#option_2').addClass('active');
 		getOrdenes();
+		frm_ot_upload();
 	}
 	if ( url == '?menu=reports' ) {
+		//alert('vamos a reportar')
 		$('#option_3').addClass('active');
+		load_catalogo('municipio','select',10);
+		frm_reportes();
 	}
 	if ( url == '?menu=aviso' ) {
 		$('#option_4').addClass('active');
@@ -52,6 +59,14 @@ function getURL(url) {
 	}
 	if ( url == '?menu=seguimiento' ) {
 		frm_add_pr();//FORMUALRIO DEL PRESUNTO RESPONSABLE
+		getPresuntos();
+		frm_add_quejoso();getQuejosos();
+		frm_add_vehiculo();
+		frm_add_animal();
+		getAutos();getAnimales();frm_add_arma();
+		getDocumentos();
+		//Catalogos
+		load_catalogo('submarca','select',40);//Marcas de los vehiculos
 	}
 	return false; 
 }
@@ -89,28 +104,30 @@ function getOrdenes() {
 	        
 	    ],
 	    modelo: [
-	    	        { class:'',formato: function(tr, obj, valor){
-	    	            return anexGrid_dropdown({
-	                        contenido: '<i class="glyphicon glyphicon-cog"></i>',
-	                        class: 'btn btn-primary ',
-	                        target: '_blank',
-	                        id: 'editar-' + obj.id,
-	                        data: [
-	                            { href: "javascript:open_modal('modal_ot_upload');", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento' },
-	                            { href: "javascript:open_modal('modal_add_obs');", contenido: '<i class="glyphicon glyphicon-comment"></i>Agregar observaciones' },
-	                            { href: 'index.php?menu=detalle&ot='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i>Ver detalle' },
-	                        ]
-	                    });
-	    	        }},
+	    	
+	    	{ class:'',formato: function(tr, obj, valor){
+	            return anexGrid_dropdown({
+                    contenido: '<i class="glyphicon glyphicon-cog"></i>',
+                    class: 'btn btn-primary ',
+                    target: '_blank',
+                    id: 'editar',
+                    data: [
+                        { href: "javascript:open_modal('modal_ot_upload',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento' },
+                        { href: "javascript:open_modal('modal_add_obs');", contenido: '<i class="glyphicon glyphicon-comment"></i>Agregar observaciones' },
+                        { href: 'index.php?menu=detalle&ot='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i>Ver detalle' },
+                    ]
+                });
+	        }},
+	    	
 	        { propiedad: 'id' },
 	        { propiedad: 'clave' },
-	        { propiedad: 'fecha' },
-	        { propiedad: 'estado', class: '', },
-	        { propiedad: 'participantes', class: '', },
+	        { propiedad: 'f_creacion' },
+	        { propiedad: 'id'},
+	        { propiedad: 'estatus'}
 	        
 	        
 	    ],
-	    url: 'controller/puente.php?option=1',
+	    url: 'controller/puente.php?option=8',
 	    filtrable: false,
 	    columna: 'id',
 	    columna_orden: 'DESC'
@@ -171,7 +188,7 @@ function getActas() {
                     target: '_blank',
                     id: obj.id,
                     data: [
-                        { href: 'index.php?menu=seguimiento&acta=1', contenido: '<i class="glyphicon glyphicon-road"></i> Dar seguimiento' },
+                        { href: 'index.php?menu=seguimiento&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-road"></i> Dar seguimiento' },
                         { href: 'index.php?menu=general&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-pencil"></i> Editar' },
                         { href: 'index.php?menu=cedula&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i> Ver cedula' },
                         { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", 
@@ -200,9 +217,15 @@ function getActas() {
 function open_modal(modal,id) {
 	$('#'+modal).modal('show');
 	//agregar el ID del acta al modal
-	$('[name="acta_id"]').val(id);
+	if (modal == 'modal_ot_upload') {
+		$('[name="oin_id"]').val(id);
+	}else{
+		$('[name="acta_id"]').val(id);
+	}
+	
 	return false;
 }
+
 //Autocompletado de informacion 
 function autocomplete_input(input,hidden,option){
 	//2.- areas, 3.- personal, 5.- oins
@@ -394,12 +417,682 @@ function frm_add_pr() {//FORMUALRIO DEL PRESUNTO RESPONSABLE
 			cache:false,
 		})
 		.done(function(response) {
-			alerta('alert_pr',response.status,reponse.message,'');
+			alerta('div_pr',response.status,response.message,'modal_add_pr');
+			setTimeout(function(){
+				document.getElementById('frm_add_pr').reset();
+				getPresuntos();
+			},3000);
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
-			alerta('alert_pr',response.status,reponse.message,'');
+			alerta('div_pr','error',jqXHR.responseText,'modal_add_pr');
 		});
 		
 	} );
+	return false;
+}
+function getPresuntos() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '34',acta:$('acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_pr>tbody').html("");
+		var ap,am;
+		$.each(response, function(i, val) {
+			if(val.ap_pat == null ){
+				ap = "S/A"
+			}else{
+				ap = val.ap_pat;
+			}
+			if(val.ap_mat == null ){
+				am = "S/A"
+			}else{
+				am = val.ap_mat;
+			}
+
+			$('#tbl_pr').append(
+				'<tr>'+
+					'<td>'+(++i)+'</td>'+
+					'<td>'+val.nombre+' '+ap+' '+am+'</td>'+
+					'<td>'+val.procedencia+'</td>'+
+					'<td>'+
+						'<button class="btn btn-danger btn-flat" onclick="delete_pr('+val.id+')">'+
+							'<i class="fa fa-trash "></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	return false;
+}
+//Eliminar un presunto responsable 
+function delete_pr(element){
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '35',e:element},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alerta('alert_pr',response.status,response.message,'');
+		if(response.status == 'success'){
+			setTimeout(function(){
+				getPresuntos();
+			},3000);
+		}
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("error");
+	});
+	
+	return false;
+}
+//formulario para agregar quejoso 
+function frm_add_quejoso(){
+	$('#frm_add_quejoso').submit( function(e){
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('modal_quejoso',response.status,response.message,'modal_add_quejoso');
+			setTimeout(function(){
+				document.getElementById('frm_add_quejoso').reset();
+				getPresuntos();
+			},3000);
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('modal_quejoso','error',jqXHR.responseText,'modal_add_quejoso');
+		});
+		
+	} );
+	return false;
+}
+
+function getQuejosos(){
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '37',acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_quejoso>tbody').html("");
+		var ap,am;
+		$.each(response, function(i, val) {
+			if(val.ap_pat == null ){
+				ap = "S/A"
+			}else{
+				ap = val.ap_pat;
+			}
+			if(val.ap_mat == null ){
+				am = "S/A"
+			}else{
+				am = val.ap_mat;
+			}
+
+			$('#tbl_quejoso').append(
+				'<tr>'+
+					'<td>'+(++i)+'</td>'+
+					'<td>'+val.nombre+' '+ap+' '+am+'</td>'+
+					'<td>'+val.genero+'</td>'+
+					'<td>'+
+						'<button class="btn btn-danger btn-flat" onclick="delete_quejoso('+val.id+')">'+
+							'<i class="fa fa-trash "></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	return false;
+}
+//Eliminar un quejoso
+function delete_pr(element){
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '38',e:element},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alerta('alert_quejoso',response.status,response.message,'');
+		if(response.status == 'success'){
+			setTimeout(function(){
+				getQuejosos();
+			},3000);
+		}
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("error");
+	});
+	
+	return false;
+}
+//AGREGAR UN VEHICULO 
+function frm_add_vehiculo() {
+	$('#frm_add_vehiculo').submit(function (e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('div_auto',response.status,response.message,'modal_add_vehiculo');
+			if(response.status == 'success'){
+				setTimeout(function(){
+					//getAutos();
+					return false;
+				},3000);
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('div_auto','error', jqXHR.responseText, '');
+		});
+		
+	});
+	return false;
+}
+//Recuperar los autos implicados 
+function getAutos() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '41',acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_autos>tbody').html("");
+		var ap,am;
+		$.each(response, function(i, val) {
+			
+			$('#tbl_autos').append(
+				'<tr>'+
+					'<td>'+(++i)+'</td>'+
+					'<td>'+
+						'<ol>'+
+							'<li>'+val.n_marca+'</li>'+
+							'<li>'+val.n_submarca+'</li>'+
+							'<li>'+val.t_auto+'</li>'+
+							'<li>'+val.modelo+'</li>'+
+							'<li>'+val.color+'</li>'+
+						'</ol>'+
+					'</td>'+
+					'<td>'+
+						'<ol>'+
+							'<li>NIV: '+val.niv+'</li>'+
+							'<li>PLACAS: '+val.placa+'</li>'+
+							'<li>PLACAS: '+val.n_inventario+'</li>'+
+						'</ol>'+
+					'</td>'+
+					'<td>'+
+						'<button class="btn btn-danger btn-flat" onclick="delete_auto('+val.id+')">'+
+							'<i class="fa fa-trash "></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	return false;
+}
+//Eliminar un vehiculo
+function delete_auto(element){
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '42',e:element,acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alerta('alert_autos',response.status,response.message,'');
+		if(response.status == 'success'){
+			setTimeout(function(){
+				getAutos();
+			},3000);
+		}
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		alerta('alert_autos','error', jqXHR.responseText, '');
+	});
+	return false;
+}
+//recuperar marcas de vehiculos 
+function getMarcas() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '37'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_quejoso>tbody').html("");
+		var ap,am;
+		$.each(response, function(i, val) {
+			if(val.ap_pat == null ){
+				ap = "S/A"
+			}else{
+				ap = val.ap_pat;
+			}
+			if(val.ap_mat == null ){
+				am = "S/A"
+			}else{
+				am = val.ap_mat;
+			}
+
+			$('#tbl_quejoso').append(
+				'<tr>'+
+					'<td>'+(++i)+'</td>'+
+					'<td>'+val.nombre+' '+ap+' '+am+'</td>'+
+					'<td>'+val.genero+'</td>'+
+					'<td>'+
+						'<button class="btn btn-danger btn-flat" onclick="delete_quejoso('+val.id+')">'+
+							'<i class="fa fa-trash "></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	return false;
+}
+
+function frm_add_animal() {
+	$('#frm_add_animal').submit(function(e) {
+		e.preventDefault();
+		
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('div_animal',response.status,response.message,'modal_add_animal');
+			if(response.status == 'success'){
+				setTimeout(function(){
+					getAnimales();
+					return false;
+				},3000);
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('div_animal','error', jqXHR.responseText, '');
+		});
+	});
+	return false;
+}
+
+function getAnimales() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '44',acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_animales>tbody').html("");
+		var ap,am;
+		$.each(response, function(i, val) {
+			
+			$('#tbl_animales').append(
+				'<tr>'+
+					'<td>'+(++i)+'</td>'+
+					'<td>'+
+						'<ol>'+
+							'<li> TIPO: '+val.tipo+'</li>'+
+							'<li> RAZA: '+val.raza+'</li>'+
+							'<li> NOMBRE: '+val.nombre+'</li>'+
+							'<li> EDAD: '+val.edad+'</li>'+
+							'<li> COLOR: '+val.color+'</li>'+
+						'</ol>'+
+					'</td>'+
+					'<td>'+val.inv+'</td>'+
+					'<td>'+
+						'<button class="btn btn-danger btn-flat" onclick="delete_animal('+val.id+')">'+
+							'<i class="fa fa-trash "></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	return false;
+}
+function delete_animal(element){
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '45',e:element,acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alerta('alert_animales',response.status,response.message,'');
+		if(response.status == 'success'){
+			setTimeout(function(){
+				getAnimales();
+			},3000);
+		}
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		alerta('alert_animales','error', jqXHR.responseText, '');
+	});
+	return false;
+}
+//METODOS DE LAS ARMAS 
+function frm_add_arma() {
+	$('#frm_add_arma').submit(function(e) {
+		e.preventDefault();
+		
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('div_armas',response.status,response.message,'modal_add_arma');
+			if(response.status == 'success'){
+				setTimeout(function(){
+					getArmas();
+					return false;
+				},3000);
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('div_armas','error', jqXHR.responseText, '');
+		});
+	});
+	return false;
+}
+function getArmas() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '46',acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_armas>tbody').html("");
+		
+		$.each(response, function(i, val) {
+			
+			$('#tbl_armas').append(
+				'<tr>'+
+					'<td>'+(++i)+'</td>'+
+					'<td>'+
+						val.tipo+
+					'</td>'+
+					'<td>'+
+						'<ol>'+
+							
+							'<li> MATRICULA: '+val.matricula+'</li>'+
+							'<li> INVENTARIO: '+val.inv+'</li>'+
+						'</ol>'+
+					'</td>'+
+					'<td>'+
+						'<button class="btn btn-danger btn-flat" onclick="delete_arma('+val.id+')">'+
+							'<i class="fa fa-trash "></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	return false;
+}
+function delete_arma(element){
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '48',e:element,acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alerta('alert_armas',response.status,response.message,'');
+		if(response.status == 'success'){
+			setTimeout(function(){
+				getArmas();
+			},3000);
+		}
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		alerta('alert_arma','error', jqXHR.responseText, '');
+	});
+	return false;
+}
+//METODOS DE LOS ARCHIVOS 
+function getDocumentos(){
+	//console.log($('#acta_id').val());
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '49',acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_docs>tbody').html("");
+		
+		$.each(response, function(i, val) {
+			
+			$('#tbl_docs').append(
+				'<tr>'+
+					'<td>'+(++i)+'</td>'+
+					'<td>'+
+						val.nombre+
+					'</td>'+
+					'<td>'+
+						val.comentarios+
+					'</td>'+
+					'<td>'+
+						'<a href="#" class="btn btn-default btn-flat" onclick="view_docs('+val.id+')">'+
+							'<i class="fa fa-eye "></i>'+
+						'</a>'+
+					'</td>'+
+					'<td>'+
+						'<button class="btn btn-danger btn-flat" onclick="delete_doc('+val.id+')">'+
+							'<i class="fa fa-trash "></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	return false;
+}
+function delete_doc(element){
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '50',e:element,acta:$('#acta_id').val()},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alerta('alert_docs',response.status,response.message,'');
+		if(response.status == 'success'){
+			setTimeout(function(){
+				getDocumentos();
+			},3000);
+		}
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		alerta('alert_docs','error', jqXHR.responseText, '');
+	});
+	return false;
+}
+//GENERADOR DE REPORTE
+function frm_reportes() {
+	$('#frm_reportes').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			if ( ! $.fn.DataTable.isDataTable( '#tbl_reporte_actas' ) ) {
+				tbl = applyDataTables('reporte');
+			}else{
+
+				tbl.rows().remove().draw();
+			}
+			$('#tbl_reporte_actas>tbody').html();
+			$.each(response, function(i, val) {
+				$('#tbl_reporte_actas').append(
+					'<tr>'+
+						'<td>'+(++i)+'</td>'+
+						'<td>'+val.clave+'</td>'+
+						'<td>'+val.t_actuacion+'</td>'+
+						'<td>'+val.fecha+'</td>'+
+						'<td>'+val.procedencia+'</td>'+
+						'<td>'+val.n_municipio+'</td>'+
+						'<td>'+val.comentarios+'</td>'+
+					'</tr>'
+				);
+			});
+			applyDataTables('tbl_reporte_actas');
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			console.log("error");
+		});
+		
+	});
+}
+//Funcion que permite aplicar DataTables en Español
+function applyDataTables(t) {
+	var tabla = $('#'+t).DataTable({
+		dom: 'Bfrtip',
+		buttons:{
+		    buttons: [
+		        { extend: 'pdf', className: 'btn btn-flat btn-warning',text:' <i class="fa  fa-file-pdf-o"></i>PDF' },
+		        { extend: 'excel', className: 'btn btn-success btn-flat',text:' <i class="fa fa-file-excel-o"></i>Excel' }
+		    ]
+		},
+		"language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json"
+        }
+	});
+	return tabla ;
+}
+function frm_ot_upload (){
+	$('#frm_ot_upload').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('div_doc_oin', response.status, response.message, 'modal_ot_upload');
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			alerta('div_doc_oin', 'error', jqXHR.responseText, 'modal_ot_upload');
+		});
+	});
+	return false;
+}
+function getDashboard() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '57'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+
+		$.each(response, function(i, val) {
+			console.log();
+			if(val.t_actuacion == 'INSPECCION'){
+				$('#c_ins').text(val.cuenta);
+			}
+			if(val.t_actuacion == 'VERIFICACION'){
+				$('#c_ver').text(val.cuenta);
+			}
+			if(val.t_actuacion == 'SUPERVISION'){
+				$('#c_sup').text(val.cuenta);
+			}
+		});
+	})
+	.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+
 	return false;
 }

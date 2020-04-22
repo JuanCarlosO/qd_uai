@@ -71,10 +71,17 @@ class QDModel extends Connection
 	public function getQDs()
 	{
 		try {
-
+			session_start();
+			$perfil = "";
+			
 			$quejas = array();
 			$anexgrid = new AnexGrid();
 			$wh = " 1=1 ";
+			if ( $_SESSION['perfil'] == "QDP") {
+				$wh .= " AND t_asunto = 'POLICIAL'";
+			}elseif ($_SESSION['perfil'] == "QDNP") {
+				$wh .= " AND t_asunto = 'NO POLICIAL'";
+			}
 			#Los filtros 
 			foreach ($anexgrid->filtros as $filter) {
 				
@@ -82,12 +89,13 @@ class QDModel extends Connection
 					if ( $filter['columna'] == 'q.cve_ref' || $filter['columna'] == 'q.cve_exp' ) {
 						$wh .= " AND ".$filter['columna']." LIKE '%".$filter['valor']."%'";
 					}else{
+						
 						$wh .= " AND ".$filter['columna'] ." = ".$filter['valor'];
 					}
 				}
 			}
 			$this->sql = "SELECT q.*,UPPER(m.nombre) AS municipio,
-			p.nombre AS procedencia, e.nombre AS n_estado
+			p.nombre AS procedencia, e.nombre AS n_estado, DATEDIFF(DATE(NOW()),DATE(q.created_at) ) AS fase
 			 FROM quejas AS q
 			INNER JOIN ubicacion_referencia AS u ON u.queja_id = q.id
 			INNER JOIN municipios AS m ON m.id = u.municipio
@@ -98,6 +106,8 @@ class QDModel extends Connection
 			$this->stmt = $this->pdo->prepare($this->sql);
 			$this->stmt->execute();
 			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			#La cuenta de datos 
+			$total = $this->stmt->rowCount();
 			foreach ($this->result as $key => $qd) {
 				$aux['id'] = $qd->id;
 				$aux['cve_ref'] = $qd->cve_ref;
@@ -107,6 +117,7 @@ class QDModel extends Connection
 				$aux['municipio'] = $qd->municipio;
 				$aux['procedencia'] = $qd->procedencia;
 				$aux['n_estado'] = $qd->n_estado;
+				$aux['fase'] = $qd->fase;
 				#Buscar las presuntas conductas de cada expediente
 				$sql_conductas = "SELECT cc.id,cc.nombre  FROM p_conductas AS pc
 				INNER JOIN catalogo_conductas AS cc ON cc.id = pc.conducta_id
@@ -119,8 +130,7 @@ class QDModel extends Connection
 				
 				array_push($quejas, $aux);
 			}
-			#La cuenta de datos 
-			$total = $this->stmt->rowCount();
+			
 
 			return $anexgrid->responde($quejas,$total);
 
@@ -628,13 +638,13 @@ class QDModel extends Connection
 
 			#Validacion de los campos
 			if ( $_FILES['file']['error'] > 0 ) {
-				throw new Exception("DEBE DE SELECCIONAR UN DOCUMENTO.", 1);				
+				throw new Exception("DEBE DE SELECCIONAR UN DOCUMENTO.", 1);
 			}
 			if ( $_FILES['file']['size'] > 10485760 ) {
-				throw new Exception("EL DOCUMENTO EXCEDE EL TAMAÑO DE ARCHIVO ADMITIDO.", 1);				
+				throw new Exception("EL DOCUMENTO EXCEDE EL TAMAÑO DE ARCHIVO ADMITIDO.", 1);	
 			}
 			if ( $_FILES['file']['type'] != 'application/pdf' ) {
-				throw new Exception("EL FORMATO DE ARCHIVO NO ES ADMITIDO (SOLO PDF). ", 1);		
+				throw new Exception("EL FORMATO DE ARCHIVO NO ES ADMITIDO (SOLO PDF). ", 1);
 			}
 			
 			#Recuperar las variables necesarias
@@ -642,7 +652,6 @@ class QDModel extends Connection
 			$doc_type = $_FILES['file']['type'];
 			$doc_size = $_FILES['file']['size'];
 			$destino  = $_SERVER['DOCUMENT_ROOT'].'/qd_uai/uploads/';
-
 			$name 		 	= mb_strtoupper($_POST['name_file'],'utf-8');
 			$comentario		= mb_strtoupper($_POST['comentario'],'utf-8');
 			$queja_id		= $_POST['queja_id'];
@@ -681,7 +690,7 @@ class QDModel extends Connection
 	{
 		try {
 			$t_asunto = $_POST['t_asunto'];
-			
+			#print_r($_POST['pro'][1]);exit;
 			#Valida el tipo de referencia 
 			if( isset($_POST['t_ref']) ){
 				$t_ref = $_POST['t_ref'];
@@ -714,30 +723,93 @@ class QDModel extends Connection
 			$evidencia 	= $_POST['evidencia'];
 			$estado 	= $_POST['estado'];
 			$procedencia 	= $_POST['procedencia'];
+			if( $_POST['pregunta'] == '1' ){
+				$this->sql = "
+					INSERT INTO quejas (
+					id,
+					t_asunto,
+					ref_id,
+					cve_ref,
+					n_turno,
+					t_tramite,
+					cve_exp,
+					f_hechos,
+					h_hechos,
+					genero,
+					t_afectado,
+					categoria,
+					d_ano,
+					comentario,
+					descripcion,
+					prioridad,
+					fojas,
+					evidencia,
+					estado,
+					procedencia
+					) VALUES ( 
+						'',
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?
+						
+					);
+				";
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->bindParam(1,$t_asunto,PDO::PARAM_INT);
+				$this->stmt->bindParam(2,$ref_id,PDO::PARAM_INT);
+				$this->stmt->bindParam(3,$cve_ref,PDO::PARAM_STR);
+				$this->stmt->bindParam(4,$n_turno,PDO::PARAM_STR);
+				$this->stmt->bindParam(5,$t_tramite,PDO::PARAM_STR);
+				$this->stmt->bindParam(6,$cve_exp,PDO::PARAM_STR);
+				$this->stmt->bindParam(7,$f_hechos,PDO::PARAM_STR);
+				$this->stmt->bindParam(8,$h_hechos,PDO::PARAM_STR);
+				$this->stmt->bindParam(9,$genero,PDO::PARAM_INT);
+				$this->stmt->bindParam(10,$t_afectado,PDO::PARAM_STR);
+				$this->stmt->bindParam(11,$categoria,PDO::PARAM_STR);
+				$this->stmt->bindParam(12,$d_ano,PDO::PARAM_STR);
+				$this->stmt->bindParam(13,$comentario,PDO::PARAM_STR);
+				$this->stmt->bindParam(14,$descripcion,PDO::PARAM_STR);
+				$this->stmt->bindParam(15,$prioridad,PDO::PARAM_STR);
+				$this->stmt->bindParam(16,$fojas,PDO::PARAM_STR);
+				$this->stmt->bindParam(17,$evidencia,PDO::PARAM_STR);
+				$this->stmt->bindParam(18,$estado,PDO::PARAM_STR);
+				$this->stmt->bindParam(19,$procedencia,PDO::PARAM_STR);
+				
+				$this->stmt->execute();
+				#RECUPERAR EL ID DE LA QUEJA INSERTADO 
+				$queja_id = $this->pdo->lastInsertId();
+				unset($this->sql);
+				unset($this->stmt);
 
-			$this->sql = "
-				INSERT INTO quejas (
-				id,
-				t_asunto,
-				ref_id,
-				cve_ref,
-				n_turno,
-				t_tramite,
-				cve_exp,
-				f_hechos,
-				h_hechos,
-				genero,
-				t_afectado,
-				categoria,
-				d_ano,
-				comentario,
-				descripcion,
-				prioridad,
-				fojas,
-				evidencia,
-				estado,
-				procedencia
-				) VALUES ( 
+				#GUARDAR DATOS DE LA UBICACION
+				$calle			= ( isset( $_POST['c_principal'] ) && !empty( $_POST['c_principal'] ) ) ? mb_strtoupper($_POST['c_principal']): 0;
+				$e_calle		= ( isset( $_POST['e_calle'] ) && !empty( $_POST['e_calle'] ) ) ? mb_strtoupper($_POST['e_calle']): 0;
+				$y_calle		= ( isset( $_POST['y_calle'] ) && !empty( $_POST['y_calle'] ) ) ? mb_strtoupper($_POST['y_calle']): 0;
+				$edificacion 	= ( isset( $_POST['edificacion'] ) && !empty( $_POST['edificacion'] ) ) ? $_POST['edificacion']: 0;
+				$n_edificacion	= ( isset( $_POST['n_edificacion'] ) && !empty( $_POST['n_edificacion'] ) ) ? $_POST['n_edificacion']: 0;
+				$municipio		= ( isset( $_POST['municipios'] ) && !empty( $_POST['municipios'] ) ) ? $_POST['municipios']: 0;
+				$this->sql 		= "INSERT INTO ubicacion_referencia 
+				(
+					id,queja_id,calle,e_calle,y_calle,edificacion,numero,municipio
+				) 
+				VALUES 
+				(
 					'',
 					?,
 					?,
@@ -745,127 +817,303 @@ class QDModel extends Connection
 					?,
 					?,
 					?,
-					?,
-					?,
-					?,
-					?,
-					?,
-					?,
-					?,
-					?,
-					?,
-					?,
-					?,
-					?,
 					?
-					
-				);
-			";
-			$this->stmt = $this->pdo->prepare($this->sql);
-			$this->stmt->bindParam(1,$t_asunto,PDO::PARAM_INT);
-			$this->stmt->bindParam(2,$ref_id,PDO::PARAM_INT);
-			$this->stmt->bindParam(3,$cve_ref,PDO::PARAM_STR);
-			$this->stmt->bindParam(4,$n_turno,PDO::PARAM_STR);
-			$this->stmt->bindParam(5,$t_tramite,PDO::PARAM_STR);
-			$this->stmt->bindParam(6,$cve_exp,PDO::PARAM_STR);
-			$this->stmt->bindParam(7,$f_hechos,PDO::PARAM_STR);
-			$this->stmt->bindParam(8,$h_hechos,PDO::PARAM_STR);
-			$this->stmt->bindParam(9,$genero,PDO::PARAM_STR);
-			$this->stmt->bindParam(10,$t_afectado,PDO::PARAM_STR);
-			$this->stmt->bindParam(11,$categoria,PDO::PARAM_STR);
-			$this->stmt->bindParam(12,$d_ano,PDO::PARAM_STR);
-			$this->stmt->bindParam(13,$comentario,PDO::PARAM_STR);
-			$this->stmt->bindParam(14,$descripcion,PDO::PARAM_STR);
-			$this->stmt->bindParam(15,$prioridad,PDO::PARAM_STR);
-			$this->stmt->bindParam(16,$fojas,PDO::PARAM_STR);
-			$this->stmt->bindParam(17,$evidencia,PDO::PARAM_STR);
-			$this->stmt->bindParam(18,$estado,PDO::PARAM_STR);
-			$this->stmt->bindParam(19,$procedencia,PDO::PARAM_STR);
-			
-			$this->stmt->execute();
-			#RECUPERAR EL ID DE LA QUEJA INSERTADO 
-			$queja_id = $this->pdo->lastInsertId();
-			unset($this->sql);
-			unset($this->stmt);
+				);";
+				$this->stmt = $this->getPDO()->prepare($this->sql);
+				$this->stmt->bindParam(1,$queja_id,PDO::PARAM_STR);
+				$this->stmt->bindParam(2,$calle,PDO::PARAM_STR);
+				$this->stmt->bindParam(3,$e_calle,PDO::PARAM_STR);
+				$this->stmt->bindParam(4,$y_calle,PDO::PARAM_STR);
+				$this->stmt->bindParam(5,$nombre,PDO::PARAM_STR);
+				$this->stmt->bindParam(6,$nombre,PDO::PARAM_STR);
+				$this->stmt->bindParam(7,$municipio,PDO::PARAM_STR);
+				$this->stmt->execute();
+				#Guardar las presuntas conductas
+				unset($this->sql);
+				unset($this->stmt);
+				for($i = 0; $i < count($_POST['conductas']); $i++ ){
+					$conducta = $_POST['conductas'][$i];
+					$this->sql = " INSERT INTO p_conductas (id,queja_id,conducta_id) VALUES ('',?,?); ";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$conducta,PDO::PARAM_INT);
+					$this->stmt->execute();
+				}
+				#Agregar los datos de la averiguación previa.
+				unset($this->sql);
+				unset($this->stmt);
 
-			#GUARDAR DATOS DE LA UBICACION
-			$calle			= ( isset( $_POST['c_principal'] ) && !empty( $_POST['c_principal'] ) ) ? mb_strtoupper($_POST['c_principal']): 0;
-			$e_calle		= ( isset( $_POST['e_calle'] ) && !empty( $_POST['e_calle'] ) ) ? mb_strtoupper($_POST['e_calle']): 0;
-			$y_calle		= ( isset( $_POST['y_calle'] ) && !empty( $_POST['y_calle'] ) ) ? mb_strtoupper($_POST['y_calle']): 0;
-			$edificacion 	= ( isset( $_POST['edificacion'] ) && !empty( $_POST['edificacion'] ) ) ? $_POST['edificacion']: 0;
-			$n_edificacion	= ( isset( $_POST['n_edificacion'] ) && !empty( $_POST['n_edificacion'] ) ) ? $_POST['n_edificacion']: 0;
-			$municipio		= ( isset( $_POST['municipios'] ) && !empty( $_POST['municipios'] ) ) ? $_POST['municipios']: 0;
-			$this->sql 		= "INSERT INTO ubicacion_referencia 
-			(
-				id,queja_id,calle,e_calle,y_calle,edificacion,numero,municipio
-			) 
-			VALUES 
-			(
-				'',
-				?,
-				?,
-				?,
-				?,
-				?,
-				?,
-				?
-			);";
-			$this->stmt = $this->getPDO()->prepare($this->sql);
-			$this->stmt->bindParam(1,$queja_id,PDO::PARAM_STR);
-			$this->stmt->bindParam(2,$calle,PDO::PARAM_STR);
-			$this->stmt->bindParam(3,$e_calle,PDO::PARAM_STR);
-			$this->stmt->bindParam(4,$y_calle,PDO::PARAM_STR);
-			$this->stmt->bindParam(5,$nombre,PDO::PARAM_STR);
-			$this->stmt->bindParam(6,$nombre,PDO::PARAM_STR);
-			$this->stmt->bindParam(7,$municipio,PDO::PARAM_STR);
-			$this->stmt->execute();
-			#Guardar las presuntas conductas
-			unset($this->sql);
-			unset($this->stmt);
-			for($i = 0; $i < count($_POST['conductas']); $i++ ){
-				$conducta = $_POST['conductas'][$i];
-				$this->sql = " INSERT INTO p_conductas (id,queja_id,conducta_id) VALUES ('',?,?); ";
+				if ($_POST['origen'][0] != '' ) {
+					for($i = 0; $i < count($_POST['origen']); $i++ ){
+						$origen 	= $_POST['origen'][$i];
+						$tramite	= $_POST['tramite_prev'][$i];
+						$clave_prev	= $_POST['clave_prev'][$i];
+						$this->sql = " INSERT INTO referencia_queja (id,clave,origen,tipo, queja_id) VALUES ('',?,?,?,?); ";
+						$this->stmt = $this->pdo->prepare($this->sql);
+						$this->stmt->bindParam(1,$clave_prev,PDO::PARAM_STR);
+						$this->stmt->bindParam(2,$origen,PDO::PARAM_INT);
+						$this->stmt->bindParam(3,$tramite_preva,PDO::PARAM_INT);
+						$this->stmt->bindParam(4,$queja_id,PDO::PARAM_INT);
+						$this->stmt->execute();
+					}
+				}
+				#Insertar el turnado
+				unset($this->sql);
+				unset($this->stmt);
+				$this->sql = "INSERT INTO e_turnados(id,queja_id,persona_id,t_tramite,estado) VALUES ('',?,?,1,1) ";
 				$this->stmt = $this->pdo->prepare($this->sql);
 				$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
-				$this->stmt->bindParam(2,$conducta,PDO::PARAM_INT);
+				$this->stmt->bindParam(2,$_POST['sp_id'],PDO::PARAM_INT);
 				$this->stmt->execute();
-			}
-			#Agregar los datos de la averiguación previa.
-			unset($this->sql);
-			unset($this->stmt);
-
-			if ($_POST['origen'][0] != '' ) {
-				for($i = 0; $i < count($_POST['origen']); $i++ ){
-					$origen 	= $_POST['origen'][$i];
-					$tramite	= $_POST['tramite_prev'][$i];
-					$clave_prev	= $_POST['clave_prev'][$i];
-					$this->sql = " INSERT INTO referencia_queja (id,clave,origen,tipo, queja_id) VALUES ('',?,?,?,?); ";
+				#Insertar las vias de recepcion 
+				unset($this->sql);
+				unset($this->stmt);
+				$this->sql = "INSERT INTO vias_recepcion (id,via_id,queja_id) VALUES ('',?,?) ";
+				for ($i=0; $i < count($_POST['vias_r']); $i++) { 
 					$this->stmt = $this->pdo->prepare($this->sql);
-					$this->stmt->bindParam(1,$clave_prev,PDO::PARAM_STR);
-					$this->stmt->bindParam(2,$origen,PDO::PARAM_INT);
-					$this->stmt->bindParam(3,$tramite_preva,PDO::PARAM_INT);
-					$this->stmt->bindParam(4,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$_POST['vias_r'][$i],PDO::PARAM_INT);
+					$this->stmt->execute();
+				}
+			}else{
+				#Generar el numero aleatorio 
+				$aleatorio = rand(1,1000000);
+				for ($i=0; $i < $_POST['cantidad']; $i++) { 
+					#-----------------------------------------------------------------------------------
+					/*GENERAR LA CLAVE*/
+					$this->sql = "SELECT short_name AS sn FROM tipos_tramite WHERE id = ?";
+					$this->stmt = $this->getPDO()->prepare($this->sql);
+					$this->stmt->bindParam(1,$t_tramite,PDO::PARAM_INT);
+					$this->stmt->execute();
+					$sn = $this->stmt->fetch(PDO::FETCH_OBJ);
+					if( $sn->sn == "QD" ){
+						$this->sql = "SELECT COUNT(*) AS total FROM quejas WHERE t_tramite IN (1,2,3) AND YEAR(created_at) = YEAR(NOW());";
+						$this->stmt = $this->pdo->prepare($this->sql);
+						$this->stmt->execute();
+						$total = $this->stmt->fetch(PDO::FETCH_OBJ)->total;
+						$total++;
+						$c_exp = "UAI/EDOMEX/".$total."/".$sn->sn."/IP/".date('Y');
+					}else{
+						$this->sql = "SELECT COUNT(*) AS total FROM quejas WHERE t_tramite = ? AND YEAR(created_at) = YEAR(NOW());";
+						$this->stmt = $this->pdo->prepare($this->sql);
+						$this->stmt->bindParam(1,$t_tramite,PDO::PARAM_INT);
+						$this->stmt->execute();
+						$total = $this->stmt->fetch(PDO::FETCH_OBJ)->total;
+						$total++;
+						$c_exp = "UAI/EDOMEX/".$total."/".$sn->sn."/IP/".date('Y');
+					}
+					#-----------------------------------------------------------------------------------
+					$this->sql = "
+						INSERT INTO quejas (
+						id,
+						t_asunto,
+						ref_id,
+						cve_ref,
+						n_turno,
+						t_tramite,
+						cve_exp,
+						f_hechos,
+						h_hechos,
+						genero,
+						t_afectado,
+						categoria,
+						d_ano,
+						comentario,
+						descripcion,
+						prioridad,
+						fojas,
+						evidencia,
+						estado,
+						procedencia,
+						multiple_id
+						) VALUES ( 
+							'',
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?,
+							?
+							
+						);
+					";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$t_asunto,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$ref_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(3,$cve_ref,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$n_turno,PDO::PARAM_STR);
+					$this->stmt->bindParam(5,$t_tramite,PDO::PARAM_STR);
+					$this->stmt->bindParam(6,$c_exp,PDO::PARAM_STR);
+					$this->stmt->bindParam(7,$f_hechos,PDO::PARAM_STR);
+					$this->stmt->bindParam(8,$h_hechos,PDO::PARAM_STR);
+					$this->stmt->bindParam(9,$genero,PDO::PARAM_INT);
+					$this->stmt->bindParam(10,$t_afectado,PDO::PARAM_STR);
+					$this->stmt->bindParam(11,$categoria,PDO::PARAM_STR);
+					$this->stmt->bindParam(12,$d_ano,PDO::PARAM_STR);
+					$this->stmt->bindParam(13,$comentario,PDO::PARAM_STR);
+					$this->stmt->bindParam(14,$descripcion,PDO::PARAM_STR);
+					$this->stmt->bindParam(15,$prioridad,PDO::PARAM_STR);
+					$this->stmt->bindParam(16,$fojas,PDO::PARAM_STR);
+					$this->stmt->bindParam(17,$evidencia,PDO::PARAM_STR);
+					$this->stmt->bindParam(18,$estado,PDO::PARAM_STR);
+					$this->stmt->bindParam(19,$procedencia,PDO::PARAM_STR);
+					$this->stmt->bindParam(20,$aleatorio,PDO::PARAM_INT);
+					
+					$this->stmt->execute();
+					#RECUPERAR EL ID DE LA QUEJA INSERTADO 
+					$queja_id = $this->pdo->lastInsertId();
+					unset($this->sql);
+					unset($this->stmt);
+
+					#GUARDAR DATOS DE LA UBICACION
+					$calle			= ( isset( $_POST['c_principal'] ) && !empty( $_POST['c_principal'] ) ) ? mb_strtoupper($_POST['c_principal']): 0;
+					$e_calle		= ( isset( $_POST['e_calle'] ) && !empty( $_POST['e_calle'] ) ) ? mb_strtoupper($_POST['e_calle']): 0;
+					$y_calle		= ( isset( $_POST['y_calle'] ) && !empty( $_POST['y_calle'] ) ) ? mb_strtoupper($_POST['y_calle']): 0;
+					$edificacion 	= ( isset( $_POST['edificacion'] ) && !empty( $_POST['edificacion'] ) ) ? $_POST['edificacion']: 0;
+					$n_edificacion	= ( isset( $_POST['n_edificacion'] ) && !empty( $_POST['n_edificacion'] ) ) ? $_POST['n_edificacion']: 0;
+					$municipio		= ( isset( $_POST['municipios'] ) && !empty( $_POST['municipios'] ) ) ? $_POST['municipios']: 0;
+					$this->sql 		= "INSERT INTO ubicacion_referencia 
+					(
+						id,queja_id,calle,e_calle,y_calle,edificacion,numero,municipio
+					) 
+					VALUES 
+					(
+						'',
+						?,
+						?,
+						?,
+						?,
+						?,
+						?,
+						?
+					);";
+					$this->stmt = $this->getPDO()->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$calle,PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$e_calle,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$y_calle,PDO::PARAM_STR);
+					$this->stmt->bindParam(5,$nombre,PDO::PARAM_STR);
+					$this->stmt->bindParam(6,$nombre,PDO::PARAM_STR);
+					$this->stmt->bindParam(7,$municipio,PDO::PARAM_STR);
+					$this->stmt->execute();
+					#Guardar las presuntas conductas
+					
+					for($a = 0; $a < count($_POST['conductas']); $a++ ){
+						$conducta = $_POST['conductas'][$a];
+						$this->sql = " INSERT INTO p_conductas (id,queja_id,conducta_id) VALUES ('',?,?); ";
+						$this->stmt = $this->pdo->prepare($this->sql);
+						$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+						$this->stmt->bindParam(2,$conducta,PDO::PARAM_INT);
+						$this->stmt->execute();
+					}
+					#Agregar los datos de la averiguación previa.
+					
+					if ($_POST['origen'][0] != '' ) {
+						for($b = 0; $b < count($_POST['origen']); $b++ ){
+							$origen 	= $_POST['origen'][$b];
+							$tramite	= $_POST['tramite_prev'][$b];
+							$clave_prev	= $_POST['clave_prev'][$b];
+							$this->sql = " INSERT INTO referencia_queja (id,clave,origen,tipo, queja_id) VALUES ('',?,?,?,?); ";
+							$this->stmt = $this->pdo->prepare($this->sql);
+							$this->stmt->bindParam(1,$clave_prev,PDO::PARAM_STR);
+							$this->stmt->bindParam(2,$origen,PDO::PARAM_INT);
+							$this->stmt->bindParam(3,$tramite_preva,PDO::PARAM_INT);
+							$this->stmt->bindParam(4,$queja_id,PDO::PARAM_INT);
+							$this->stmt->execute();
+						}
+					}
+					#Insertar el turnado
+					
+					$this->sql = "INSERT INTO e_turnados(id,queja_id,persona_id,t_tramite,estado) VALUES ('',?,?,1,1) ";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$_POST['sp_id'],PDO::PARAM_INT);
+					$this->stmt->execute();
+					#Insertar las vias de recepcion 
+					
+					$this->sql = "INSERT INTO vias_recepcion (id,via_id,queja_id) VALUES ('',?,?) ";
+					for ($j=0; $j < count($_POST['vias_r']); $j++) { 
+						$this->stmt = $this->pdo->prepare($this->sql);
+						$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+						$this->stmt->bindParam(2,$_POST['vias_r'][$j],PDO::PARAM_INT);
+						$this->stmt->execute();
+					}
+					#insertar a los presuntos
+					
+					$pro 	=( !empty($_POST['pro'][$i]) ) ? $_POST['pro'][$i] : NULL;
+					
+					if ( !is_null($pro) ) {
+						if ($pro == '1') {
+							$adscripcion 	= ( !empty($_POST['adscripcion'][$i]) ) ? mb_strtoupper($_POST['adscripcion'][$i]) : NULL ;
+							$subdir 		= ( !empty($_POST['subdir'][$i]) ) ? $_POST['subdir'][$i] : NULL ;
+							$region 		= ( !empty($_POST['region'][$i]) ) ? $_POST['region'][$i] : NULL ;
+							$agrupamiento 	= ( !empty($_POST['agrupamiento'][$i]) ) ? $_POST['agrupamiento'][$i] : NULL ;
+						}
+						if ($pro == '2') {
+							$agencia 	= ( !empty($_POST['agencia'][$i]) ) ? mb_strtoupper($_POST['agencia'][$i],'utf-8') : NULL ;
+							$fiscalia 	= ( !empty($_POST['fiscalia'][$i]) ) ? mb_strtoupper($_POST['fiscalia'][$i],'utf-8') : NULL ;
+							$mesa 		= ( !empty($_POST['mesa'][$i]) ) ? mb_strtoupper($_POST['mesa'][$i],'utf-8') : NULL ;
+							$turno 		= ( !empty($_POST['turno'][$i]) ) ? mb_strtoupper($_POST['turno'][$i],'utf-8') : NULL ;
+						}
+					}else{
+						$adscripcion	= NULL;			
+						$subdir			= NULL;	
+						$region			= NULL;	
+						$agrupamiento	= NULL;			
+						$agencia		= NULL;		
+						$fiscalia		= NULL;		
+						$mesa			= NULL;	
+						$turno			= NULL;	
+					}
+					$nombre 	= ( !empty($_POST['nombre'][$i]) ) ? mb_strtoupper($_POST['nombre'][$i],'utf-8'): NULL;
+					$ap_pat 	= ( !empty($_POST['ap_pat'][$i]) ) ? mb_strtoupper($_POST['ap_pat'][$i],'utf-8'): NULL;
+					$ap_mat 	= ( !empty($_POST['ap_mat'][$i]) ) ? mb_strtoupper($_POST['ap_mat'][$i],'utf-8'): NULL;
+					$full_name 	= mb_strtoupper($nombre,'utf-8')." ".mb_strtoupper($ap_pat,'utf-8')." ".mb_strtoupper($ap_mat,'utf-8'); 
+					$genero 	= ( !empty($_POST['ge'][$i]) ) ? $_POST['ge'][$i] : NULL;
+					$cargo  	= ( !empty($_POST['cargo'][$i]) )  ? $_POST['cargo'][$i] : NULL;
+					$mun  = ( !empty($_POST['mun'][$i]) )  ? $_POST['mun'][$i] : NULL;
+					$media 	= ( !empty($_POST['media'][$i]) ) ? mb_strtoupper($_POST['media'][$i],'utf-8'): NULL;
+					
+					$this->sql 	= "INSERT INTO presuntos 
+					(id, queja_id, genero, nombre, procedencia, cargo_id, municipio_id, 
+					comentarios, adscripcion, subdireccion, agrupamiento, agencia, fiscalia, mesa, turno)
+					VALUES 
+					(
+					'', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+					);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id);
+					$this->stmt->bindParam(2,$genero);
+					$this->stmt->bindParam(3,$full_name);
+					$this->stmt->bindParam(4,$pro);
+					$this->stmt->bindParam(5,$cargo);
+					$this->stmt->bindParam(6,$mun);
+					$this->stmt->bindParam(7,$media);
+					$this->stmt->bindParam(8,$adscripcion);
+					$this->stmt->bindParam(9,$subdir);
+					$this->stmt->bindParam(10,$agrupamiento);
+					$this->stmt->bindParam(11,$agencia);
+					$this->stmt->bindParam(12,$fiscalia);
+					$this->stmt->bindParam(13,$mesa);
+					$this->stmt->bindParam(14,$turno);
 					$this->stmt->execute();
 				}
 			}
-			#Insertar el turnado
-			unset($this->sql);
-			unset($this->stmt);
-			$this->sql = "INSERT INTO e_turnados(id,queja_id,persona_id,t_tramite,estado) VALUES ('',?,?,1,1) ";
-			$this->stmt = $this->pdo->prepare($this->sql);
-			$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
-			$this->stmt->bindParam(2,$_POST['sp_id'],PDO::PARAM_INT);
-			$this->stmt->execute();
-			#Insertar las vias de recepcion 
-			unset($this->sql);
-			unset($this->stmt);
-			$this->sql = "INSERT INTO vias_recepcion (id,via_id,queja_id) VALUES ('',?,?) ";
-			for ($i=0; $i < count($_POST['vias_r']); $i++) { 
-				$this->stmt = $this->pdo->prepare($this->sql);
-				$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
-				$this->stmt->bindParam(2,$_POST['vias_r'][$i],PDO::PARAM_INT);
-				$this->stmt->execute();
-			}
+			
 			
 			#Insertar la pista de auditoria
 			session_start();
@@ -879,7 +1127,7 @@ class QDModel extends Connection
 			$stmt->bindParam(1,$desc,PDO::PARAM_STR);
 			$stmt->bindParam(2,$logger,PDO::PARAM_INT);
 			$stmt->execute();
-			return json_encode( array('status'=>'success','message'=>'EL EXPEDIENTE '.$_POST['cve_exp'].' A SIDO GENERADO DE MANERA EXITOSA.') );
+			return json_encode( array('status'=>'success','message'=>'SE HA INSERTADO LA INFORMACIÓN DE MANERA CORRECTA.') );
 		} catch (Exception $e) {
 			#if( $e->getCode()  ){}
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
@@ -995,7 +1243,7 @@ class QDModel extends Connection
 			#Agregar presuntos responsables
 			$sql_presuntos = "SELECT p.* ,m.nombre AS n_municipio 
 			FROM presuntos AS p 
-			INNER JOIN municipios AS m ON m.id = p.municipio_id
+			LEFT JOIN municipios AS m ON m.id = p.municipio_id
 			WHERE p.queja_id = ?";
 			$this->stmt = $this->pdo->prepare($sql_presuntos);
 			$this->stmt->bindParam(1,$qd->id,PDO::PARAM_INT);
@@ -1021,6 +1269,26 @@ class QDModel extends Connection
 			$this->stmt->execute();
 			$archivos = $this->stmt->fetchAll(PDO::FETCH_OBJ);
 			$aux['archivos'] = $archivos;
+			#buscar expedientes acumulados 
+			$this->sql = "
+			SELECT
+			    q1.cve_exp AS original,
+			    q2.cve_exp AS acumulado,
+			    q2.id AS acumulado_id
+			FROM
+			    quejas_acumuladas AS qa
+			INNER JOIN quejas AS q1
+			ON
+			    q1.id = qa.q_original
+			INNER JOIN quejas AS q2
+			ON
+			    q2.id = qa.q_acumulado
+			WHERE qa.q_original = ?;";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$qd->id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$acumulados = $this->stmt->fetchAll( PDO::FETCH_OBJ );
+			$aux['acumuladas'] = $acumulados;
 
 			array_push($quejas, $aux);
 			return $quejas;

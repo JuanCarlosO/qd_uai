@@ -19,6 +19,12 @@ $(document).ready(function() {
 });
 
 function getURL(url) {
+	if ( url == '?menu=list_queja' ) {
+		$('#option_1').addClass('active');
+		$('#option_1_2').addClass('active');
+		listado_qd();
+		frm_upload_file();
+	}
 	if ( url == '?menu=general' ) {
 		$('#option_1').addClass('active');
 		$('#option_1_1').addClass('active');
@@ -33,12 +39,17 @@ function getURL(url) {
 		load_catalogo('estado','select',12);
 		change_TR();
 		autocomplete_input('sp','sp_id');
-	}
-	if ( url == '?menu=list_queja' ) {
-		$('#option_1').addClass('active');
-		$('#option_1_2').addClass('active');
-		listado_qd();
-		frm_upload_file();
+		$('#pregunta').change(function(e) {
+			e.preventDefault();
+			if( $(this).val() == '2' ){
+				$('#cant_person').removeClass('hidden');
+				
+			}else{
+				$('#cant_person').addClass('hidden');
+				$('#cantidad').val("");
+			}
+		});
+
 	}
 	if ( url == '?menu=reports' ) {
 		$('#option_2').addClass('active');
@@ -78,6 +89,45 @@ function getURL(url) {
 	if ( url == '?menu=expedientes' ) {
 		tbl = applyDataTables('tbl_abogado');
 	}
+	if ( url == '?menu=turnar' ) {
+		load_catalogo('estado','select',12);
+		load_catalogo('t_ley','select',7);
+		autocomplete_input('persona','persona_id');
+		$('#estado').change(function(e) {
+			e.preventDefault();
+			var e = $(this).val();
+			//cuando es tramite
+			if ( e == '1' || e == '9'  ) {
+				$('#contenedor_1,#contenedor_2,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
+			}
+			//cuando es archivo o imporcedencia
+			if ( e == '3' || e == '11'  ) {
+				$('#contenedor_1').removeClass('hidden');
+				$('#contenedor_2,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
+			}
+			//Cuando es respo
+			if ( e == '8' ) {
+				$('#contenedor_2').removeClass('hidden');
+				$('#contenedor_1,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
+			}
+			//Cuando es incompetencia
+			if ( e == '4' ) {
+				$('#contenedor_3').removeClass('hidden');
+				$('#contenedor_2,#contenedor_1,#contenedor_4,#contenedor_5').addClass('hidden');
+			}
+			//Cuando es acumulado
+			if ( e == '2' ) {
+				$('#contenedor_4').removeClass('hidden');
+				$('#contenedor_2,#contenedor_3,#contenedor_1,#contenedor_5').addClass('hidden');
+			}
+			//Cuando es reserva
+			if ( e == '10'  ) {
+				$('#contenedor_5').removeClass('hidden');
+				$('#contenedor_2,#contenedor_3,#contenedor_4,#contenedor_1').addClass('hidden');
+			}
+		});
+	}
+	
 	return false; 
 }
 
@@ -137,7 +187,7 @@ function listado_qd() {
 	});
 
 	var datos = {
-	    class: 'table-striped table-bordered',
+	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	    	{ leyenda: 'Acciones', class:'text-center', style: 'width:10px;',ordenable:true,columna:'id'},
 	        { leyenda: 'ID', class:'text-center', style: 'width:20px;',ordenable:true,columna:'id'},
@@ -157,6 +207,7 @@ function listado_qd() {
     	        });
 	        }},
 	        { leyenda: 'Procedencia',class:'text-center', style: 'width:100px;', columna:'',ordenable:false},
+	        { leyenda: 'Fase', class: 'text-center', style: 'width:10px;', columna:'',ordenable:false },
 	    ],
 	    modelo: [
 	    	{ class:'',formato: function(tr, obj, valor){
@@ -170,6 +221,8 @@ function listado_qd() {
                         { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
                         { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
                         { href: 'index.php?menu=m_queja&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Modificar' },
+                        { href: 'index.php?menu=turnar&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Turnar' },
+                        
                     ]
                 });
 	        }}, 
@@ -206,6 +259,21 @@ function listado_qd() {
 	        }}, 
 	        {class:'text-center', formato: function(tr, obj, valor){
 	            return obj.procedencia;
+	        }},
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	var fase = parseInt(obj.fase);
+	            if (fase >= 0 && fase < 70) {
+					tr.addClass('bg-green');
+	            	return 'INVESTIGAR ('+fase+')';
+	            }
+	            if (fase > 70 && fase < 88) {
+	            	tr.addClass('bg-yellow');
+	            	return 'COMPLEMENTO DE INVESTIGACIÓN('+fase+')';
+	            }
+	            if (fase > 88 ) {
+	            	tr.addClass('bg-red-active');
+	            	return 'DETERMINACIÓN ('+fase+')';
+	            }
 	        }}, 
 	    ],
 	    url: 'controller/puente.php?option=1',
@@ -401,6 +469,10 @@ function load_catalogo(element,type,option){
 	})
 	.done(function(response) {
 		if ( type == 'select') {
+			if( element == 'conductas' ){
+				$('#conductas').attr('multiple', '');
+				$('#conductas').select2();
+			}
 			$('#'+element).append('<option value="" >...</option>');
 			$.each(response, function(index, val) {
 				$('#'+element).append('<option value="'+val.id+'">'+val.nombre+'</option>');
@@ -796,5 +868,181 @@ function applyDataTables(t) {
 function cero()
 {
 	alert('No existen datos por consultar.');
+	return false;
+}
+function addPresuntos() {
+	var cantidad = $('#cantidad').val();
+	if (cantidad <=30 && cantidad >= 1) {
+		$('#mult_presuntos').removeClass('hidden');
+		$('#formularios').html("");
+		var conta = 1;
+		for (var i = 0; i < cantidad; i++) {
+			var formulario = "";
+			
+			formulario +=  '<div class="row">'+
+			    '<div class="col-md-12">'+
+			        '<h3>FORMULARIO PRESUNTO RESPONSABLE '+conta+'</h3>'+
+			        '<div class="row">'+
+			            '<div class="col-md-4">'+
+			                '<div class="form-group">'+
+			                    '<label for="n_ref">Nombre </label>'+
+			                    '<input type="text" id="nombre" name="nombre[]" value="" required="" placeholder="Nombre(s)" maxlength="50" class="form-control">'+
+			                '</div>'+
+			            '</div>'+
+			            '<div class="col-md-4">'+
+			                '<div class="form-group">'+
+			                    '<label for="ap_pat">Apellido paterno</label>'+
+			                    '<input type="text" id="ap_pat" name="ap_pat[]" value="" required="" placeholder="Nombre de la nueva referencia" maxlength="50" class="form-control">'+
+			                '</div>'+
+			            '</div>'+
+			            '<div class="col-md-4">'+
+			                '<div class="form-group">'+
+			                    '<label for="ap_mat">Apellido materno</label>'+
+			                    '<input type="text" id="ap_mat" name="ap_mat[]" value="" required="" placeholder="Apellido materno" maxlength="50" class="form-control">'+
+			                '</div>'+
+			            '</div>'+
+			        '</div>'+
+			        '<div class="row">'+
+			            '<div class="col-md-4">'+
+			                '<div class="form-group">'+
+			                    '<label for="ge">Seleccione el genero</label>'+
+			                    '<select id="ge" name="ge[]" class="form-control">'+
+			                        '<option value="">...</option>'+
+			                        '<option value="1">Hombre</option>'+
+			                        '<option value="2">Mujer</option>'+
+			                    '</select>'+
+			                '</div>'+
+			            '</div>'+
+			            '<div class="col-md-4">'+
+			                '<div class="form-group">'+
+			                    '<label for="cargo">Seleccione el cargo</label>'+
+			                    '<select id="cargo" name="cargo[]" class="form-control">'+
+			                        '<option value=""></option>'+
+			                    '</select>'+
+			                '</div>'+
+			            '</div>'+
+			            '<div class="col-md-4">'+
+			                '<div class="form-group">'+
+			                    '<label>Municipio</label>'+
+			                    '<select id="mun" name="mun[]" class="form-control">'+
+			                        '<option value="">...</option>'+
+			                    '</select>'+
+			                '</div>'+
+			            '</div>'+
+			        '</div>'+
+			        '<div class="row">'+
+			            '<div class="col-md-4">'+
+			                '<div class="form-group">'+
+			                    '<label>Procedencia</label>'+
+			                    '<select id="procedencia" name="pro[]" class="form-control">'+
+			                        '<option value="">...</option>'+
+			                        '<option value="1">ESTATAL</option>'+
+			                        '<option value="2">CPRS</option>'+
+			                    '</select>'+
+			                '</div>'+
+			            '</div>'+
+			        '</div>'+
+			        '<div id="estatal" class="">'+
+			            '<div class="row">'+
+			                '<div class="col-md-3">'+
+			                    '<div class="form-group">'+
+			                        '<label>Adscripción</label>'+
+			                        '<input type="text" name="adscripcion[]" class="form-control">'+
+			                    '</div>'+
+			                '</div>'+
+			                '<div class="col-md-3">'+
+			                    '<div class="form-group">'+
+			                        '<label>Subdirección</label>'+
+			                        '<select id="subdir" name="subdir[]" class="form-control">'+
+			                            '<option value="">...</option>'+
+			                        '</select>'+
+			                    '</div>'+
+			                '</div>'+
+			                '<div class="col-md-3">'+
+			                    '<div class="form-group">'+
+			                        '<label>Region</label>'+
+			                        '<select id="region" name="region[]" class="form-control">'+
+			                            '<option value="">...</option>'+
+			                        '</select>'+
+			                    '</div>'+
+			                '</div>'+
+			                '<div class="col-md-3">'+
+			                    '<div class="form-group">'+
+			                        '<label>Agrupamiento</label>'+
+			                        '<select id="agrupamiento" name="agrupamiento[]" class="form-control">'+
+			                            '<option value="">...</option>'+
+			                        '</select>'+
+			                    '</div>'+
+			                '</div>'+
+			            '</div>'+
+			        '</div>'+
+			        '<div id="cprs" class="">'+
+			            '<div class="row">'+
+			                '<div class="col-md-4">'+
+			                    '<div class="form-group">'+
+			                        '<label>Agencia</label>'+
+			                        '<input type="text" name="agencia[]" class="form-control">'+
+			                    '</div>'+
+			                '</div>'+
+			                '<div class="col-md-4">'+
+			                    '<div class="form-group">'+
+			                        '<label>Fiscalia</label>'+
+			                        '<input type="text" name="fiscalia[]" class="form-control">'+
+			                    '</div>'+
+			                '</div>'+
+			                '<div class="col-md-4">'+
+			                    '<div class="form-group">'+
+			                        '<label>Mesa</label>'+
+			                        '<input type="text" name="mesa[]" class="form-control">'+
+			                    '</div>'+
+			                '</div>'+
+			            '</div>'+
+			            '<div class="row">'+
+			                '<div class="col-md-4">'+
+			                    '<div class="form-group">'+
+			                        '<label>Turno</label>'+
+			                        '<input type="text" id="turno" name="turno[]" class="form-control" value="" >'+
+			                    '</div>'+
+			                '</div>'+
+			            '</div>'+
+			        '</div>'+
+			        '<div class="row">'+
+			            '<div class="col-md-12">'+
+			                '<div class="form-group">'+
+			                    '<label>Media filiación</label>'+
+			                    '<textarea name="media[]" class="form-control" style="resize: vertical; max-height: 250px;"></textarea>'+
+			                '</div>'+
+			            '</div>'+
+			        '</div>'+
+			    '</div>'+
+			'</div>';
+			$('#formularios').append(formulario);
+			conta++;
+			load_municicios('mun[]');
+		}
+	}else{
+		alert('NO');
+	}
+}
+function load_municicios(name) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: 10},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		var options = "";
+		options += '<option value="" >...</option>';
+		$.each(response, function(index, val) {
+			options += '<option value="'+val.id+'">'+val.nombre+'</option>';
+		});
+		$('[name="'+name+'"]').html(options);
+	})
+	.fail(function() {
+		alert('Ocurrio un error al cargar el catalogo de opcion: '+option)
+	});
 	return false;
 }

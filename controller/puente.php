@@ -7,6 +7,8 @@ spl_autoload_register(function ($class) {
 $u = new UserController();
 $i = new QDController();
 $s = new SiraController();
+$r = new DRController();
+$uai = new UAIController();
 /***/
 if ( isset($_POST['option']) ) {
 	$o = $_POST['option'];
@@ -23,6 +25,7 @@ if ( isset($_POST['option']) ) {
 				$_SESSION['perfil'] 	= $access->perfil;
 				$_SESSION['area_id'] 	= $access->area_id;
 				$_SESSION['n_area'] 	= $access->n_area;
+				$_SESSION['nivel'] 		= $access->nivel;
 				if ( isset($_SESSION) ) {
 					header('Location: ../index.php?menu=general');
 				}
@@ -131,9 +134,128 @@ if ( isset($_POST['option']) ) {
 		case '33':
 			echo $s->savePresuntoR();
 			break;
-				
-		default:
-			# code...
+		case '34':
+			echo $s->getPresuntos();
+			break;
+		case '35':
+			echo $s->deletePR();			
+			break;
+		case '36':
+			echo $s->saveQuejoso();
+			break;
+		case '37':
+			echo $s->getQuejosos();
+			break;
+		case '38':
+			echo $s->deleteQuejoso();
+			break;
+		case '39':
+			echo $s->saveAuto();
+			break;
+		case '40':
+			echo $s->getMarcas();
+			break;
+		case '41':
+			echo $s->getAutos();
+			break;
+		case '42':
+			echo $s->deleteAuto();
+			break;
+		case '43':
+			echo $s->saveAnimal();
+			break;
+		case '44':
+			echo $s->getAnimales();
+			break;
+		case '45':
+			echo $s->deleteAnimal();
+			break;
+		case '46':
+			echo $s->getArmas();
+			break;
+		case '47':
+			echo $s->saveArma();
+			break;
+		case '48':
+			echo $s->deleteArma();
+			break;
+		case '49':
+			echo $s->getDocumentos();
+			break;	
+		case '50':
+			echo $s->deleteDoc();
+			break;	
+		case '51':
+			echo $s->generateReporte();
+			break;	
+		case '52':
+			echo $s->generateReporte();
+			break;	
+		case '53':
+			echo $s->saveDocOIN();
+			break;
+		case '54':
+			echo $r->saveEdoProcesal();
+			break;	
+		case '55':
+			echo $r->delete_responsable();
+			break;	
+		case '56':
+			echo $r->updateEdoProcesal();
+			break;	
+		case '57':
+			echo $s->getDashboard();
+			break;	
+		case '58':
+			echo $r->saveOpinion();
+			break;	
+		case '59':
+			echo $r->getConductasRespo();
+			break;	
+		case '60':
+			echo $r->saveConductaRespo();
+			break;	
+		case '61':
+			echo $r->saveAbogadoRes();
+			break;	
+		case '62':
+			echo $r->saveResolucion();
+			break;	
+		case '63':
+			echo $r->saveDemanda();
+			break;	
+		case '64':
+			echo $r->saveResolucionDemanda();
+			break;	
+		case '65':
+			echo $r->saveReserva();
+			break;	
+		case '66':
+			echo $r->saveAImprocedencia();
+			break;
+		case '67':
+			echo $r->devolverExp();
+			break;
+		case '68':
+			echo $r->getReporte();
+			break;	
+		case '69':
+			echo $r->editResolucion();
+			break;
+		case '70':
+			echo $r->getResolucion();
+			break;
+		case '71':
+			echo $uai->getDashboard();
+			break;
+		case '72':
+			echo $uai->getExpedientesEstado();
+			break;
+		case '73':
+			echo $uai->getDashboardActas();
+			break;
+		case '74':
+			echo $uai->getActasTipo();
 			break;
 	}
 }elseif ( isset($_GET['option']) ) {
@@ -157,9 +279,32 @@ if ( isset($_POST['option']) ) {
 			echo $s->getOINs();
 			break;
 		case '6':
-			#Buscar las ordenes de trabajo
+			#Buscar las ACTAS
 			echo $s->getActas();
 			break;
+		case '7':
+			header("Content-type: application/pdf");	
+			echo $s->getDocumentoActa($_GET['file']);
+			break;
+		case '8':
+			#Buscar las ordenes de trabajo
+			echo $s->getListONIs();
+			break;
+		case '9':
+			#Buscar las expedientes
+			echo $r->getExpedientes();
+			break;	
+		case '10':
+			#Buscar Numeros de oficio del Sistema de Oficina digital
+			echo $r->getOFs();
+			break;	
+		case '11':
+			#Buscar expedientes para el Lic reyes
+			echo $r->getExpedientesSC();
+			break;	
+		case '12':
+			echo $uai->getClavesExp();
+			break;	
 			
 		default:
 			echo json_encode( array("status"=>'error','message'=>'La ruta seleccionada no existe. Verifique con el Depto. de Desarrollo de Sistemas.') );

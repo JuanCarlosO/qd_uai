@@ -7,7 +7,7 @@ $q = new QDModel;
 $r = $q->getQDOnly($queja_id);
 $colores = json_decode( $q->getColores() );
 $municipios = json_decode( $q->getMunicipios() );
-#print_r( $r[0]['quejosos'] );
+#print_r( $r );
 ?>
 
 
