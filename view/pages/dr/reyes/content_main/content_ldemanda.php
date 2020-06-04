@@ -5,14 +5,16 @@ if (isset($_GET['exp'])) {
 	$queja_id = $_GET['exp'];
 	$q = new DRModel;
     $r = $q->getDemandas($queja_id);
+    $clave = $q->getClave($queja_id);
 }
+
 ?>
 <section class="content container-fluid">
     <div class="row">
         <div class="col-md-12">
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Demandas</h3>
+                    <h3 class="box-title">Demandas <u><?=$clave?></u></h3>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
@@ -42,13 +44,19 @@ if (isset($_GET['exp'])) {
                     									<button type="button" class="btn btn-success btn-flat" onclick="resolverDemanda(<?=$dem->id?>);">
                     										Resolución
                     									</button>
+                                                        
                     								<?php else: ?>
+                                                        <button type="button" class="btn btn-success btn-flat" onclick="modal_apersonamiento(<?=$dem->id?>);">
+                                                            Generar apersonamiento
+                                                        </button>
+
                                                         <button type="button" class="btn btn-success btn-flat btn-block" onclick="editResolucion(<?=$dem->resolucion_id?>);">
                                                             Editar la resolución
                                                         </button>
                     									<ol>
                     										<li><label>Fecha de resolución: </label> <?=$dem->f_resolucion?></li>
                     										<li><label>Resolución: </label> <?=$dem->solucion?></li>
+                                                            <li><label>Estado: </label> <?=$dem->estado?></li>
                     									</ol>
                     								<?php endif ?>
                     								

@@ -6,6 +6,15 @@ $queja_id = $_GET['exp_id'];
 $q = new DRModel;
 $data = $q->getCedula($queja_id);
 #echo "<pre>";print_r($data);echo "</pre>";
+if ($data['qr']->e_procesal == 'DEVUELTO') {
+    $mayor = date('Y-m-d');
+    $menor = $data['devolucion']->f_devolucion;
+    $resta = $q->operacionesFechas('-',$mayor,$menor);
+    
+}
+$hoy = date('Y-m-d');
+$c_apertura     = $q->operacionesFechas('-',$hoy,$data['queja']->f_apertura);
+$c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
 ?>
 <section class="content container-fluid">
     <div class="row">
@@ -20,6 +29,30 @@ $data = $q->getCedula($queja_id);
                             <h1> <center>Expediente con número: <u> <?=$data['queja']->cve_exp ?> </u></center> </h1>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <?php if ($data['qr']->e_procesal == 'DEVUELTO'): ?>
+                                    <h4> <u>DÍAS EN DEVOLUCIÓN:</u> <label> <?=$resta->resta?> </label> </h4> 
+                            <?php endif ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <table class="table table-hover table-bordered">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th class="bg-gray">Días transcurridos desde la fecha de apertura</th>
+                                        <td class="bg-info"><?=$c_apertura->resta?></td>
+                                    </tr>
+                                    <tr class="text-center">
+                                        <th class="bg-gray">Días transcurridos desde la fecha de hechos</th>
+                                        <td class="bg-info"><?=$c_hechos->resta?></td>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                    <h2 class="bg-gray"> <center> <u>Dirección de Investigación</u> </center> </h2>
                     <div class="row">
                         <div class="col-md-12">
                             <dl class="dl-horizontal">
@@ -55,7 +88,9 @@ $data = $q->getCedula($queja_id);
                                 <dd class="text-justify"> <?=$data['queja']->descripcion?> </dd>
 
                                 <dt>Estado del expediente</dt>
-                                <dd>  <?=$data['queja']->n_estado?> </dd>
+                                <dd>  <?=$data['queja']->n_estado?> 
+                                
+                                </dd>
 
                                 <dt>Prioridad</dt>
                                 <dd> <?=$data['queja']->prioridad?>  </dd>
@@ -229,68 +264,7 @@ $data = $q->getCedula($queja_id);
                             </div>
                         </div>
                     </div> 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h1> <center>Opiniones de los abogados.</center> </h1>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <table class="table table-hover table-bordered">
-                                        <thead>
-                                            <tr class="bg-info">
-                                                <th>Fecha</th>
-                                                <th>Abogado analista.</th>
-                                                <th>Comentario</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($data['opiniones'] as $key => $opinion): ?>
-                                            <tr class="bg-gray">
-                                                <td><?=$opinion->created_at?></td>
-                                                <td><?=$opinion->abogado?></td>
-                                                <td><?=$opinion->comentario?></td>
-                                            </tr>
-                                            <?php endforeach ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h1> <center>Devoluciones.</center> </h1>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <table class="table table-condesed">
-                                        <thead>
-                                            <tr class="bg-info">
-                                                <th>FECHA</th>
-                                                <th>OFICIO</th>
-                                                <th>MOTIVO</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                             <?php foreach ($data['devoluciones'] as   $key => $devuelto): ?>
-                                                <tr class="bg-gray">
-                                                    <td><?=$devuelto->f_acuse?></td>
-                                                    <td><?=$devuelto->oficio?></td>
-                                                    <td><?=$devuelto->motivo?></td>
-                                                </tr>
-                                            <?php endforeach ?>
-                                            
-                                        </tbody>
-                                    </table>
-                                    
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <h1> <center>Expedientes acumulados</center> </h1>
@@ -307,7 +281,7 @@ $data = $q->getCedula($queja_id);
                                 </tr>
                             </thead>
                             <tbody>
-                                 <?php $i = 1; foreach ($data['acumuladas'] as   $key => $acumulado): ?>
+                                <?php $i = 1; foreach ($data['acumuladas'] as   $key => $acumulado): ?>
                                     <tr class="bg-gray">
                                         <td> <?=$i;$i++;?> </td>
                                         <td>
@@ -364,8 +338,77 @@ $data = $q->getCedula($queja_id);
                                 
                             </ol>
                         </div>
+                        
                     </div>
-                            
+                     <h2 class="bg-gray"> <center> <u>Dirección de Responsabilidades</u> </center> </h2>
+                     <div class="row">
+                         <div class="col-md-6">
+                             <div class="row">
+                                 <div class="col-md-12">
+                                     <h1> <center>Observaciones del abogado.</center> </h1>
+                                 </div>
+                             </div>
+                             <div class="row">
+                                 <div class="col-md-12">
+                                     <table class="table table-hover table-bordered">
+                                         <thead>
+                                             <tr class="bg-info">
+                                                 <th>Fecha de observación</th>
+                                                 <th>Abogado analista.</th>
+                                                 <th>Comentario</th>
+                                             </tr>
+                                         </thead>
+                                         <tbody>
+                                             <?php foreach ($data['opiniones'] as $key => $opinion): ?>
+                                             <tr class="bg-gray">
+                                                 <td><?=$opinion->created_at?></td>
+                                                 <td><?=$opinion->abogado?></td>
+                                                 <td><?=$opinion->comentario?></td>
+                                             </tr>
+                                             <?php endforeach ?>
+                                         </tbody>
+                                     </table>
+                                 </div>
+                             </div>
+                         </div>
+                         <div class="col-md-6">
+                             <div class="row">
+                                 <div class="col-md-12">
+                                     <h1> <center>Devoluciones a D.I.</center> </h1>
+                                 </div>
+                             </div>
+                             <div class="row">
+                                 <div class="col-md-12">
+                                     <table class="table table-condesed">
+                                         <thead>
+                                             <tr class="bg-info">
+                                                 <th>FECHA</th>
+                                                 <th>OFICIO</th>
+                                                 <th>MOTIVO</th>
+                                                 <th>VER DOCUMENTO</th>
+                                             </tr>
+                                         </thead>
+                                         <tbody>
+                                              <?php foreach ($data['devoluciones'] as   $key => $devuelto): ?>
+                                                 <tr class="bg-gray">
+                                                     <td><?=$devuelto->f_acuse?></td>
+                                                     <td><?=$devuelto->oficio?></td>
+                                                     <td><?=$devuelto->motivo?></td>
+                                                     <td>
+                                                        <a href="controller/puente.php?option=4B&dev=<?=$devuelto->id?>" class="btn btn-success btn-flat" target="__blank">
+                                                            <i class="fa fa-eye"></i>
+                                                        </a>
+                                                     </td>
+                                                 </tr>
+                                             <?php endforeach ?>
+                                             
+                                         </tbody>
+                                     </table>
+                                     
+                                 </div>
+                             </div>
+                         </div>
+                     </div>       
                 </div>
             </div>
         </div>

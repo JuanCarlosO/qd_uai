@@ -1,3 +1,6 @@
+<?php 
+#
+?>
 <section class="content container-fluid">
     <div class="row">
         <div class="col-md-12">
@@ -37,6 +40,14 @@
             								</ol>
             							</div>
             						</div>
+                                                <div class="row">
+                                                      <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                  <label>Descripción de la Orden de Trabajo </label>
+                                                                  <p class="text-justify">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae earum, laudantium commodi, beatae perspiciatis iusto harum vel iure autem assumenda similique! Vitae optio sequi, incidunt enim provident reiciendis quidem reprehenderit.</p>
+                                                            </div>
+                                                      </div>
+                                                </div>
             						<h3> <center>INFORMACIÓN DEL OFICIO </center> </h3>
             						<div class="row">
             							<div class="col-md-4">

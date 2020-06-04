@@ -99,7 +99,21 @@ if ( $_SESSION['perfil'] == 'QDNP' ) { $t_as = 2; }
                             </div>
                         </div>
                         <div class="row">
-                            
+                            <div class="col-md-6">
+                                <div class="table-responsive">
+                                    <table id="tbl_ordenes" class="table table-hover table-bordered">
+                                        <caption class="bg-gray text-center">CONTADOR DE ORDENES DE TRABAJO</caption>
+                                        <thead>
+                                            <tr class="bg-gray">
+                                                <th class="text-center">TIPO DE ORDEN</th>
+                                                <th class="text-center">TOTAL</th>
+                                                <th class="text-center">MOSTRAR</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                         
                         <div id="qd_estado" class="hidden">
@@ -141,6 +155,30 @@ if ( $_SESSION['perfil'] == 'QDNP' ) { $t_as = 2; }
                                                     <th width="15">Quien elaboró</th>
                                                     <th width="15">Fecha del acta</th>
                                                     <th width="15">Procedencia</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_oins" class="hidden">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table id="tbl_oins" class="table table-hover table-bordered">
+                                            <caption class="text-center bg-gray">
+                                                LISTADO DE ORDENES DE TRABAJO
+                                            </caption>
+                                            <thead>
+                                                <tr class="bg-gray">
+                                                    <th>#</th>
+                                                    <th>Número de orden</th>
+                                                    <th>Número de oficio</th>
+                                                    <th>Tipo de orden</th>
+                                                    <th>Estado </th>
+                                                    <th>Fecha de registro de O.T. </th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>

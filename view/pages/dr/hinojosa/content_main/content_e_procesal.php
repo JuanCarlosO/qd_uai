@@ -152,6 +152,18 @@
 	                			</div>
 	                		</div>
 	                	</div>
+	                	<div id="motivo_sc" class="hidden">
+	                		<!--MOTIVO DE LA DEVOLUCION A LA SC -->
+	                		<div class="row">
+	                			<div class="col-md-6">
+	                				<div class="form-group">
+	                					<label>Motivo del turnado</label>
+	                					<input type="text" name="motivo_sc" value="" placeholder="¿Porque razon lo debe trabajar la Subdirección de lo Contencioso?" class="form-control">
+	                				</div>
+	                			</div>
+	                			
+	                		</div>
+	                	</div>
 	                    <div class="row">
 	                		<div class="col-md-12">
 	                			<div class="form-group">

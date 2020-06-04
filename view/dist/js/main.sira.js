@@ -98,6 +98,7 @@ function getOrdenes() {
 	    	{ leyenda: 'Acciones', style: 'width:100px;', columna: 'Sueldo' },
 	    	{ leyenda: 'ID', style:'width:20px;'},
 	        { leyenda: 'Clave de orden de trabajo', style: 'width:200px;', columna: 'clave'},
+	        { leyenda: 'Número de oficio', style: 'width:200px;', columna: 'clave'},
 	        { leyenda: 'Fecha', columna: 'fecha', filtro: false },
 	        { leyenda: 'Participantes', style: 'width:300px;', columna: 'Correo' },
 	        { leyenda: 'Estado', style: 'width:120px;', columna: 'Sexo'},
@@ -121,6 +122,7 @@ function getOrdenes() {
 	    	
 	        { propiedad: 'id' },
 	        { propiedad: 'clave' },
+	        { propiedad: 'oficio' },
 	        { propiedad: 'f_creacion' },
 	        { propiedad: 'id'},
 	        { propiedad: 'estatus'}
@@ -157,6 +159,9 @@ function getActas() {
     	                    { valor: '1', contenido: 'INSPECCION' },
     	                    { valor: '2', contenido: 'VERIFICACION' },
     	                    { valor: '3', contenido: 'SUPERVISIÓN' },
+    	                    { valor: '4', contenido: 'INVESTIGACIÓN' },
+    	                    { valor: '5', contenido: 'USUARIO SIMULADO' },
+    	                    { valor: '6', contenido: 'AGENTE ENCUBIERTO' },
     	                ]
     	            });
     	        }
@@ -1088,6 +1093,16 @@ function getDashboard() {
 			if(val.t_actuacion == 'SUPERVISION'){
 				$('#c_sup').text(val.cuenta);
 			}
+			if(val.t_actuacion == 'INVESTIGACION'){
+				$('#c_inv').text(val.cuenta);
+			}
+			if(val.t_actuacion == 'AGENTE ENCUBIERTO'){
+				$('#c_age').text(val.cuenta);
+			}
+			if(val.t_actuacion == 'USUARIO SIMULADO'){
+				$('#c_usi').text(val.cuenta);
+			}
+			
 		});
 	})
 	.fail(function(jqXHR, textStatus, errorThrown) {

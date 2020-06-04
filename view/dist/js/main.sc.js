@@ -10,6 +10,7 @@ function getURL(url) {
 		$('#option_1').addClass('active');
 		getExpedientes();
 		autocomplete_input('sp','sp_id',3);
+		autocomplete_input('jefe','jefe_id',3);
 		frm_add_responsable();
 	}
 	if ( url == '?menu=resolver' ) {
@@ -24,7 +25,9 @@ function getURL(url) {
 	}
 	if ( url == '?menu=list_demandas' ) {
 		$('#option_1').addClass('active');
+		autocomplete_input('oficio','oficio_id',10);
 		frm_resolver_demanda();
+		frm_add_apersonamiento();
 	}
 	if ( url == '?menu=reserva' ) {
 		$('#option_1').addClass('active');
@@ -43,9 +46,14 @@ function getURL(url) {
 	}
 	if ( url == '?menu=reportes' ) {
 		$('#option_2').addClass('active');
-		load_catalogo('estado','select',12);
+		acciones_frm();
 		frm_reporte();
 	}
+	if ( url == '?menu=apersonamiento' ) {
+		autocomplete_input('oficio','oficio_id',10);
+		frm_apersonamiento();
+	}
+	
 	return false; 
 }
 function getExpedientes() {
@@ -62,23 +70,15 @@ function getExpedientes() {
 	        { leyenda: 'Procedencia'},	        
 	        { leyenda: 'Presunto(s)',columna:''},	        
 	        { leyenda: 'Abogado responsable', filtro:false, columna:''},	        
+	        { leyenda: 'Motivo', filtro:false, columna:''},	        
+	        { leyenda: 'Dias trabajados', filtro:false, columna:''},	        
 	    ],
 	    modelo: [
 	    	
 	    	{ class:'',formato: function(tr, obj, valor){
 	    		var ruta = "", demanda = { href: "#", contenido: '<i class="fa fa-edit"></i> ------' };
-	    		if( obj.sancion == 'VACIA' ){
-	    			ruta ="index.php?menu=resolver&exp="+obj.id;
-	    		}else{
-	    			ruta ="#";
-	    			if(obj.sancion == 'NO'){
-	    				tr.addClass('bg-red');
-	    				demanda = { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demanda' };
-	    			}else{
-	    				tr.addClass('bg-green');
-	    				demanda = { href: "#", contenido: '<i class="fa fa-edit"></i> ------' };
-	    			}	    			
-	    		}
+	    		ruta ="index.php?menu=resolver&exp="+obj.id;
+	    		
 	    		if(nivel == 'ANALISTA' ){
 	    			links = [
 	    				{ href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-archive"></i>Acuerdo de improcedencia' },
@@ -86,14 +86,49 @@ function getExpedientes() {
 	    				{ href: "index.php?menu=list_reservas&exp="+obj.queja_id, contenido: '<i class="fa fa-eye"></i>Acuerdos de reserva' },
 	    			];
 	    		}else{
-	    			links = [
-			            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
-			            { href: ruta, contenido: '<i class="fa fa-edit"></i> Registrar resolucion' },
-			            demanda,
-			            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
-			            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
-			            { href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-book"></i>Acuerdo de improcedencia' },
-			        ];
+	    			if(obj.estado == '10'){
+		    			links = [
+				            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
+				            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
+				            { href: "index.php?menu=reserva&exp="+obj.queja_id, contenido: '<i class="fa fa-pause"></i>Poner en reserva' },
+				            { href: "index.php?menu=list_reservas&exp="+obj.queja_id, contenido: '<i class="fa fa-eye"></i>Listar reserva' },
+				            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demandas' },
+				            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
+				        ];
+	    			}else if( obj.estado == '11' ){
+		    			links = [
+				            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
+				            { href: ruta, contenido: '<i class="fa fa-edit"></i> Registrar resolucion de la Comisión' },
+				            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
+				            { href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-book"></i>Acuerdo de improcedencia' },
+				            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
+				            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demandas' }
+				        ];
+	    			}else{
+	    				if ( obj.autoridad == 'SC' ) {
+			    			links = [
+					            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
+					            { href: "index.php?menu=apersonamiento&queja_id="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Registrar seguimiento presencial' },
+					            { href: ruta, contenido: '<i class="fa fa-edit"></i> Registrar resolucion de la Comisión' },
+					            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demanda' },
+					            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
+					            { href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-book"></i>Acuerdo de improcedencia' },
+					            { href: "index.php?menu=reserva&exp="+obj.queja_id, contenido: '<i class="fa fa-pause"></i>Poner en reserva' },
+					            { href: "index.php?menu=list_reservas&exp="+obj.queja_id, contenido: '<i class="fa fa-eye"></i>Listar reserva' },
+					            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
+					        ];
+	    				}else{
+	    					links = [
+					            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
+					            { href: "index.php?menu=apersonamiento&queja_id="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Registrar seguimiento presencial' },
+					            { href: ruta, contenido: '<i class="fa fa-edit"></i> Registrar resolucion' },
+					            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demanda' },
+					            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
+					            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
+					        ];
+	    				}
+	    			}
+	    			
 	    		}
 	            return anexGrid_dropdown({
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
@@ -102,8 +137,30 @@ function getExpedientes() {
                     data: links
                 });
 	        }},
-	    	
-	        { propiedad: 'id' },
+	        { formato: function(tr, obj, valor){
+	        	if (obj.estado == 10) {
+	        			if (obj.edo_tr == 'SI') {
+	        				tr.addClass('bg-orange-active');
+	        			}else{
+	        				tr.addClass('bg-orange');
+	        				tr.addClass('disabled');
+	        			}
+	        	}
+	        	if (obj.estado == 11) {
+	        		if (obj.edo_tr == 'SI') {
+	        			tr.addClass('bg-maroon-active');
+	        		}else{
+	        			tr.addClass('bg-maroon');
+	        			tr.addClass('disabled');
+	        		}
+	        	}
+	        	if (obj.estado == '8' && obj.edo_tr == 'NA') {
+	        		tr.addClass('bg-green-active');
+	        	}else{
+	        		tr.addClass('bg-teal disabled');
+	        	}
+            	return obj.id;
+        	}},
 	        { propiedad: 'cve_exp' },
 	        { propiedad: 'sapa.oficio' },
 	        { formato: function(tr, obj, valor){
@@ -128,6 +185,16 @@ function getExpedientes() {
 	        	}else{
 	        		return obj.a_responsable;
 	        	}
+	        }},
+	        { formato: function(tr, obj, valor){
+	        	if ( obj.motivo == null || obj.motivo == '') {
+	        		return 'SIN MOTIVO';
+	        	}else{
+	        		return obj.motivo;
+	        	}
+	        }},
+	        { formato: function(tr, obj, valor){
+	        	return obj.f_cierre;
 	        }},
 	    ],
 	    url: 'controller/puente.php?option=11',
@@ -195,13 +262,15 @@ function frm_add_resolucion() {
 				document.getElementById('frm_add_resolucion').reset();
 				alerta('div_resolucion','error',jqXHR.responseText,'');
 			});
-			
 		}
 	});
 }
 function open_modal( modal, val, name){
 	if (name != '') {
 		$('[name="'+name+'"]').val(val);
+	}
+	if (name == 'queja_id') {
+		getClave(val,modal);
 	}
 	$('#'+modal).modal('show');
 	return false;
@@ -316,7 +385,7 @@ function frm_resolver_demanda() {
 function frm_reserva() {
 	$('#frm_reserva').submit(function(e) {
 		e.preventDefault();
-		var dataForm = $(this).serialize();
+		var dataForm = new FormData(document.getElementById("frm_reserva"));
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
@@ -324,6 +393,8 @@ function frm_reserva() {
 			data: dataForm,
 			async:false,
 			cache:false,
+			processData: false,
+            contentType: false,
 		})
 		.done(function(response) {
 			document.getElementById('frm_reserva').reset();
@@ -417,7 +488,7 @@ function frm_reporte() {
 			$('#tbl_reporte').DataTable();
 		})
 		.fail(function(jqXHR,textStatus,errorThrow) {
-			console.log("error");
+			alerta('div_reportes','error',jqXHR.responseText,'');
 		});
 		
 	});
@@ -496,3 +567,109 @@ function editResolucion(resolucion) {
 	
  	return false;
  } 
+ function modal_apersonamiento(demanda) {
+ 	$('#modal_add_apersonamiento').modal('show');
+ 	$('#demanda_id').val(demanda);
+ 	return false;
+ }
+
+ function frm_add_apersonamiento(){
+ 	$('#frm_add_apersonamiento').submit(function(e) {
+ 		e.preventDefault();
+ 		var dataForm = $(this).serialize();
+ 		$.ajax({
+ 			url: 'controller/puente.php',
+ 			type: 'POST',
+ 			dataType: 'json',
+ 			data: dataForm,
+ 			async:false,
+ 			cache:false,
+ 		})
+ 		.done(function(response) {
+ 			alerta('div_apersonamiento',response.status,response.message,'modal_add_apersonamiento');
+ 		})
+ 		.fail(function(jqXHR,textStatus,errorThrow) {
+ 			alerta('div_apersonamiento','error',jqXHR.responseText,'');
+ 		});
+ 		
+ 	});
+ 	return false;
+ }
+ // 
+ function frm_apersonamiento() {
+ 	$('#frm_apersonamiento').submit(function(e) {
+ 		e.preventDefault();
+ 		var dataForm = $(this).serialize();
+ 		$.ajax({
+ 			url: 'controller/puente.php',
+ 			type: 'POST',
+ 			dataType: 'json',
+ 			data: dataForm,
+ 			cache:false,
+ 			async:false,
+ 		})
+ 		.done(function(response) {
+ 			alerta('apersonamiento',response.status, response.message, '');
+ 		})
+ 		.fail(function(jqXHR,textStatus,errorThrow) {
+ 			console.log("error");
+ 		});
+ 		
+ 	});
+ 	return false;
+ }
+ //recuperador de clave del expediente
+function getClave(id,modal) {
+	//var id = $('#id').val();
+	var clave = "";
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		//dataType: 'json',
+		data: {option: '98',id:id},
+		async:false,
+	})
+	.done(function(response) {
+		$('#etiqueta_'+modal).text(response);
+	})
+	.fail(function() {
+		console.log("error");
+	});
+	return clave;
+}
+function acciones_frm() {
+	$('#f_buscar').change(function(e) {
+		e.preventDefault();
+		if ( $(this).val() == '' ) {
+			$('#campos_queja').addClass('hidden');
+			$('#campos_res').addClass('hidden');
+			$('#campos_dem').addClass('hidden');
+			$('#campos_rdem').addClass('hidden');
+		}
+		if ( $(this).val() == 1 ){
+			$('#campos_queja').removeClass('hidden');
+			$('#campos_res').addClass('hidden');
+			$('#campos_dem').addClass('hidden');
+			$('#campos_rdem').addClass('hidden');
+		}
+		if ( $(this).val() == 2 ){
+			$('#campos_queja').addClass('hidden');
+			$('#campos_res').removeClass('hidden');
+			$('#campos_dem').addClass('hidden');
+			$('#campos_rdem').addClass('hidden');
+		}
+		if ( $(this).val() == 3 ){
+			$('#campos_queja').addClass('hidden');
+			$('#campos_res').addClass('hidden');
+			$('#campos_dem').removeClass('hidden');
+			$('#campos_rdem').addClass('hidden');
+		}
+		if ( $(this).val() == 4 ){
+			$('#campos_queja').addClass('hidden');
+			$('#campos_res').addClass('hidden');
+			$('#campos_dem').addClass('hidden');
+			$('#campos_rdem').removeClass('hidden');
+		}
+	});
+	return false;
+}

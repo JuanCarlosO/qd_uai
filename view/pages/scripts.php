@@ -1,7 +1,6 @@
 <!-- jQuery 3 -->
 <script src="view/bower_components/jquery/dist/jquery.min.js"></script>
 
-
 <!-- Bootstrap 3.3.7 -->
 <script src="view/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- Morris.js charts -->
@@ -25,6 +24,8 @@
 <script src="view/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
 <!-- FastClick -->
 <script src="view/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- iCheck 1.0.1 -->
+<script src="view/plugins/iCheck/icheck.min.js"></script>
 <!-- AdminLTE App -->
 <script src="view/dist/js/adminlte.min.js"></script>
 
@@ -54,12 +55,16 @@ if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'QDNP' ) {
 	echo '<script src="view/dist/js/main.qd.js"></script>';
 }elseif ( $_SESSION['perfil'] == 'SIRA' ) {
 	echo '<script src="view/dist/js/main.sira.js"></script>';
-}elseif ( $_SESSION['perfil'] == 'DR' ) {
-	echo '<script src="view/dist/js/main.dr.js"></script>';
+}elseif ( $_SESSION['perfil'] == 'SAPA' ) {
+	echo '<script src="view/dist/js/main.sapa.js"></script>';
 }elseif ( $_SESSION['perfil'] == 'SC' ) {
 	echo '<script src="view/dist/js/main.sc.js"></script>';
 }elseif ( $_SESSION['perfil'] == 'TITULAR' ) {
 	echo '<script src="view/dist/js/main.uai.js"></script>';
+}elseif ( $_SESSION['perfil'] == 'DR' ) {
+	echo '<script src="view/dist/js/main.dr.js"></script>';
+}elseif ( $_SESSION['perfil'] == 'DI' ) {
+	echo '<script src="view/dist/js/main.di.js"></script>';
 }elseif ( $_SESSION['perfil'] == 'sys' ) {
 	echo '<script src="view/dist/js/main.sys.js"></script>';
 }

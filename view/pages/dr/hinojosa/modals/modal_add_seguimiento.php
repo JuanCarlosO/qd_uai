@@ -15,7 +15,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<label> Comentarios </label>
+								<label> Comentario de conclución de expediente </label>
 								<textarea name="comentario" id="comentario" class="form-control" style="resize: vertical; max-height: 200px;"></textarea>
 							</div>
 						</div>

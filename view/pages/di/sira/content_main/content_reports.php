@@ -30,12 +30,15 @@
 										<option value="1">INSPECCIÓN</option>
 										<option value="2">VERIFICACIÓN</option>
 										<option value="3">SUPERVISIÓN</option>
+										<option value="4">INVESTIGACION</option>
+										<option value="5">USUARIO SIMULADO</option>
+										<option value="6">AGENTE ENCUBIERTO</option>
 									</select>
 								</div>
 							</div>
 							<div class="col-md-4">
 								<div class="form-group">
-									<label>Procedecia:</label>
+									<label>Procedencia:</label>
 									<select name="procedencia" class="form-control">
 										<option value="">...</option>
 										<option value="1">Secretaría de Seguridad</option>

@@ -260,7 +260,79 @@ if ( isset($_POST['option']) ) {
 		case '75':
 			echo $uai->getCoincidencias();
 			break;
-			
+		case '76':#Cuando se va a turnar un expediente
+			echo $i->saveTurno();
+			break;
+		case '77':#Cuando se va a turnar un expediente
+			echo $i->getDependenciasF();
+			break;
+		case '78':#
+			echo $r->getTblCtrl();
+			break;
+		case '79':#Obtener exédientes del tablero de control
+			echo $r->getExpedientesTC();
+			break;
+		case '80':#Contar expe
+			echo $i->getTblCtrl();
+			break;
+		case '81':#Contar expe
+			echo $i->getExpedientesTC();
+			break;
+		case '82':#Contar expe
+			echo $i->getTblCtrlSubd();
+			break;	
+		case '83':#
+			echo $i->getExpedientesForMigrate();
+			break;	
+		case '84':#
+			echo $i->MigrateQuejas();
+			break;
+		case '85':#
+			echo $i->getOINs();
+			break;
+		case '86':#Obtener actas por tipo de tramite 
+			echo $s->getActasBy();
+			break;
+		case '87':#Obtener actas por tipo de tramite 
+			echo $i->contadorOINs();
+			break;
+		case '88':#
+			echo $i->getOINBy();
+			break;
+		case '89':#
+			echo $r->saveAcuse();
+			break;
+		case '90':#eNVIAR A SAPA
+			echo $r->sendSAPA();
+			break;
+		case '91':#
+			echo $r->saveApersonamiento();
+			break;
+		case '92':#
+			echo $r->saveAcuseSapa();
+			break;
+		case '93':#
+			echo $r->asignarPersonal();
+			break;
+		case '94':#Guardar el estadp procesal
+			echo $r->saveEProcesal();
+			break;
+		case '95':#Guardar el estadp procesal
+			echo $r->saveCulpable();
+			break;
+		case '96':
+			echo $r->getEstadistica();
+			break;
+		case '97':
+			echo $r->saveApersonamiento();
+			break;
+		case '98':
+			echo $r->getClave($_POST['id']);
+			break;
+		case '99':
+			echo $r->getContadoresByEdo();
+			break;
+				
 	}
 }elseif ( isset($_GET['option']) ) {
 	$o = $_GET['option'];	
@@ -277,6 +349,14 @@ if ( isset($_POST['option']) ) {
 		case '4':
 			header("Content-type: application/pdf");	
 			echo $i->getDocumento($_GET['file']);
+			break;
+		case '4A':
+			header("Content-type: application/pdf");	
+			echo $i->getDocumentoByOficio($_GET['o']);
+			break;
+		case '4B':
+			header("Content-type: application/pdf");	
+			echo $r->getDocumentoDevoluciones($_GET['dev']);
 			break;
 		case '5':
 			#Buscar las ordenes de trabajo
@@ -303,13 +383,27 @@ if ( isset($_POST['option']) ) {
 			echo $r->getOFs();
 			break;	
 		case '11':
-			#Buscar expedientes para el Lic reyes
+			#Buscar expedientes para el Lic Hinojosa
 			echo $r->getExpedientesSC();
 			break;	
 		case '12':
 			echo $uai->getClavesExp();
 			break;	
-			
+		case '13':
+			echo $r->getExpedientesAnalista();
+			break;	
+		case '14':
+			echo $r->getCorrespondencia();
+			break;	
+		case '15':
+			echo $r->getAcusesSAPA();
+			break;	
+		case '16':
+			header("Content-type: application/pdf");
+			echo $r->getAcuse($_GET['doc']);
+			break;	
+		
+					
 		default:
 			echo json_encode( array("status"=>'error','message'=>'La ruta seleccionada no existe. Verifique con el Depto. de Desarrollo de Sistemas.') );
 			break;

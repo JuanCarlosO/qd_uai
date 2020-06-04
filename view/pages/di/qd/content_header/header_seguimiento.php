@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Seguimiento del expediente
+		Datos del presunto responsable y quejoso(s).
 		<small class="cve_exp">  </small>
 	</h1>
 	<ol class="breadcrumb">

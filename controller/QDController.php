@@ -10,6 +10,14 @@ class QDController
 	{
 		$this->model = new QDModel();
 	}
+	public function getExpedientesTC()
+	{
+		return $this->model->getExpedientesTC();
+	}
+	public function getTblCtrl()
+	{
+		return $this->model->getTblCtrl();
+	}
 	public function getTR()
 	{
 		return $this->model->getTR();
@@ -138,5 +146,47 @@ class QDController
 	{
 		return $this->model->generateReporte();
 	}
+	public function saveTurno()
+	{
+		return $this->model->saveTurno();
+	}
+	public function getDependenciasF()
+	{
+		return $this->model->getDependenciasF();
+	}
+	public function getTblCtrlSubd()
+	{
+		return $this->model->getTblCtrlSubd();
+	}
+	public function getExpedientesForMigrate()
+	{
+		return $this->model->getExpedientesForMigrate();
+	}
+	public function MigrateQuejas()
+	{
+		return $this->model->MigrateQuejas();
+	}
+	public function getOINs()
+	{
+		return $this->model->getOINs();
+	}
+	public function getOINBy()
+	{
+		return $this->model->getOINBy();
+	}
+	
+	public function contadorOINs()
+	{
+		return $this->model->contadorOINs();
+	}
+	public function saveAcuse()
+	{
+		return $this->model->saveAcuse();
+	}
+	public function getDocumentoByOficio($oficio)
+	{
+		return $this->model->getDocumentoByOficio($oficio);
+	}
+	
 }
 ?>

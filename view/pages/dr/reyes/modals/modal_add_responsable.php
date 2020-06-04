@@ -8,13 +8,22 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h4 class="modal-title">Asignar abogado responsable</h4>
+				<h4 class="modal-title">Asignar abogado responsable <u id="etiqueta_modal_add_responsable"></u></h4>
 			</div>
 			<div class="modal-body">
 				<div id="div_responsable"></div>
 				<form id="frm_add_responsable" action="#">
 					<input type="hidden" name="option" value="61">
 					<input type="hidden" id="queja_id" name="queja_id" value="">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-group">
+								<label> Asignar jefe/encargado de departamento </label>
+								<input type="text" id="jefe" name="jefe" value="" class="form-control" required="">
+								<input type="hidden" id="jefe_id" name="jefe_id" value="" >
+							</div>
+						</div>
+					</div>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">

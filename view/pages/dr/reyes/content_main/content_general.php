@@ -8,11 +8,28 @@
                 </div>
                 <div class="box-body">
                     <div class="row">
-                        <div class="col-md-2">
-                            <i class="fa fa-circle text-red"></i> <label> NO SANCIONADO</label>
-                        </div>
-                        <div class="col-md-2">
-                            <i class="fa fa-circle text-green"></i> <label> SANCIONADO</label>
+                        <div class="col-md-6">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th width="100px" class="bg-gray">Reserva</th>
+                                    <td width="50px" class="bg-orange-active">Con  acuerdo</td>
+                                    <td width="50px" class="bg-orange disabled"> Sin acuerdo</td>
+                                </tr>
+                                <tr>
+                                    <th width="100px" class="bg-gray">Improcedencia</th>
+                                    <td width="50px" class="bg-maroon-active">Con  acuerdo</td>
+                                    <td width="50px" class="bg-maroon disabled"> Sin acuerdo</td>
+                                </tr>
+                                <tr>
+                                    <th width="100px" class="bg-gray">Enviados a la Comisión</th>
+                                    <td class="bg-green-active" colspan="2"></td>
+                                </tr>
+                                <tr>
+                                    <th width="100px" class="bg-gray">Para atender</th>
+                                    <td class="bg-teal disabled " colspan="2"></td>
+                                </tr>
+                                
+                            </table>
                         </div>
                     </div>
                     <div class="row">

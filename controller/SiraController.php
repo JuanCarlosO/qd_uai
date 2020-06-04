@@ -122,6 +122,10 @@ class SiraController
 	{
 		return $this->model->getDashboard();
 	}
+	public function getActasBy()
+	{
+		return $this->model->getActasBy();
+	}
 	
 }
 ?>

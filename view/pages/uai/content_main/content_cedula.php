@@ -1,17 +1,22 @@
 <?php
 require_once 'model/Connection.php';
 require_once 'model/QDModel.php';
-require_once 'model/Connection.php';
 require_once 'model/DRModel.php';
+require_once 'model/UAIModel.php';
 $queja_id = $_GET['exp_id'];
 
 if(!empty($_GET['exp_id'])){
     $queja_id = $_GET['exp_id'];
     $q = new QDModel;
-    $r = $q->getQDOnly($queja_id);
     $m = new DRModel;
+    $uai = new UAIModel;
+    $r = $q->getQDOnly($queja_id);
     $data = $m->getCedula($queja_id);
+    $tbl_ctrl = $uai->getContadores($queja_id);
+    $demandas = $uai->getDataSC($queja_id);
+    #print_r($demandas);
 }
+
 ?>
 <div class="contente container-fluid">
     <div class="row">
@@ -21,6 +26,66 @@ if(!empty($_GET['exp_id'])){
                     <h3 class="box-title"></h3>
                 </div>
                 <div class="box-body">
+                    <h3>
+                        <center>
+                            Clave del expediente <b><?=$r[0]['cve_exp'] ?></b>
+                        </center>
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-hover table-bordered">
+                                <caption class="text-center bg-gray">
+                                    Contadores generales
+                                </caption>
+                                <thead>
+                                    <tr>
+                                        <th class="text-right" width="35%">Estado del expediente: </th>
+                                        <td class="text-center" colspan="2">
+                                            <?=$tbl_ctrl['estado'] ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-right" width="35%">Dias trancurridos desde la apertura:</th>
+                                        <td class="text-center">
+                                            <?=$tbl_ctrl['d_apertura'] ?>
+                                        </td>
+                                        <th class="text-left" width="35%">Días trabajados por la Dirección de Investigación: </th>
+                                        <td class="text-center">
+                                            <?=$tbl_ctrl['d_hechos'] ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="text-left" width="35%">Dias trancurridos desde fecha de hechos:</th>
+                                        <td class="text-center"><?=$tbl_ctrl['d_hechos'] ?></td>
+                                        <th class="text-left" width="35%">Días trabajados por la Dirección de Responsabilides: </th>
+                                        <td class="text-center"><?=$tbl_ctrl['d_dr'] ?></td>
+                                    </tr>
+                                    
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <?php if (count($demandas) > 0): ?>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table class="table table-bordered">
+                                    <?php foreach ($demandas as $key => $demanda): ?>
+                                        <tr class="bg-gray">
+                                            <th>Subdirección</th>
+                                            <th>Estado</th>
+                                            <th>Descripción de la resolución</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="bg-gray" rowspan="2">Subdirección de lo Contencioso</th>
+                                            <td><?=$demanda->estado?></td>
+                                            <td><?=$demanda->comentario?></td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                </table>
+                            </div>
+                        </div>
+                    <?php endif ?>
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs pull-right">
                             <li class="active"><a href="#di" data-toggle="tab">Dirección de Investigación</a></li>
@@ -29,11 +94,7 @@ if(!empty($_GET['exp_id'])){
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="di">
-                                <h3>
-                                    <center>
-                                        Clave del expediente <b><?=$r[0]['cve_exp'] ?></b>
-                                    </center>
-                                </h3>
+                                
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table class="table table-bordered table-hover ">
@@ -43,7 +104,7 @@ if(!empty($_GET['exp_id'])){
                                             <tr class="bg-gray">
                                                 <thead>
                                                     <tr>
-                                                        <th>T. Tramite</th>
+                                                        <th>Tipo de Tramite</th>
                                                         <th>Fecha/Hora de hechos</th>
                                                         <th>Estado del expediente</th>
                                                         <th>Prioridad </th>
@@ -176,7 +237,7 @@ if(!empty($_GET['exp_id'])){
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table class="table table-hover table-bordered">
-                                            <caption class="bg-gray text-center">Información de o los Quejosos </caption>
+                                            <caption class="bg-gray text-center">Información del o los Quejosos </caption>
                                             <thead>
                                                 <tr class="bg-gray">
                                                     <th>Nombre Completo</th>
@@ -312,7 +373,8 @@ if(!empty($_GET['exp_id'])){
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane" id="dr">  
+                            <div class="tab-pane" id="dr"> 
+                            <h3 class="bg-gray"><center>INFORMACIÓN DE SUBDIRECCIÓN DE ANÁLISIS Y PROCEDIMIENTOS ADMINISTRATIVOS.</center></h3> 
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="row">
@@ -320,6 +382,7 @@ if(!empty($_GET['exp_id'])){
                                                 <h1> <center>Opiniones de los abogados.</center> </h1>
                                             </div>
                                         </div>
+
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <table class="table table-hover table-bordered">
@@ -375,30 +438,115 @@ if(!empty($_GET['exp_id'])){
                                         </div>
                                     </div>
                                 </div>
-                                
+                                <h3 class="bg-gray"><center>INFORMACIÓN DE SUBDIRECCIÓN DE LO CONTENCIOSO</center></h3> 
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="box box-default box-solid "><!-- collapsed-box-->
+                                            <div class="box-header with-border ">
+                                                <h3 class="box-title">Seguimiento de estado actual de expediente</h3>
+                                                <div class="box-tools pull-right">
+                                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="box-body">
+                                                <table class="table table-hover table-bordered">
+                                                    <tr>
+                                                        <td class="bg-gray">Fecha del primer apersonamiento:</td>
+                                                        <?php if ( !empty($data['apersona_uno']->f_apersonamiento) ): ?>
+                                                            <td><?=$data['apersona_uno']->f_apersonamiento ?></td>
+                                                        <?php else: ?>
+                                                            <td> SIN APERSONAMIENTO </td>
+                                                        <?php endif ?>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">Resolución de la Comisión de Honor y Justicia:</td>
+                                                        <?php if ( !empty($data['resolucion_ape']->fecha) ): ?>
+                                                            <td>
+                                                                ¿HUBO SANCIÓN?: <b><?=$data['resolucion_ape']->sancion ?></b> <br>
+                                                                FECHA DE LA RESOLUCIÓN: <b><?=$data['resolucion_ape']->fecha ?></b>
+                                                            </td>
+                                                        <?php else: ?>
+                                                            <td> SIN RESOLUCIÓN </td>
+                                                        <?php endif ?>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">Situación de demandas:</td>
+                                                        <?php if ( $data['demandas'] != false): ?>
+                                                            <td>
+                                                            <?php foreach ($data['demandas'] as $key => $dem): ?>
+                                                                    <ul>
+                                                                        <li>
+                                                                            <?=$dem->t_demanda ?>
+                                                                            <ol>
+                                                                                <li> <b>OFICIO:</b> <?=$dem->oficio ?> </li>
+                                                                                <li> <b>ESTADO</b>: <?=$dem->estado ?> </li>
+                                                                            </ol>
+                                                                        </li>
+                                                                    </ul>
+                                                            <?php endforeach ?>
+                                                            </td>
+                                                        <?php else: ?>
+                                                            <td> SIN DEMANDAS REGISTRADAS </td>
+                                                        <?php endif ?>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">CONTADOR DESDE LA PRIMER RESOLUCIÓN HASTA LA PRIMER DEMANDA</td>
+                                                        <?php if ( $data['c_res_dem'] != false ): ?>
+                                                            <td><?=$data['c_res_dem']?></td>    
+                                                        <?php else: ?>
+                                                            <td>SIN DEFINIR</td>
+                                                        <?php endif ?>
+                                                        
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">CONTADOR DESDE LA RESOLUCIÓN DE LA PRIMER DEMANDA HASTA LA SEGUNDA DEMANDA</td>
+                                                        <?php if ( $data['c_rdem_dem2'] != false ): ?>
+                                                            <td><?php print_r("sex".$data['c_rdem_dem2']);?></td>
+                                                        <?php else: ?>
+                                                            <td>SIN DEFINIR</td>
+                                                        <?php endif ?>
+                                                        
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bg-gray">CONTADOR DESDE LA FECHA DE LA SEGUNDA DEMANDA HASTA LA RESOLUCIÓN DE LA MISMA</td>
+                                                        <?php if ( $data['c_rdem2_res2'] != false ): ?>
+                                                            <td><?=$data['c_rdem2_res2']?></td>
+                                                        <?php else: ?>
+                                                            <td>SIN DEFINIR</td>
+                                                        <?php endif ?>
+                                                    </tr>
+                                                </table>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-hover">
-                                                <caption class="bg-gray text-center">
-                                                    Expedientes acumulados
+                                                <caption class="bg-gray">
+                                                    LISTADO DE DEMANDAS 
                                                 </caption>
-                                                <thead class="bg-gray">
+                                                <thead>
                                                     <tr>
-                                                        <th>#</th>
-                                                        <th>Expediente</th>
+                                                        <th>Demanda</th>
+                                                        <th>Oficio</th>
+                                                        <th>Fecha del oficio</th>
+                                                        <th>Fecha del acuse</th>
+                                                        <th>Dependencia</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <?php $i = 1; foreach ($data['acumuladas'] as   $key => $acumulado): ?>
-                                                        <tr class="">
-                                                            <td> <?=$i;$i++;?> </td>
-                                                            <td>
-                                                                <a href="index.php?menu=cedula&exp_id=<?=$acumulado->acumulado_id?>" target="_blank">
-                                                                    <?=$acumulado->acumulado?>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
+                                                    <?php foreach ($demandas as $key => $demanda): ?>
+                                                    <tr>
+                                                        <td><?=$demanda->t_demanda?></td>
+                                                        <td><?=$demanda->oficio?></td>
+                                                        <td><?=$demanda->f_oficio?></td>
+                                                        <td><?=$demanda->f_acuse?></td>
+                                                        <td><?=$demanda->dependencia?></td>
+                                                    </tr>
                                                     <?php endforeach ?>
                                                 </tbody>
                                             </table>

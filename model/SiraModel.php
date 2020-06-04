@@ -62,6 +62,7 @@ class SiraModel extends Connection
 			$this->stmt = $this->getPDO()->prepare($this->sql);
 			$this->stmt->execute();
 			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$total = $this->stmt->rowCount();
 			$aux = array();
 			foreach ($this->result as $oin) {
 				$aux['id'] = $oin->id;
@@ -69,21 +70,49 @@ class SiraModel extends Connection
 				$aux['f_creacion'] = $oin->f_creacion;
 				$aux['comentario'] = $oin->comentario;
 				$aux['estatus'] = $oin->estatus;
-				$sql_participantes = " SELECT * FROM participantes_oin AS p
+				/*$sql_participantes = " SELECT * FROM participantes_oin AS p
 				INNER JOIN personal AS pe ON pe.id = p.person_id
 				WHERE pe.oin_id = ? 
 				";
 				$this->stmt = $this->getPDO()->prepare($this->sql);
 				$this->stmt->execute();
+				$participantes = $this->stmt->fetchAll(PDO::FETCH_OBJ);*/
+				$oficio = $this->getOficioById($oin->oficio_id);
+				if ( is_array($oficio) ) {
+					$aux['oficio'] = $oficio->no_oficio;
+				}else{
+					$aux['oficio'] = $oficio;
+				}
+				
 			}
-			$total = $this->stmt->rowCount();
+			
 			#print_r($this->result);
-			return $anexgrid->responde($this->result,$total);
+			return $anexgrid->responde($aux,$total);
 		} catch (Exception $e) {
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
-	
+	public function getOficioById($id)
+	{
+		try {
+			$this->setPDO(new PDO('mysql:dbname=inspeccion;host=127.0.0.1;charset=utf8','root',''));
+			$this->sql = " SELECT * FROM oficios_generados 
+				WHERE id = ? 
+				";
+			$this->stmt = $this->getPDO()->prepare($this->sql);
+			$this->stmt->bindParam(1,$id,PDO::PARAM_INT);
+			$this->stmt->execute();
+			
+			if ($this->stmt->rowCount() > 0 ) {
+				$this->result =  $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			}else{
+				$this->result = "NO SE ENCONTRÓ ";
+			}
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
 	public function saveActa()
 	{
 		try {
@@ -93,7 +122,7 @@ class SiraModel extends Connection
 			if ( !isset($_POST['area_h']) OR empty($_POST['area_h']) ) {
 				throw new Exception("NO EXISTE UN DATO CORRECTO EN EL CAMPO DE ÁREA.", 1);
 			}
-			if ( !isset($_POST['f_acta']) OR empty($_POST['f_acta']) ) {
+			if ( !isset($_POST['f_acta']) AND empty($_POST['f_acta']) ) {
 				throw new Exception("NO EXISTE UN DATO CORRECTO EN LA FECHA DEL ACTA.", 1);
 			}
 			if ( !isset($_POST['t_actuacion']) OR empty($_POST['t_actuacion']) ) {
@@ -124,7 +153,8 @@ class SiraModel extends Connection
 			$this->stmt->bindParam(1,$_POST['t_actuacion'],PDO::PARAM_INT);
 			$this->stmt->execute();
 			$total = $this->stmt->fetch(PDO::FETCH_OBJ)->total;
-			if ( $_POST['t_actuacion'] == '1' ) {
+			$ta = $_POST['t_actuacion'];
+			/*if ( $_POST['t_actuacion'] == '1' ) {
 				$ta = "INS";
 			}
 			if ( $_POST['t_actuacion'] == '2' ) {
@@ -132,7 +162,7 @@ class SiraModel extends Connection
 			}
 			if ( $_POST['t_actuacion'] == '3' ) {
 				$ta = "SUP";
-			}
+			}*/
 			$clave			= $cve_area."/".$ta."/".(++$total)."/".date('Y');
 			$fecha			= $_POST['f_acta'];		
 			$t_actuacion	= $_POST['t_actuacion'];				
@@ -271,9 +301,9 @@ class SiraModel extends Connection
 			a.lugar,UPPER(a.comentarios) AS comentarios,ar.nombre AS n_area,UPPER(m.nombre) AS n_municipio,
 			CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS persona 
 			FROM actas AS a 
-			INNER JOIN areas AS ar ON ar.id = a.area_id
-			INNER JOIN personal AS p ON p.id = a.persona_id
-			INNER JOIN municipios AS m ON m.id = a.municipio_id
+			LEFT JOIN areas AS ar ON ar.id = a.area_id
+			LEFT JOIN personal AS p ON p.id = a.persona_id
+			LEFT JOIN municipios AS m ON m.id = a.municipio_id
 			WHERE $wh ORDER BY a.$anexgrid->columna $anexgrid->columna_orden LIMIT $anexgrid->pagina , $anexgrid->limite";
 			
 			$this->stmt = $this->pdo->prepare($this->sql);
@@ -1345,7 +1375,7 @@ class SiraModel extends Connection
 	{
 		try {
 			$this->sql 		= "SELECT t_actuacion, COUNT(t_actuacion) AS cuenta FROM actas 
-			WHERE YEAR(fecha) = YEAR(NOW())
+			#WHERE YEAR(fecha) = YEAR(NOW())
 			GROUP BY t_actuacion";
 			$this->stmt 	= $this->pdo->prepare($this->sql);
 			$this->stmt->bindParam(1,$acta_id,PDO::PARAM_INT);
@@ -1354,6 +1384,25 @@ class SiraModel extends Connection
 			return json_encode($this->result);
 		} catch (Exception $e) {
 			return json_encode( array( 'status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
+	public function getActasBy()
+	{
+		try {
+			$ta = $_POST['ta'];
+			$this->sql = "SELECT a.*,ar.nombre as n_area, CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS n_abogado, UPPER(m.nombre) as n_municipio
+			FROM actas AS a
+			INNER JOIN areas AS ar ON  ar.id = a.area_id
+			INNER JOIN personal AS p ON  p.id = a.persona_id
+			INNER JOIN municipios AS m ON m.id = a.municipio_id
+			WHERE a.t_actuacion = ? ";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$ta,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode($this->result);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
 } 	

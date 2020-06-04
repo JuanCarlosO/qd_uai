@@ -12,7 +12,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<label>Colocar un estado a la OIN</label>
+								<label>Colocar un estado a la orden de trabajo</label>
 								<select id="estado" name="estado" class="form-control" required>
 									<option value="">...</option>
 									<option value="">Cumplida</option>

@@ -37,6 +37,7 @@ if ( isset($_GET['estado']) ) {
                             				<th>Infracción(es)</th>
                             				<th>Municipio</th>
                             				<th>Procedencia</th>
+                                            <th>Días trabajados (desde apertura)</th>
                             			</tr>
                             		</thead>
                             		<tbody>
@@ -56,6 +57,7 @@ if ( isset($_GET['estado']) ) {
                             					</td>
                             					<td><?=$queja['municipio']?></td>
                             					<td><?=$queja['procedencia']?></td>
+                                                <td><?=$queja['dias_t']?></td>
                             				</tr>
                             			<?php endforeach ?>
                             			

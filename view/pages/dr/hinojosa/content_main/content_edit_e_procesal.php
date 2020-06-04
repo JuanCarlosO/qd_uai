@@ -5,9 +5,12 @@ require_once 'model/DRModel.php';
 $queja_id = $_GET['exp'];
 $q = new DRModel;
 $data = $q->getOnlyEdoProcesal($queja_id);
+if (empty($data)) {
+	echo "Esta vacio";
+}
 #CONSULTAR LOS CARGOS DE LOS PRESUNTOS
 $cargos = $q->getCargos();
-
+$clave = $q->getClave($queja_id);
 ?>
 <form action="#" method="post" id="frm_edit_edo_procesal">
 	<input type="hidden" name="option" value="56">
@@ -19,7 +22,7 @@ $cargos = $q->getCargos();
 	        <div class="col-md-12">
 	            <div class="box">
 	                <div class="box-header with-border">
-	                    <h3 class="box-title">Formulario de edición del Estado Procesal. <small>Los campos obligatorios se encunetran marcados con un <i class="fa fa-asterisk text-red"></i> asterisco. </small></h3>
+	                    <h3 class="box-title">Formulario de edición del Estado Procesal <u><?=$clave?></u>. <small>Los campos obligatorios se encunetran marcados con un <i class="fa fa-asterisk text-red"></i> asterisco. </small></h3>
 	                </div>
 	                <!-- /.box-header -->
 	                <div class="box-body">
@@ -41,18 +44,44 @@ $cargos = $q->getCargos();
 	                				<label for="e_procesal">Estado procesal <i class="fa fa-asterisk text-red"></i></label>
 	                				<select id="e_procesal" name="e_procesal" class="form-control" required>
 	                					<option value="">...</option>
-	                					<option value="1" <?=$var = ( $data->e_procesal == 'ENVIADO' ) ? 'selected' : '';?> >Enviado</option>
+	                					<option value="1" <?=$var = ( $data->e_procesal == 'ENVIADO' ) ? 'selected' : '';?> >Enviado a</option>
 	                					<option value="2" <?=$var = ( $data->e_procesal == 'TRÁMITE' ) ? 'selected' : '';?> >Trámite</option>
-	                					<option value="3" <?=$var = ( $data->e_procesal == 'DEVUELTO' ) ? 'selected' : '';?> >Devolver a D.I.</option>
+	                					<option value="3" <?=$var = ( $data->e_procesal == 'DEVUELTO' ) ? 'selected' : '';?> >Devolver a D.I.</option><option value="4" <?=$var = ( $data->e_procesal == 'EN FIRMA' ) ? 'selected' : '';?> >En firma</option><option value="5" <?=$var = ( $data->e_procesal == 'CON PROYECTO ELABORADO' ) ? 'selected' : '';?> >Con proyecto elaborado</option>
 	                				</select>
 	                			</div>
 	                		</div>
-	                		<div id="motivo" class="hidden">
+	                		
+	                	</div>
+	                	<div id="motivo_sc" class="hidden">
+	                		<!--MOTIVO DE LA DEVOLUCION A LA SC -->
+	                		<div class="row">
+	                			<div class="col-md-4">
+	                				<div class="form-group">
+	                					<label>Motivo del turnado</label>
+	                					<select name="motivo_sc" id="motivo_sc" class="form-control">
+	                						<option value="">...</option>
+	                						<option value="IMPROCEDNECIA">IMPROCEDENCIA</option>
+	                						<option value="RESERVA">RESERVA</option>
+	                					</select>
+	                				</div>
+	                			</div>
+	                		</div>
+	                	</div>
+	                	<div id="motivo" class="hidden">
+	                		<h3> <center> <u>Sección de devolucion</u> </center> </h3>
+	                		<div class="row">
 	                			<div class="col-md-4">
 	                				<label>Motivo de devolución</label>
 	                				<input type="text" name="motivo" value="" class="form-control">
 	                			</div>
+	                			<div class="col-md-4">
+	                				<div class="form-group">
+	                					<label>Documento de devolución</label>
+	                					<input type="file" name="file" value="" class="form-control">
+	                				</div>
+	                			</div>
 	                		</div>
+	                		
 	                	</div>
 	                	<div class="row">
 	                		<div class="col-md-6">

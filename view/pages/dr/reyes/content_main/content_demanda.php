@@ -1,3 +1,10 @@
+<?php
+require_once 'model/Connection.php';
+require_once 'model/DRModel.php';
+$queja_id = $_GET['exp'];
+$q = new DRModel;
+$clave = $q->getClave($queja_id);
+?>
 <input type="hidden" id="nivel" name="nivel" value="<?=$_SESSION['nivel']?>">
 <form action="#" id="frm_add_demanda">
 	<input type="hidden" name="option" value="63">
@@ -7,7 +14,7 @@
 	        <div class="col-md-12">
 	            <div class="box">
 	                <div class="box-header with-border">
-	                    <h3 class="box-title">Demanda</h3>
+	                    <h3 class="box-title">Demanda <u><?=$clave?></u></h3>
 	                </div>
 	                <!-- /.box-header -->
 	                <div class="box-body">

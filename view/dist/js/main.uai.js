@@ -16,6 +16,7 @@ function getURL(url) {
 		});
 		dashboard('');
 		dashboard_a('');
+		contador_actas();
 		autocomplete_input('clave','clave_id',12);
 		frm_coincidencias();
 	}
@@ -38,9 +39,10 @@ function dashboard(year) {
 		cache:false,
 	})
 	.done(function(response) {
-		
+		var suma = 0;
 		$.each(response, function(i, val) {
 			var fila = "";
+			suma += parseInt(val.total);
 			fila += "<tr>";
 				fila += "<td>"+val.nombre+"</td>";
 				fila += "<td>"+val.total+"</td>";
@@ -52,6 +54,11 @@ function dashboard(year) {
 			fila += "</tr>";
 			$('#dash').append(fila);
 		});
+		fila += "<tr>";
+			fila += "<td class='text-right'>TOTAL GENERAL:</td>";
+			fila += "<td colspan='2'>"+suma+"</td>";
+		fila += "</tr>";
+		$('#dash').append(fila);
 	})
 	.fail(function(jqXHR,textStatus,errorThrow) {
 		console.log("error");
@@ -92,6 +99,7 @@ function applyDataTables(t) {
 function getListadoEstado(estado) {
 	$('#qd_estado').removeClass('hidden');
 	$('#actas').addClass('hidden');
+	$('#div_oins').addClass('hidden');
 	$('#tbl_ee tbody').html("");
 	var year = $('#year').val();
 	
@@ -147,9 +155,10 @@ function dashboard_a(year) {
 		cache:false,
 	})
 	.done(function(response) {
-		
+		var suma = 0;
 		$.each(response, function(i, val) {
 			var fila = "";
+			suma += parseInt(val.total);
 			fila += "<tr>";
 				fila += "<td>"+val.nombre+"</td>";
 				fila += "<td>"+val.total+"</td>";
@@ -161,6 +170,11 @@ function dashboard_a(year) {
 			fila += "</tr>";
 			$('#dash_a').append(fila);
 		});
+		fila += "<tr>";
+			fila += "<td class='text-right'>TOTAL GENERAL:</td>";
+			fila += "<td colspan='2'>"+suma+"</td>";
+		fila += "</tr>";
+		$('#dash_a').append(fila);
 	})
 	.fail(function(jqXHR,textStatus,errorThrow) {
 		console.log("error");
@@ -171,6 +185,7 @@ function dashboard_a(year) {
 function getListadoAcutaciones(actuacion) {
 	$('#actas').removeClass('hidden');
 	$('#qd_estado').addClass('hidden');
+	$('#div_oins').addClass('hidden');
 	//$('#tbl_actas tbody').html("");
 	var year = $('#year').val();
 	
@@ -253,5 +268,95 @@ function frm_coincidencias() {
 		});
 		
 	});
+	return false;
+}
+function contador_actas() {
+	$('#tbl_ordenes tbody').html("");
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '87'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		var suma = 0;
+		$.each(response, function(i, val) {
+			var fila = "", t_orden = "";
+			suma += parseInt(val.cuenta);
+			if (val.t_orden == 'INS') { t_orden = 'INSPECCIÓN'; }
+			if (val.t_orden == 'VER') { t_orden = 'VERIFICACIÓN'; }
+			if (val.t_orden == 'SUP') { t_orden = 'SUPERVISIÓN'; }
+			if (val.t_orden == 'INV') { t_orden = 'INVESTIGACIÓN'; }
+			if (val.t_orden == 'AGE') { t_orden = 'AGENTE ENCUBIERTO'; }
+			if (val.t_orden == 'USI') { t_orden = 'USUARIO SIMULADO'; }
+			fila += '<tr>';
+				fila += '<td>'+t_orden+'</td>';
+				fila += '<td>'+val.cuenta+'</td>';
+				fila += '<td>'
+					fila += '<button class="btn btn-flat btn-success" onclick="verOIN('+"'"+val.t_orden+"'"+')"> <i class="fa fa-eye"></i> Mostrar </button>';
+				fila += '</td>';
+			fila += '</tr>';
+			$('#tbl_ordenes tbody').append(fila)
+		});
+		var fila = "";
+		fila += '<tr>';
+			fila += '<td>TOTAL: </td>';
+			fila += '<td colspan="2">'+suma+'</td>';
+			
+		fila += '</tr>';
+		$('#tbl_ordenes tbody').append(fila)
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("error");
+	});
+	
+	return false;
+}
+function verOIN(tipo) {
+	//alert('Buscar: '+tipo);
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '88',t:tipo},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		if ( $.fn.DataTable.isDataTable( '#tbl_oins' ) ) 
+		{
+			$('#tbl_oins').DataTable().destroy();
+		}
+		$('#qd_estado, #actas').addClass('hidden');
+		$('#div_oins').removeClass('hidden');
+		$('#tbl_oins tbody').html("");
+		var c = 1;
+		$.each(response, function(i, val) {
+			var fila = "", t_orden = "";
+			if (val.t_orden == 'INS') { t_orden = 'INSPECCIÓN'; }
+			if (val.t_orden == 'VER') { t_orden = 'VERIFICACIÓN'; }
+			if (val.t_orden == 'SUP') { t_orden = 'SUPERVISIÓN'; }
+			if (val.t_orden == 'INV') { t_orden = 'INVESTIGACIÓN'; }
+			if (val.t_orden == 'AGE') { t_orden = 'AGENTE ENCUBIERTO'; }
+			if (val.t_orden == 'USI') { t_orden = 'USUARIO SIMULADO'; }
+			fila += '<tr>';
+				fila += '<td>'+c+'</td>';
+				fila += '<td>'+val.clave+'</td>';
+				fila += '<td>'+val.oficio_id+'</td>';
+				fila += '<td>'+t_orden+'</td>';
+				fila += '<td>'+val.estatus+'</td>';
+				fila += '<td>'+val.f_creacion+'</td>';
+			fila += '</tr>';
+			$('#tbl_oins').append(fila);
+			c++;
+		});
+		applyDataTables('tbl_oins');
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	
 	return false;
 }

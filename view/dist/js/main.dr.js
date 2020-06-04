@@ -1,4 +1,3 @@
-var rescate;
 $(document).ready(function() {
 	url = window.location.search;
 	url = url.split('&');
@@ -7,222 +6,185 @@ $(document).ready(function() {
 //Detectando la URL
 function getURL(url) {
 	if ( url == '?menu=general' ) {
-		$('#option_1').addClass('active');
-		getExpedientes();
-		frm_add_seguimiento();
-		
+		$('#option_1').addClass('active');	
+		autocomplete_input('oficio_dr','oficio_dr_id',10);
+		frm_add_acuse();
+		frm_turnar();
+		if ( $('#nivel').val() == 'ANALISTA' ) {
+			getCorrespondencia();
+		}else{
+			tablero_ctrl();
+		}
 	}
-	if ( url == '?menu=estadistica' ) {
+	if ( url == '?menu=list_exp' ) {
 		$('#option_2').addClass('active');
-		frm_estadistica();
-	}
-	if ( url == '?menu=e_procesal' ) {
-		//evento('autoridad','select');
-		load_catalogo('cargo','select',22);
-		autocomplete_input('jefe','jefe_id',3);
-		autocomplete_input('analista','analista_id',3);
-		autocomplete_input('oficio','oficio_id',10);
-		frm_edo_procesal();
-		catalogo_conductas();
-	}
-	if ( url == '?menu=e_e_procesal' ) {
-		frm_edit_edo_procesal();
-		autocomplete_input('oficio','oficio_id',10);
-		$('#e_procesal').change(function (e) {
-			e.preventDefault();
-			if ( $(this).val() == 3 ) {
-				$('#motivo').removeClass('hidden');
-			}else{
-				$('#motivo').addClass('hidden');
-			}
-		})
+		frm_add_acuse();		
+		getCorrespondencia();
 	}
 	return false; 
 }
-function getExpedientes() {
-	var nivel = $('#nivel').val();
-	var actions = [];
+//tablero de control
+function tablero_ctrl() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '78'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		//Agregar contenido a la SC
+		if (response.sc.primer == '0') {
+			var des = 'disabled';
+		}else{ var desactiva = ''; }
+		$('#tbl_sc tbody').append('<tr class="text-center">'+
+			'<td>EXPEDIENTES CON UNA DEMANDA</td>'+
+			'<td>'+response.sc.primer+'</td>'+
+			'<td>'+
+				'<button type="button" onclick="verExpedientes(2);" class="btn btn-success btn-flat" '+des+'> <i class="fa fa-eye"></i> </button>'+
+			'</td>'+
+		'</tr>');
+		if (response.sc.rec_rev == '0') {
+			var desactiva = 'disabled';
+		}else{ var desactiva = ''; }
+		$('#tbl_sc tbody').append('<tr class="text-center">'+
+			'<td>EXPEDIENTES EN RECURSO DE REVISIÓN</td>'+
+			'<td>'+response.sc.rec_rev+'</td>'+
+			'<td>'+
+				'<button type="button" onclick="verExpedientes(1);" class="btn btn-success btn-flat"'+desactiva+'> <i class="fa fa-eye"></i> </button>'+
+			'</td>'+
+		'</tr>');
+		//Agregar el contenido de SAPA
+		$('#tbl_sapa tbody').append('<tr class="text-center">'+
+			'<td>EXPEDIENTES EN CHyJ</td>'+
+			'<td>'+response.sapa.chyj+'</td>'+
+			'<td>'+
+				'<button type="button" onclick="verExpedientes(3);" class="btn btn-success btn-flat"> <i class="fa fa-eye"></i> </button>'+
+			'</td>'+
+		'</tr>');
+		$('#tbl_sapa tbody').append('<tr class="text-center">'+
+			'<td>EXPEDIENTES ENVIADOS A LA SUBD. DE LO CONTENCIOSO</td>'+
+			'<td>'+response.sapa.sc+'</td>'+
+			'<td>'+
+				'<button type="button" onclick="verExpedientes(4);" class="btn btn-success btn-flat"> <i class="fa fa-eye"></i> </button>'+
+			'</td>'+
+		'</tr>');
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("Error: "+jqXHR.responseText);
+	});
 	
-	var tabla = $("#expedientes").anexGrid({
+	return false;
+}
+//CONSULAR LOS EXPEDIENTES DEL TABLERO DE CONTROL
+function verExpedientes(num) {
+	
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '79',tipo:num},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_general tbody').html("");
+		$.each(response, function(i, val) {
+			var fila = "";var c =0;
+			c = i+1;
+			fila += "<tr>";
+				fila += "<td>"+c+"</td>";
+				fila += "<td><a href='index.php?menu=cedula&exp="+val.id+"'>"+val.cve_exp+"</a></td>";
+				fila += "<td>"+val.oficio+"</td>";
+				fila += "<td>"+val.n_procedencia+"</td>";
+				fila += "<td>"+val.e_procesal+"</td>";
+			fila += "</tr>";
+			$('#tbl_general').append(fila);
+		});
+		
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("error");
+	});
+	
+	return false;
+}
+//Recuperar los oficios de los expedientes turnados
+function getCorrespondencia() {
+	var tabla = $("#correspondencia").anexGrid({
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
-	    	{ leyenda: 'Acciones', style: 'width:10px;', columna: 'Sueldo' },
-	    	{ leyenda: 'ID'},
-	        { leyenda: 'Clave', filtro:true, columna:'q.cve_exp'},
-	        { leyenda: 'Procedencia'},
-	        { leyenda: 'Presuntos'},
-	        { leyenda: 'Oficio', filtro:true, columna:'qr.oficio'},
-	        { leyenda: 'Origen de queja'},	        
-	        { leyenda: 'Edo. Procesal',columna:'qr.e_procesal',filtro:function () {
-	        	return anexGrid_select({
-		            data: [
-		                { valor: '', contenido: 'Todos' },
-		                { valor: '1', contenido: 'ENVIADO' },
-		                { valor: '2', contenido: 'TRÁMITE' },
-		                { valor: '3', contenido: 'DEVUELTO' },
-		            ]
-		        });
-	        }},	        
-	        { leyenda: 'Turnado a (Jefe de Depto.)', filtro:true, columna:'qr.jefatura'},	        
-	        { leyenda: 'Asignado a (Abogado Analista)', filtro:true, columna:'qr.analista'},	        
-	        { leyenda: 'Días transcurridos', filtro:false, columna:''},	        
+	    	{ leyenda: 'Acciones', style: 'width:100px;', columna: 'Sueldo' },
+	    	{ leyenda: 'ID', style:'width:20px;'},
+	        { leyenda: 'Número de oficio', style: 'width:200px;', columna: ''},
+	        { leyenda: 'Fecha/Hora de alta', columna: 'fecha', filtro: false },
+	        { leyenda: 'Expedientes adjuntos', style: 'width:300px;', columna: '' },
+	        { leyenda: 'Estado', style: 'width:120px;', columna: ''},
+	        { leyenda: 'Fecha de recepción', style: 'width:120px;', columna: ''},
+	        { leyenda: 'Fecha de acuse', style: 'width:120px;', columna: ''},
+	        { leyenda: 'Fecha de turnado a S.A.P.A', style: 'width:120px;', columna: ''},
 	    ],
 	    modelo: [
 	    	
 	    	{ class:'',formato: function(tr, obj, valor){
-	    		if (nivel == 'ANALISTA') {
-					actions = [
-			            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
-			        ];
-				}else{
-					actions = [
-			            { href: "index.php?menu=e_e_procesal&exp="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Editar Edo. Procesal' },
-			            { href: "index.php?menu=e_procesal&exp="+obj.queja_id, contenido: '<i class="fa fa-pencil"></i>Edo. Procesal' },
-			            { href: "index.php?menu=cedula&exp_id="+obj.queja_id, contenido: '<i class="fa fa-file-text-o"></i>Cédula' },
-			            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
-			        ];
-				}
+	    		var options;
+	    		if (obj.f_acuse != 'SIN ACUSE') {
+	    			options = [
+                        { href: "javascript:open_modal('modal_turnar','"+obj.oficio+"','oficio_inv');", contenido: '<i class="fa fa-mail-forward"></i> Turnar a S.A.P.A.' },
+                        { href: "controller/puente.php?option=4A&o="+obj.oficio, contenido: '<i class="fa fa-eye"></i> Ver acuse' },
+                    ];
+	    		}else{
+	    			options = [
+                        { href: "javascript:open_modal('modal_add_acuse',"+"'"+obj.oficio+"'"+",'oficio');", contenido: '<i class="glyphicon glyphicon-cloud"></i> Alta de acuse' },
+                    ];
+	    		}
 	            return anexGrid_dropdown({
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
                     class: 'btn btn-primary ',
-                    target: '_blank',
+                    attr: [],
                     id: 'editar',
-                    data: actions
+                    data: options
                 });
 	        }},
 	    	
-	        { propiedad: 'id' },
-	        { propiedad: 'cve_exp' },
-	        { propiedad: 'n_procedencia' },
-	        { formato: function(tr, obj, valor){
-	        	var lista = "";
-	        	lista += "<ol>";
-            	for (var i = 0; i < obj.presuntos.length  ; i++) {
-            		lista += "<li>"+obj.presuntos[i].nombre+"</li>";
-            	}
-            	lista += "</ol>";
-            	return lista;
-        	}},
-	        { propiedad: 'oficio'},
-	        { propiedad: 'categoria'},
-	        { formato:function(tr,obj,valor){
-	        	
-	        	if(obj.e_procesal == 'ENVIADO'){tr.addClass('bg-green');}
-	        	if(obj.e_procesal == 'TRAMITE'){tr.addClass('bg-yellow');}
-	        	if(obj.e_procesal == 'DEVUELTO'){tr.addClass('bg-gray');}
-	        	return obj.e_procesal;
-	        }},
-	        { formato: function(tr, obj, valor){
-	        	if (obj.n_jefatura == null) {
-	        		return "Aún no se turna";
+	        { class:'', formato:function (tr, obj, valor) {
+	        	if (obj.t_tramite == 'ENVIADO') {
+	        		tr.addClass('bg-aqua');
 	        	}else{
-	        		return obj.n_jefatura;
+	        		tr.addClass('bg-green');
 	        	}
+	        	return obj.id;
 	        }},
-
-	        { formato: function(tr, obj, valor){
-	        	if (obj.n_analista == null) {
-	        		return "Aún no se turna";
-	        	}else{
-	        		return obj.n_analista;
-	        	}
+	        { propiedad: 'oficio' },
+	        { propiedad: 'fecha' },
+	        { class:'', formato:function (tr, obj, valor) {
+	        	var fila = "";
+	        	fila += "<ul>";
+	        	$.each(obj.claves, function(i, val) {
+	        		fila += "<li>"+val.cve_exp+"</li>";
+	        	});
+	        	fila += "</ul>";
+	        	return fila;
 	        }},
-
-	        { class:'text-center',formato: function(tr, obj, valor){
-	        	return obj.dias_t;
-	        }}
+	        { propiedad: 't_tramite'},
+	        { propiedad: 'f_oficio'},
+	        { propiedad: 'f_acuse'},
+	        { propiedad: 'f_sapa'},
 	    ],
-	    url: 'controller/puente.php?option=9',
-	    filtrable: true,
+	    url: 'controller/puente.php?option=14',
+	    filtrable: false,
 	    columna: 'id',
 	    columna_orden: 'DESC'
 	});
 	return tabla;
 }
-function evento(element,type){
-	$('#'+element).change(function(e){
-		e.preventDefault();
-		if ( $(this).val() == "3" ) {
-			$('#ctrl_interno').removeClass('hidden');
-		}else{
-			$('#ctrl_interno').addClass('hidden');
-		}
-	});
-	
-	return false;
-}
-function open_modal( modal, val, name){
-	if (name != '') {
-		$('[name="'+name+'"]').val(val);
-	}
+
+function open_modal(modal,valor,input) {
 	$('#'+modal).modal('show');
+	$('#'+input).val(valor);
 	return false;
 }
-//Guardar el estado procesal
-function frm_edo_procesal(){
-	$('#frm_edo_procesal').submit(function(e) {
-		e.preventDefault();
-		var dataForm = $(this).serialize();
-		console.log('Preparando la info para enviar al modelo.')
-		$.ajax({
-			url: 'controller/puente.php',
-			type: 'POST',
-			dataType: 'json',
-			data: dataForm,
-			async:false,
-			cache:false
-		})
-		.done(function(response) {
-			alerta('div_edo',response.status,response.message,'');
-		})
-		.fail(function(jqXHR,textStatus,errorThrow) {
-			alerta('div_edo','error',jqXHR.responseText,'');
-		});
-	});
-	return false;
-}
-//Autocompletado de informacion 
-function autocomplete_input(input,hidden,option){
-	$('#'+input).autocomplete({
-		source: "controller/puente.php?option="+option,
-		select:function(event,ui){
-			$('#'+hidden).val(ui.item.id);
-		}
-	});
-	return false;
-}
-//Carga de catalogos 
-function load_catalogo(element,type,option){
-	var result, data='0'; 
-	if ( element != '' ) {
-		$('#'+element).html('');
-	}
-	$.ajax({
-		url: 'controller/puente.php',
-		type: 'POST',
-		dataType: 'json',
-		data: {option: option, data:data},
-		async:false,
-		cache:false,
-	})
-	.done(function(response) {
-		if ( type == 'select') {
-			$('#'+element).append('<option value="" >...</option>');
-			$.each(response, function(index, val) {
-				$('#'+element).append('<option value="'+val.id+'">'+val.nombre+'</option>');
-			});
-			result = false;
-		}else{
-			result = response;
-			setInfo(result);
-		}
-	})
-	.fail(function() {
-		alert('Ocurrio un error al cargar el catalogo de opcion: '+option)
-	});	
-}
-// Setear un array de municipios 
-function setInfo( json ) { rescate = json; }
 //Creador de alertas automatico
 function alerta(div,estado,mensaje,modal)
 {
@@ -243,7 +205,7 @@ function alerta(div,estado,mensaje,modal)
 		clase = "alert-success";
 		msj = mensaje;
 		edo = "Éxito!";
-		time = 3000;
+		time = 10000;
 	}
 	var contenedor = 
 	'<div class="row">'+
@@ -265,38 +227,61 @@ function alerta(div,estado,mensaje,modal)
 	},time);
 	return false;
 }
-//eliminar al responable del expediente
-function delete_responsable(id) {
-	$('#div_tbl_res').addClass('hidden');
-	$('#field_res').removeClass('hidden');
-
+function frm_add_acuse() {
+	$('#frm_add_acuse').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_add_acuse"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			processData: false,
+            contentType: false,
+		})
+		.done(function(response) {
+			alerta('div_acuse',response.status,response.message,'modal_add_acuse');
+			getCorrespondencia();
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('div_acuse','error',jqXHR.responseText,'modal_add_acuse');
+		});
+	});
+	return false;
+}
+//Enviar a sapa
+function sendSAPA(oficio){
 	$.ajax({
 		url: 'controller/puente.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {option:'55',pr:id},
+		data: {option: '90',oficio:oficio},
 		async:false,
 		cache:false,
 	})
 	.done(function(response) {
-		alert(response.message);
-		$('#nombre').attr('required', '');
-		$('#ap_pat').attr('required', '');
-		$('#ap_mat').attr('required', '');
-		$('#genero').attr('required', '');
-		$('#cargo').attr('required', '');
-		$('#adscripcion').attr('required', '');
-		$('#presunto_id').val("");
+		alerta('alerta',response.status,response.message,'');
 	})
-	.fail(function(jqXHR,textStatus,errorThrow) {
-		console.log("Error al tratar de elimiar al responsable: "+jqXHR.responseText );
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("Error: ".jqXHR.responseText);
 	});
 	
 	return false;
 }
-//Formulario para actualizar el estado Procesal
-function frm_edit_edo_procesal() {
-	$('#frm_edit_edo_procesal').submit(function(e) {
+//Autocompletado de informacion 
+function autocomplete_input(input,hidden,option){
+	$('#'+input).autocomplete({
+		source: "controller/puente.php?option="+option,
+		select:function(event,ui){
+			$('#'+hidden).val(ui.item.id);
+		}
+	});
+	return false;
+}
+function frm_turnar() {
+	$('#frm_turnar').submit(function(e) {
 		e.preventDefault();
 		var dataForm = $(this).serialize();
 		$.ajax({
@@ -308,95 +293,11 @@ function frm_edit_edo_procesal() {
 			cache:false,
 		})
 		.done(function(response) {
-			alerta('div_edo',response.status,response.message,'');
+			alerta('div_turnar',response.status,response.message,'modal_turnar');
 		})
-		.fail(function(jqXHR,textStatus,errorThrow) {
-			console.log("Error al tratar de elimiar al responsable: "+jqXHR.responseText );
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			console.log("Error: ".jqXHR.responseText);
 		});
-		
 	});
 	return false;
-}
-//El analista de DR guarda una observación del expediente 
-function frm_add_seguimiento() {
-	$('#frm_add_seguimiento').submit(function(e) {
-		e.preventDefault();
-		var dataForm = $(this).serialize();
-		$.ajax({
-			url: 'controller/puente.php',
-			type: 'POST',
-			dataType: 'json',
-			data: dataForm,
-			async:false,
-			cache:false,
-		})
-		.done(function(response) {
-			alerta('div_seguimiento',response.status,response.message,'modal_add_seguimiento');
-			document.getElementId("frm_add_seguimiento").reset();
-		})
-		.fail(function(jqXHR,textStatus,errorThrow) {
-			console.log("Error: "+jqXHR.responseText);
-		});
-		
-	});
-	return false;
-}
-//agregar una nueva conducta
-function add_conducta() {
-	var conducta = prompt('Escriba la nueva conducta:');
-	if (conducta != "") {
-		conducta = conducta.toUpperCase();
-		$.ajax({
-			url: 'controller/puente.php',
-			type: 'POST',
-			dataType: 'json',
-			data: {option: '60',nombre:conducta},
-			async:false,
-			cache:false,
-		})
-		.done(function(response) {
-			$('#conducta').html("");
-			$('#conducta').append('<option value="">...</option>');
-			$.each(response, function(i, con) {
-				$('#conducta').append('<option value="'+con.id+'">'+con.nombre+'</option>');
-			});
-			catalogo_conductas();
-		})
-		.fail(function(jqXHR,textStatus,errorThrow) {
-			console.log("Error: "+jqXHR.responseText);
-		});
-	}else{
-		console.log('No tienen conducta');
-	}
-}
-// Consultar las conducta
-function catalogo_conductas() {
-	$.ajax({
-		url: 'controller/puente.php',
-		type: 'POST',
-		dataType: 'json',
-		data: {option: '59'},
-		async:false,
-		cache:false,
-	})
-	.done(function(response) {
-
-		$('#conducta').html("");
-		$('#conducta').append('<option value="">...</option>');
-		$.each(response, function(i, con) {
-			$('#conducta').append('<option value="'+con.id+'">'+con.nombre+'</option>');
-		});
-	})
-	.fail(function(jqXHR,textStatus,errorThrow) {
-		console.log("Error: "+jqXHR.responseText);
-	});
-	
-}
-//Formulario de estadistica
-function frm_estadistica() {
-	$('#frm_estadistica').submit(function(e) {
-		e.preventDefault();
-		var dataForm = $(this).serialize();
-		alert(dataForm);
-	});
 }

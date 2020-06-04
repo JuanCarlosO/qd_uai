@@ -1,3 +1,10 @@
+<?php
+require_once 'model/Connection.php';
+require_once 'model/DRModel.php';
+$queja_id = $_GET['exp'];
+$q = new DRModel;
+$clave = $q->getClave($queja_id);
+?>
 <input type="hidden" id="nivel" name="nivel" value="<?=$_SESSION['nivel']?>">
 <form action="#" id="frm_acuerdo_improcedencia">
     <input type="hidden" name="option" value="66">
@@ -7,7 +14,7 @@
             <div class="col-md-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Registro de acuerdo de improcedencia</h3>
+                        <h3 class="box-title">Registro de acuerdo de improcedencia <u><?=$clave?></u></h3>
                     </div>
                     <div class="box-body">
                         <div id="div_acuerdo"></div>

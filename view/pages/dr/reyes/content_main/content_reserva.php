@@ -1,5 +1,11 @@
-
-<form action="#" id="frm_reserva">
+<?php
+require_once 'model/Connection.php';
+require_once 'model/DRModel.php';
+$queja_id = $_GET['exp'];
+$q = new DRModel;
+$clave = $q->getClave($queja_id);
+?>
+<form action="#" id="frm_reserva" enctype="multipart/form-data">
     <input type="hidden" name="option" value="65">
     <input type="hidden" name="queja_id" value="<?=$_GET['exp']?>">
     <section class="content container-fluid">
@@ -7,7 +13,7 @@
             <div class="col-md-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Registro reserva del expediente</h3>
+                        <h3 class="box-title">Registro reserva del expediente <u><?=$clave?></u></h3>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
@@ -15,20 +21,14 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label>Oficio</label>
-                                    <input type="text" id="oficio" name="oficio" value="" class="form-control">
-                                    <input type="hidden" id="oficio_id" name="oficio_id" value="">
+                                    <label>Documento de acuerdo de reserva</label>
+                                    <input type="file" id="file" name="file" value="" class="form-control" accept=".pdf">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            
+                            <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Fecha oficio</label>
-                                    <input type="date" name="f_oficio" value="" class="form-control">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label>Fecha de reserva</label>
+                                    <label>Fecha de acuerdo de reserva</label>
                                     <input type="date" name="f_reserva" value="" class="form-control">
                                 </div>
                             </div>

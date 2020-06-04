@@ -58,7 +58,8 @@ if ( isset($_GET['acta']) ) {
                             <?php else: ?>
                                 Formulario de registro de actas
                             <?php endif ?>
-                            (<label>NOTA: </label>Los campos obligatorios se encuentran marcados con un asterisco "<i class="fa fa-asterisk text-red"></i>" )
+                            <br>
+                            <small>(<label>NOTA: </label>Campos obligatorios "<i class="fa fa-asterisk text-red"></i>" )</small>
                         </h3>
                     </div>
                     <!-- /.box-header -->
@@ -74,7 +75,7 @@ if ( isset($_GET['acta']) ) {
                     		<div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label>Área que genera <i class="fa fa-asterisk text-red"></i></label>
+                                        <label>Área ejecutora<i class="fa fa-asterisk text-red"></i></label>
                                         <input type="text" id="area" name="area" value="<?=$n_area?>" placeholder="Escriba un indicio del área y seleccione alguna de las coincidencias" class="form-control" required="">
                                         <input type="hidden" id="area_h" name="area_h" value="<?=$area_h?>">
                                     </div>
@@ -115,11 +116,25 @@ if ( isset($_GET['acta']) ) {
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Tipo de actuación</label>
+                                        <select name="t_actuacion" id="" class="form-control">
+                                            <option value="">...</option>
+                                            <option value="1">INSPECCIÓN</option>
+                                            <option value="2">VERIFICACIÓN</option>
+                                            <option value="3">SUPERVISIÓN</option>
+                                            <option value="4">INVESTIGACIÓN</option>
+                                            <option value="5">USUARIO SIMULADO</option>
+                                            <option value="6">AGENTE ENCUBIERTO</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label>Escriba el nombre del lugar</label>
+                                        <label>Domicilio</label>
                                         <input type="text" id="lugar" name="lugar" maxlength="255" value="<?=$lugar?>" class="form-control" autocomplete="off">
                                     </div>
                                 </div>
@@ -197,7 +212,7 @@ if ( isset($_GET['acta']) ) {
                             </fieldset>
                             <div class="row">
                                 <div class="col-md-5">
-                                    <label class="pull-right">¿El acta esta relacionada a una Orden de Inspección/ Verificación/ Supervisión?</label>
+                                    <label class="pull-right">¿El acta esta relacionada a una Orden ?</label>
                                 </div>
                                 <div class="col-md-2">
                                     <select id="question" name="question" class="form-control">

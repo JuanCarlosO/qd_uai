@@ -6,13 +6,12 @@ if ( isset($_GET['menu']) ) {
 	$menu = $_GET['menu'];
 
 	switch ($perfil) {
-		case 'DI';
+		
 		case 'QDP';
 		case 'QDNP':
 			switch ($menu) {
 				case 'general':#formulario de alta de queja
-					
-					if ( $_SESSION['nivel'] == 'ANALISTA' ) {
+					if ( $_SESSION['nivel'] == 'ANALISTA' || $_SESSION['nivel'] == 'JEFE' ) {
 						include 'view/pages/di/qd/content_header/header_list.php';
 						include 'view/pages/di/qd/content_main/content_list.php';
 					}else{
@@ -21,13 +20,14 @@ if ( isset($_GET['menu']) ) {
 					}
 					#Inclución de los modales
 					include 'view/pages/di/qd/modals/modal_add_referencia.php';
-
+					include 'view/pages/di/qd/modals/modal_asignar.php';
 					break;
 				case 'list_queja':#Listado de quejas
 					include 'view/pages/di/qd/content_header/header_list.php';
 					include 'view/pages/di/qd/content_main/content_list.php';
 					#Inclución de modales
 					include 'view/pages/di/qd/modals/modal_upload_file.php';
+					include 'view/pages/di/qd/modals/modal_asignar.php';
 					break;
 				case 'reports':#opcion de reportes
 					include 'view/pages/di/qd/content_header/header_reports.php';
@@ -68,6 +68,22 @@ if ( isset($_GET['menu']) ) {
 				case 'turnar':
 					include 'view/pages/di/qd/content_header/header_turnar.php';
 					include 'view/pages/di/qd/content_main/content_turnar.php';
+					break;
+				case 'devoluciones':
+					include 'view/pages/di/qd/content_header/header_devoluciones.php';
+					include 'view/pages/di/qd/content_main/content_devoluciones.php';
+					break;
+				case 'tablero':
+					include 'view/pages/di/directivo/content_header/header_general.php';
+					include 'view/pages/di/qd/content_main/content_tablero.php';
+					break;
+				case 'migracion':
+					include 'view/pages/di/qd/content_header/header_migracion.php';
+					include 'view/pages/di/qd/content_main/content_migracion.php';
+					break;
+				case 'turnado_multi':
+					include 'view/pages/di/qd/content_header/header_turnar.php';
+					include 'view/pages/di/qd/content_main/content_turnado_multi.php';
 					break;
 				default:
 					header("Location: ../../login.php");
@@ -130,14 +146,24 @@ if ( isset($_GET['menu']) ) {
 					break;
 			}
 			break;
-		case 'DR':
+		case 'SAPA':
 			switch ($menu) {
 				case 'general':
-					include 'view/pages/dr/hinojosa/content_header/header_general.php';
-					include 'view/pages/dr/hinojosa/content_main/content_general.php';
+					if ( $_SESSION['nivel'] == 'SECRETARIA' ) {
+						include 'view/pages/dr/hinojosa/content_header/header_acuse.php';
+						include 'view/pages/dr/hinojosa/content_main/content_acuse.php';
+					}else{
+						include 'view/pages/dr/hinojosa/content_header/header_general.php';
+						include 'view/pages/dr/hinojosa/content_main/content_general.php';
+					}
+					
 					#Importacion de modales
 					include 'view/pages/dr/hinojosa/modals/modal_add_turno.php';
 					include 'view/pages/dr/hinojosa/modals/modal_add_seguimiento.php';
+					#Modales nuevos 
+					include 'view/pages/dr/hinojosa/modals/modal_add_responsable.php';
+					include 'view/pages/dr/hinojosa/modals/modal_add_eprocesal.php';
+					include 'view/pages/dr/hinojosa/modals/modal_add_culpable.php';
 					break;
 				case 'e_procesal':
 					include 'view/pages/dr/hinojosa/content_header/header_e_procesal.php';
@@ -155,9 +181,76 @@ if ( isset($_GET['menu']) ) {
 					include 'view/pages/dr/hinojosa/content_header/header_estadisticas.php';
 					include 'view/pages/dr/hinojosa/content_main/content_estadisticas.php';
 					break;
+				case 'acuse':
+					include 'view/pages/dr/hinojosa/content_header/header_acuse.php';
+					include 'view/pages/dr/hinojosa/content_main/content_acuse.php';
+					break;
 				
 				default:
 					header("Location: ../../login.php");
+					break;
+			}
+			break;
+		case 'DR':
+
+			switch ($menu) {
+				case 'general':
+					if ( $_SESSION['nivel'] == 'ANALISTA' ) {
+						include 'view/pages/dr/directivo/content_header/header_analista.php';
+						include 'view/pages/dr/directivo/content_main/content_analista.php';
+					}else{
+						include 'view/pages/dr/directivo/content_header/header_general.php';
+						include 'view/pages/dr/directivo/content_main/content_general.php';
+					}
+					#Seccion de modales
+					include 'view/pages/dr/directivo/modals/modal_add_acuse.php';
+					include 'view/pages/dr/directivo/modals/modal_send_sapa.php';
+					include 'view/pages/dr/directivo/modals/modal_turnar.php';
+					break;
+				case 'list_exp':
+					include 'view/pages/dr/directivo/content_header/header_analista.php';
+					include 'view/pages/dr/directivo/content_main/content_analista.php';
+					#Seccion de modales
+					include 'view/pages/dr/directivo/modals/modal_add_acuse.php';
+					break;
+				case 'cedula':
+					include 'view/pages/dr/directivo/content_header/header_cedula.php';
+					include 'view/pages/dr/directivo/content_main/content_cedula.php';
+					#Seccion de modales
+					include 'view/pages/dr/directivo/modals/modal_ejemplo.php';
+					break;
+			}
+			break;
+		case 'DI';
+			switch ($menu) {
+				case 'general':
+					include 'view/pages/di/directivo/content_header/header_general.php';
+					include 'view/pages/di/directivo/content_main/content_general.php';
+					#Seccion de modales
+					include 'view/pages/di/directivo/modals/modal_detalle_oin.php';
+					include 'view/pages/di/directivo/modals/modal_detalle_actas.php';
+					break;
+				case 'cedula':
+					include 'view/pages/di/directivo/content_header/header_cedula.php';
+					include 'view/pages/di/directivo/content_main/content_cedula.php';
+					#Seccion de modales
+					include 'view/pages/di/directivo/modals/modal_ejemplo.php';
+					break;
+				case 'abogados':
+					include 'view/pages/di/qd/content_header/header_abogados.php';
+					include 'view/pages/di/qd/content_main/content_abogados.php';
+					break;
+				case 'migracion':
+					include 'view/pages/di/qd/content_header/header_migracion.php';
+					include 'view/pages/di/qd/content_main/content_migracion.php';
+					break;
+				case 'turnado_multi':
+					include 'view/pages/di/qd/content_header/header_turnar.php';
+					include 'view/pages/di/qd/content_main/content_turnado_multi.php';
+					break;
+				case 'expedientes':
+					include 'view/pages/di/qd/content_header/header_exp_abogado.php';
+					include 'view/pages/di/qd/content_main/content_exp_abogado.php';
 					break;
 			}
 			break;
@@ -182,6 +275,7 @@ if ( isset($_GET['menu']) ) {
 					include 'view/pages/dr/reyes/content_main/content_ldemanda.php';
 					#Seccion de modales
 					include 'view/pages/dr/reyes/modals/modal_resolver_demanda.php';
+					include 'view/pages/dr/reyes/modals/modal_add_apersonamiento.php';
 					break;
 				case 'cedula':
 					include 'view/pages/dr/reyes/content_header/header_cedula.php';
@@ -205,6 +299,10 @@ if ( isset($_GET['menu']) ) {
 				case 'reportes':
 					include 'view/pages/dr/reyes/content_header/header_reportes.php';
 					include 'view/pages/dr/reyes/content_main/content_reportes.php';
+					break;
+				case 'apersonamiento':
+					include 'view/pages/dr/reyes/content_header/header_apersonamiento.php';
+					include 'view/pages/dr/reyes/content_main/content_apersonamiento.php';
 					break;	
 			}
 			break;

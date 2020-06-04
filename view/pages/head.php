@@ -27,6 +27,8 @@
   <link rel="stylesheet" href="view/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
   <!-- Daterange picker -->
   <link rel="stylesheet" href="view/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+  <!-- iCheck for checkboxes and radio inputs -->
+  <link rel="stylesheet" href="view/plugins/iCheck/all.css">
   <!-- bootstrap wysihtml5 - text editor -->
   <link rel="stylesheet" href="view/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
   <!-- Select2 -->

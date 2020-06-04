@@ -15,9 +15,11 @@ if ( isset($_GET['exp']) ) {
     }else{
         $bg = "bg-green";
     }
+    $clave = $q->getClave($queja_id);
 }else{
     $title = "SIN RESERVAS REGISTRADAS";
 }
+
 ?>
 
 <section class="content container-fluid">
@@ -25,7 +27,7 @@ if ( isset($_GET['exp']) ) {
         <div class="col-md-12">
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title"> <?=$title;?> </h3>
+                    <h3 class="box-title"> <?=$title;?> <u><?=$clave?></u> </h3>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">

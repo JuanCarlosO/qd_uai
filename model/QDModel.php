@@ -6,7 +6,244 @@ class QDModel extends Connection
 	private $sql;
 	private $stmt;
 	public $result;
-	
+	public function getTblCtrl()
+	{
+		try {
+			$resultado = array();
+			#Contar los expedientes por estado guarda 
+			$this->sql = "SELECT q.estado, e.nombre AS n_estado,COUNT(q.id) as cuenta 
+			FROM quejas AS q 
+			INNER JOIN estado_guarda AS e ON e.id = q.estado
+			GROUP BY q.estado";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$resultado['edos'] = $this->result;
+			$this->sql = "SELECT p.id,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS full_name,COUNT(e.persona_id) AS cuenta 
+			FROM e_turnados AS e INNER JOIN personal AS p ON p.id = e.persona_id
+			WHERE e.estado != 2
+			GROUP BY p.id";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$resultado['abogados'] = $this->result;
+			#Agregar las actas
+			$this->sql = "SELECT a.t_actuacion AS ta, COUNT(a.id) AS cuenta
+			FROM actas AS a 
+			GROUP BY a.t_actuacion
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$resultado['actas'] = $this->result;
+			#CONECTAR A LA OTRA BD 
+			$this->sql = "SELECT t_orden, COUNT( t_orden ) AS cuenta FROM orden_inspeccion GROUP BY t_orden";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$ordenes = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$resultado['c_oins'] = $ordenes;
+
+			return json_encode($resultado);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+	public function operacionesFechas($tipo,$mayor,$menor)
+	{
+		try {
+			if ($tipo == '-') {
+				$this->sql = "SELECT DATEDIFF(?,?) AS resta";
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->bindParam(1,$mayor,PDO::PARAM_STR);
+				$this->stmt->bindParam(2,$menor,PDO::PARAM_STR);
+				$this->stmt->execute();
+				$this->result = $this->stmt->fetch( PDO::FETCH_OBJ );
+			}
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+	public function getTblCtrlSubd()
+	{
+		try {
+			session_start();
+			#Buscar a que subdireccion pertenece Policial o no policial 
+			$perfil = $_SESSION['perfil'];
+			$wh = ' 1=1';
+			$wh2 = '';
+			if ( $perfil == 'QDP' ) {
+				$wh .= ' AND t_asunto = 1';
+				$wh2 .= ' AND area_id = 7';
+			}elseif ( $perfil == 'QDNP' ) {
+				$wh .= ' AND t_asunto = 2';
+				$wh2 .= ' AND area_id = 8';
+			}
+			$resultado = array();
+			#Contar los expedientes por estado guarda 
+			$this->sql = "SELECT q.estado, e.nombre AS n_estado,COUNT(q.id) as cuenta FROM quejas AS q 
+			INNER JOIN estado_guarda AS e ON e.id = q.estado
+			WHERE $wh
+			GROUP BY q.estado";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$resultado['edos'] = $this->result;
+			$this->sql = "SELECT p.id,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS full_name,COUNT(e.persona_id) AS cuenta 
+			FROM e_turnados AS e INNER JOIN personal AS p ON p.id = e.persona_id
+			WHERE e.estado != 2 $wh2
+			GROUP BY p.id";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			$resultado['abogados'] = $this->result;
+			return json_encode($resultado);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+	public function getExpedientesTC()
+	{
+		try {
+			$t = $_POST['tipo'];
+			$v = $_POST['valor'];
+			if ( $t == 'abogado') {
+				$this->sql = "SELECT DISTINCT(queja_id) FROM e_turnados WHERE persona_id = $v";
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->execute();
+				$ids = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+				$aux = array();
+				foreach ($ids as $key => $v) {
+					array_push($aux, $v->queja_id);
+				}
+				$ids = implode(',', $aux);
+			}
+			if ( $t == 'estado') {
+				$this->sql = "SELECT id FROM quejas WHERE estado = $v";
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->execute();
+				$ids = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+				$aux = array();
+				foreach ($ids as $key => $v) {
+					array_push($aux, $v->id);
+				}
+				$ids = implode(',', $aux);
+			}
+			$this->sql = "SELECT q.*,p.nombre as n_procedencia, e.nombre as n_estado ,
+			et.f_turno,et.t_tramite
+			FROM quejas AS q
+			INNER JOIN procedencias AS p ON p.id =q.procedencia
+			INNER JOIN estado_guarda AS e ON e.id = q.estado 
+			LEFT JOIN e_turnados AS et ON et.queja_id = q.id AND et.estado != 2 
+			WHERE q.id IN ($ids)";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			#agregar contador de dias 
+			$quejas = array();
+			foreach ($this->result as $key => $queja) {
+				$aux = array(); 
+				$aux['id'] = $queja->id;
+				$aux['cve_exp'] = $queja->cve_exp;
+				$aux['n_estado'] = $queja->n_estado;
+				$aux['n_procedencia'] = $queja->n_procedencia;
+				$aux['t_asunto'] = $queja->t_asunto;
+				$aux['t_tramite'] = $queja->t_tramite;
+				$aux['f_turno'] = $queja->f_turno;
+				#contador de dias 
+				if ($queja->estado == 1) {#tramite
+					$sql_diff = "SELECT DATEDIFF(DATE(NOW()),?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$queja->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+				if ($queja->estado == 3) {#archivo
+					$sql_diff = "SELECT DATEDIFF(DATE(NOW()),?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$queja->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+				if ($queja->estado == 4) {#incompe
+					$sql_diff = "SELECT DATEDIFF(DATE(NOW()),?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$queja->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+				if ($queja->estado == 8) {#respo
+					$sql_r = "SELECT f_acuse FROM quejas_respo WHERE queja_id=? ";
+					$this->stmt = $this->pdo->prepare($sql_r);
+					$this->stmt->bindParam(1,$queja->id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					$f_acuse = $this->stmt->fetch(PDO::FETCH_OBJ);	
+					if( $this->stmt->rowCount() > 0 ){
+						$f_acuse = $f_acuse->f_acuse;
+					}else{
+						$f_acuse = date('Y-m-d');
+					}
+
+					$sql_diff = "SELECT DATEDIFF(?,?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$f_acuse,PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$queja->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+				if ($queja->estado == 9) {#prescrito
+					
+					$sql_diff = "SELECT DATEDIFF(DATE(NOW()),?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$queja->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+				if ($queja->estado == 10) {#reserva
+					$sql_fr = "SELECT f_reserva FROM reservas WHERE queja_id=? ";
+					$this->stmt = $this->pdo->prepare($sql_fr);
+					$this->stmt->bindParam(1,$queja->id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					$f_reserva = $this->stmt->fetch(PDO::FETCH_OBJ);	
+					if( $this->stmt->rowCount() > 0 ){
+						$f_reserva = $f_reserva->f_reserva;
+					}
+					$sql_diff = "SELECT DATEDIFF(?,?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$f_reserva,PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$queja->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+				if ($queja->estado == 11) {#improcedencia
+					#
+					$sql_fai = "SELECT f_acuerdo FROM acuerdos_improcedencia WHERE queja_id=? ";
+					$this->stmt = $this->pdo->prepare($sql_fai);
+					$this->stmt->bindParam(1,$queja->id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					$f_acuerdo = $this->stmt->fetch(PDO::FETCH_OBJ)->f_acuerdo;	
+
+					$sql_diff = "SELECT DATEDIFF(?,?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$f_acuerdo,PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$queja->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+				array_push($quejas, $aux);
+			}
+			return json_encode($quejas);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
 	public function getTR()
 	{
 		try {
@@ -67,7 +304,32 @@ class QDModel extends Connection
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
-
+	public function getDependenciasF()
+	{
+		try {
+			$this->sql = "SELECT id, nombre FROM organismos_f ORDER BY id DESC";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode($this->result);
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+	public function getExpList($arreglo)
+	{
+		try {
+			$ids = implode(',', $arreglo);
+			$this->sql = "SELECT id, cve_exp FROM quejas WHERE id IN ($ids);";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+	
 	public function getQDs()
 	{
 		try {
@@ -82,9 +344,26 @@ class QDModel extends Connection
 			}elseif ($_SESSION['perfil'] == "QDNP") {
 				$wh .= " AND t_asunto = 'NO POLICIAL'";
 			}
+			#Para los niveles
+			if ( $_SESSION['nivel'] == "ANALISTA") {
+				$wh .= " AND et.persona_id = ".$_SESSION['id'];
+			}elseif ($_SESSION['nivel'] == "JEFE") {
+				# Buscar las personas que tiene a su cargo
+				$area = $_SESSION['area_id'];
+				$this->sql = "SELECT * FROM personal WHERE area_id = ?";
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->bindParam(1,$area,PDO::PARAM_INT);
+				$this->stmt->execute();
+				$empleados = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+				$aux = array();
+				foreach ($empleados as $key => $e) {
+					array_push($aux, $e->id);
+				}
+				$aux = implode(',', $aux);
+				$wh .= " AND et.persona_id IN ($aux) ";
+			}
 			#Los filtros 
 			foreach ($anexgrid->filtros as $filter) {
-				
 				if ( $filter['columna'] != '' ) {
 					if ( $filter['columna'] == 'q.cve_ref' || $filter['columna'] == 'q.cve_exp' ) {
 						$wh .= " AND ".$filter['columna']." LIKE '%".$filter['valor']."%'";
@@ -95,12 +374,16 @@ class QDModel extends Connection
 				}
 			}
 			$this->sql = "SELECT q.*,UPPER(m.nombre) AS municipio,
-			p.nombre AS procedencia, e.nombre AS n_estado, DATEDIFF(DATE(NOW()),DATE(q.created_at) ) AS fase
+			p.nombre AS procedencia, e.nombre AS n_estado, DATEDIFF(DATE(NOW()),DATE(q.created_at) ) AS fase,
+			CONCAT(pe.nombre,' ',pe.ap_pat,' ',pe.ap_mat) AS full_name, ev.estado AS visto, et.t_tramite, et.f_turno
 			 FROM quejas AS q
 			INNER JOIN ubicacion_referencia AS u ON u.queja_id = q.id
 			INNER JOIN municipios AS m ON m.id = u.municipio
 			INNER JOIN procedencias AS p ON p.id = q.procedencia
 			INNER JOIN estado_guarda AS e ON e.id = q.estado
+			LEFT JOIN e_vistos AS ev ON ev.queja_id = q.id
+			LEFT JOIN e_turnados AS et ON et.queja_id = q.id
+			LEFT JOIN personal AS pe ON pe.id = et.persona_id
 			WHERE $wh ORDER BY q.$anexgrid->columna $anexgrid->columna_orden LIMIT $anexgrid->pagina , $anexgrid->limite";
 			
 			$this->stmt = $this->pdo->prepare($this->sql);
@@ -108,7 +391,9 @@ class QDModel extends Connection
 			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
 			#La cuenta de datos 
 			$total = $this->stmt->rowCount();
+			$aux = array();
 			foreach ($this->result as $key => $qd) {
+
 				$aux['id'] = $qd->id;
 				$aux['cve_ref'] = $qd->cve_ref;
 				$aux['cve_exp'] = $qd->cve_exp;
@@ -118,6 +403,11 @@ class QDModel extends Connection
 				$aux['procedencia'] = $qd->procedencia;
 				$aux['n_estado'] = $qd->n_estado;
 				$aux['fase'] = $qd->fase;
+				$aux['multiple_id'] = $qd->multiple_id;
+				$aux['full_name'] = $qd->full_name;
+				$aux['visto'] = $qd->visto;
+				$aux['t_tramite'] = $qd->t_tramite;
+				$aux['f_turno'] = $qd->f_turno;
 				#Buscar las presuntas conductas de cada expediente
 				$sql_conductas = "SELECT cc.id,cc.nombre  FROM p_conductas AS pc
 				INNER JOIN catalogo_conductas AS cc ON cc.id = pc.conducta_id
@@ -127,6 +417,24 @@ class QDModel extends Connection
 				$this->stmt->execute();
 				$conductas = $this->stmt->fetchAll(PDO::FETCH_OBJ);
 				$aux['conductas'] = $conductas;
+				#Buscar la cantidad de dias que tiene el expediente
+				$sql_resta = "SELECT DATEDIFF(DATE(NOW()),?) AS resta";
+				$this->stmt = $this->pdo->prepare($sql_resta);
+				$this->stmt->bindParam(1,$qd->f_hechos,PDO::PARAM_STR);
+				$this->stmt->execute();
+				$resta = $this->stmt->fetch(PDO::FETCH_OBJ)->resta;
+				$aux['resta'] = $resta;
+				#contador de dias desde turnado
+				if ( $qd->t_tramite == 'REASIGNADO' ) {
+					$sql_reasig = "SELECT DATEDIFF(DATE(NOW()),?) AS reasig";
+					$this->stmt = $this->pdo->prepare($sql_reasig);
+					$this->stmt->bindParam(1,$qd->f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$reasig = $this->stmt->fetch(PDO::FETCH_OBJ)->reasig;
+					$aux['f_reasignado'] = $reasig;	
+				}else{
+					$aux['f_reasignado'] = ' NO REASIGNADO ';
+				}
 				
 				array_push($quejas, $aux);
 			}
@@ -482,7 +790,7 @@ class QDModel extends Connection
 				$this->stmt->execute();
 				$total = $this->stmt->fetch(PDO::FETCH_OBJ)->total;
 				$total++;
-				$this->result = "UAI/EDOMEX/".$total."/".$sn->sn."/IP/".date('Y');
+				$this->result = "UAI/EDOMEX/".$sn->sn."/IP/".$total."/".date('Y');
 			}else{
 				$this->sql = "SELECT COUNT(*) AS total FROM quejas WHERE t_tramite = ? AND YEAR(created_at) = YEAR(NOW());";
 				$this->stmt = $this->getPDO()->prepare($this->sql);
@@ -490,7 +798,7 @@ class QDModel extends Connection
 				$this->stmt->execute();
 				$total = $this->stmt->fetch(PDO::FETCH_OBJ)->total;
 				$total++;
-				$this->result = "UAI/EDOMEX/".$total."/".$sn->sn."/IP/".date('Y');
+				$this->result = "UAI/EDOMEX/".$sn->sn."/IP/".$total."/".date('Y');
 			}
 			
 			return $this->result;
@@ -689,6 +997,7 @@ class QDModel extends Connection
 	public function saveQueja()
 	{
 		try {
+			$insertados = array();
 			$t_asunto = $_POST['t_asunto'];
 			#print_r($_POST['pro'][1]);exit;
 			#Valida el tipo de referencia 
@@ -794,6 +1103,12 @@ class QDModel extends Connection
 				$this->stmt->execute();
 				#RECUPERAR EL ID DE LA QUEJA INSERTADO 
 				$queja_id = $this->pdo->lastInsertId();
+				##Insertar el estado del expediente 
+				$this->sql = "INSERT INTO e_vistos (id,queja_id,estado) VALUES ('',?,1);";
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+				$this->stmt->execute();
+
 				unset($this->sql);
 				unset($this->stmt);
 
@@ -860,7 +1175,7 @@ class QDModel extends Connection
 				#Insertar el turnado
 				unset($this->sql);
 				unset($this->stmt);
-				$this->sql = "INSERT INTO e_turnados(id,queja_id,persona_id,t_tramite,estado) VALUES ('',?,?,1,1) ";
+				$this->sql = "INSERT INTO e_turnados(id,queja_id,persona_id,t_tramite,estado,f_turno) VALUES ('',?,?,1,1,DATE(NOW() ) ) ";
 				$this->stmt = $this->pdo->prepare($this->sql);
 				$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
 				$this->stmt->bindParam(2,$_POST['sp_id'],PDO::PARAM_INT);
@@ -976,6 +1291,7 @@ class QDModel extends Connection
 					$this->stmt->execute();
 					#RECUPERAR EL ID DE LA QUEJA INSERTADO 
 					$queja_id = $this->pdo->lastInsertId();
+					array_push($insertados, $queja_id);
 					unset($this->sql);
 					unset($this->stmt);
 
@@ -1038,7 +1354,7 @@ class QDModel extends Connection
 					}
 					#Insertar el turnado
 					
-					$this->sql = "INSERT INTO e_turnados(id,queja_id,persona_id,t_tramite,estado) VALUES ('',?,?,1,1) ";
+					$this->sql = "INSERT INTO e_turnados(id,queja_id,persona_id,t_tramite,estado, f_turno) VALUES ('',?,?,1,1,DATE(NOW()) ) ";
 					$this->stmt = $this->pdo->prepare($this->sql);
 					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
 					$this->stmt->bindParam(2,$_POST['sp_id'],PDO::PARAM_INT);
@@ -1111,10 +1427,21 @@ class QDModel extends Connection
 					$this->stmt->bindParam(13,$mesa);
 					$this->stmt->bindParam(14,$turno);
 					$this->stmt->execute();
+					
 				}
+				#consular las claves de los expedientes insertados
+				$insertados = implode(',', $insertados);
+				$this->sql 	= "SELECT cve_exp FROM quejas WHERE id IN ($insertados);";
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->execute();
+				$claves = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+				$aux = array();
+				foreach ($claves as $key => $clave) {
+					array_push($aux, $clave->cve_exp);
+				}
+				$insertados = implode(',', $aux);
 			}
-			
-			
+					
 			#Insertar la pista de auditoria
 			session_start();
 			$logger = $_SESSION['id'];
@@ -1127,7 +1454,7 @@ class QDModel extends Connection
 			$stmt->bindParam(1,$desc,PDO::PARAM_STR);
 			$stmt->bindParam(2,$logger,PDO::PARAM_INT);
 			$stmt->execute();
-			return json_encode( array('status'=>'success','message'=>'SE HA INSERTADO LA INFORMACIÓN DE MANERA CORRECTA.') );
+			return json_encode( array('status'=>'success','message'=>'SE HA INSERTADO LA INFORMACIÓN DE MANERA CORRECTA.('.$insertados.')') );
 		} catch (Exception $e) {
 			#if( $e->getCode()  ){}
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
@@ -1142,7 +1469,7 @@ class QDModel extends Connection
 			$this->sql = "SELECT q.*,UPPER(m.nombre) AS municipio,
 			p.nombre AS procedencia,u.municipio AS mun_id,u.calle AS calle, u.e_calle AS e_calle, 
 			u.y_calle AS y_calle, u.edificacion AS edificacion ,u.numero AS numero, tt.nombre AS n_tramite,
-			e.nombre AS n_estado
+			e.nombre AS n_estado,DATE(q.created_at) AS f_apertura
 			FROM quejas AS q
 			INNER JOIN ubicacion_referencia AS u ON u.queja_id = q.id
 			INNER JOIN municipios AS m ON m.id = u.municipio
@@ -1179,6 +1506,7 @@ class QDModel extends Connection
 			$aux['ref_id'] 		= $qd->ref_id;
 			$aux['genero'] 		= $qd->genero;
 			$aux['estado'] 		= $qd->estado;
+			$aux['f_apertura'] 	= $qd->f_apertura;
 			#Datos de la direccion de referencia
 			$aux['calle'] 		= $qd->calle;
 			$aux['e_calle'] 	= $qd->e_calle;
@@ -1558,6 +1886,20 @@ class QDModel extends Connection
 			return json_encode( array( 'status'=>'error','message'=>$e->getMessage() ) );
 		}
 	}
+	public function getDocumentoByOficio($oficio)
+	{
+		try {
+			$this->sql = "SELECT archivo FROM documentos_qr WHERE oficio LIKE ?";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$oficio,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$doc = $this->stmt->fetch(PDO::FETCH_OBJ);
+			echo stripslashes($doc->archivo);
+			
+		} catch (Exception $e) {
+			return json_encode( array( 'status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
 	public function generateReporte()
 	{
 		try {
@@ -1781,9 +2123,9 @@ class QDModel extends Connection
 			}else{
 				$wh = '';
 			}
-			$this->sql = "SELECT q.*,UPPER(m.nombre) AS municipio,
-			p.nombre AS procedencia, e.nombre AS n_estado
-			 FROM quejas AS q
+			$this->sql = "SELECT q.*,DATE(q.created_at) AS creado, UPPER(m.nombre) AS municipio,
+			p.nombre AS procedencia, e.nombre AS n_estado, et.f_turno 
+			FROM quejas AS q
 			INNER JOIN e_turnados AS et ON et.queja_id = q.id
 			INNER JOIN ubicacion_referencia AS u ON u.queja_id = q.id
 			INNER JOIN municipios AS m ON m.id = u.municipio
@@ -1812,6 +2154,24 @@ class QDModel extends Connection
 				$this->stmt->execute();
 				$conductas = $this->stmt->fetchAll(PDO::FETCH_OBJ);
 				$aux['conductas'] = $conductas;
+				#Crear el contador de dias 
+				if ($qd->estado == 1) {
+					$sql_diff = "SELECT DATEDIFF(DATE(NOW()),?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$qd->creado,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}else{
+					$sql_diff = "SELECT DATEDIFF(?,?) AS dias ";
+					$this->stmt = $this->pdo->prepare($sql_diff);
+					$this->stmt->bindParam(1,$qd->f_turno,PDO::PARAM_STR);
+					$this->stmt->bindParam(2,$qd->creado,PDO::PARAM_STR);
+					$this->stmt->execute();
+					$dias = $this->stmt->fetch(PDO::FETCH_OBJ)->dias;	
+					$aux['dias_t'] = $dias;	
+				}
+						
 				
 				array_push($quejas, $aux);
 			}
@@ -1821,5 +2181,448 @@ class QDModel extends Connection
 			return json_encode( array( 'status'=>'error','message'=>$e->getMessage() ) );
 		}
 	}
+	#Guardar el turnado del expediente
+	public function saveTurno()
+	{
+		try {
+			session_start();
+			#print_r($_SESSION);exit;
+			##session
+			$nivel = $_SESSION['nivel'];
+			$area_id = $_SESSION['area_id'];
+			$edo = $_POST['estado'];
+			$comentario = mb_strtoupper($_POST['comentario'],'utf-8');
+			$queja_id = $_POST['queja_id'];
+			$f_turno = $_POST['f_turnado'];
+			#Validar estados guarda que no tiene permitidos Investigacion
+			if (  $edo == '11' || $edo == '10') {
+				throw new Exception("USTED NO CUENTA CON LOS PERMISOS PARA REALIZAR TURNADOS POR IMPROCEDENCIA O RESERVA.", 1);				
+			}
+			if ($nivel == 'ANALISTA' && $edo == '1' ) {
+				throw new Exception("USTED NO CUENTA CON LOS PERMISOS PARA REASIGNAR EXPEDIENTES EN TRÁMITE.", 1);	
+			}
+			#Identificar cual es el estado del turno 
+			if ( $edo == '1' || $edo == '9' ) {#Si es tramite o prescrito
+				#validar las variables necesarias 
+				if ( empty($_POST['sp']) ) {
+					throw new Exception("NECESITA BUSCAR Y SELECCIONAR UNA PERSONA A QUIEN TURNAR.", 1);
+				}else{
+					#Actualizar el estado guarda de la queja
+					$this->sql = "UPDATE quejas SET estado = ? WHERE id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$edo,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#actualizar los turnos anteriores para descativarlos 
+					$this->sql = "UPDATE e_turnados SET estado = 2 WHERE queja_id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#insertar el nuevo turnado 
+					$sp = $_POST['sp_id'];
+					$this->sql = "INSERT INTO e_turnados (id, queja_id, persona_id, t_tramite, estado, comentarios, f_turno) VALUES ('',?,?,1,1,?,?);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$sp,PDO::PARAM_INT);
+					$this->stmt->bindParam(3,$comentario,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+				}
+			}else if ( $edo == '3' ){ //cuando es archivo 
+				#validar las variables necesarias 
+				if ( empty($_POST['f_acuerdo']) || empty($_FILES['file']['name']) ) {
+					throw new Exception("NECESITA SELECCIONAR LA FECHA DEL ACUERDO Y ADJUNTAR EL PDF DEL ACUERDO.", 1);
+				}else{
+					$f_acuerdo = $_POST['f_acuerdo'];
+					#Actualizar el estado guarda de la queja
+					$this->sql = "UPDATE quejas SET estado = ? WHERE id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$edo,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#actualizar los turnos anteriores para descativarlos 
+					$this->sql = "UPDATE e_turnados SET estado = 2 WHERE queja_id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#Guardar el documento
+					if ( $_FILES['file']['error'] > 0 ) {
+						throw new Exception("DEBE DE SELECCIONAR UN DOCUMENTO.", 1);
+					}
+					if ( $_FILES['file']['size'] > 10485760 ) {
+						throw new Exception("EL DOCUMENTO EXCEDE EL TAMAÑO DE ARCHIVO ADMITIDO.", 1);	
+					}
+					if ( $_FILES['file']['type'] != 'application/pdf' ) {
+						throw new Exception("EL FORMATO DE ARCHIVO NO ES ADMITIDO (SOLO PDF). ", 1);
+					}
+					#Recuperar las variables necesarias
+					$doc_name = $_FILES['file']['name'];$doc_name = mb_strtoupper($doc_name,'utf-8');
+					$doc_type = $_FILES['file']['type'];
+					$doc_size = $_FILES['file']['size'];
+					$destino  = $_SERVER['DOCUMENT_ROOT'].'/qd_uai/uploads/';
+					#Mover el Doc
+					move_uploaded_file($_FILES['file']['tmp_name'],$destino.$doc_name);
+					#abrir el archivo
+					$file 		= fopen($destino.$doc_name,'r');
+					$content 	= fread($file, $doc_size);
+					$content 	= addslashes($content);
+					fclose($file);
+					#Eliminar  el archivo 
+					unlink($_SERVER['DOCUMENT_ROOT'].'/qd_uai/uploads/'.$doc_name);	
+					$desc = "EL ARCHIVO ADJUNTO HACE REFERENCIA UN EXPEDIENTE ARCHIVADO EL DIA: $f_acuerdo";
+					$this->sql = "INSERT INTO documentos_quejas (id, queja_id, nombre, descripcion, archivo) VALUES ('',?,?,?,?);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$doc_name,PDO::PARAM_STR);
+					$this->stmt->bindParam(3,$desc,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$content,PDO::PARAM_LOB);
+					$this->stmt->execute();
+					#insertar el nuevo turnado 
+					$sp = $_SESSION['id'];
+					$this->sql = "INSERT INTO e_turnados (id, queja_id, persona_id, t_tramite, estado,comentarios,f_turno) VALUES ('',?,?,1,1,?,?);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$sp,PDO::PARAM_INT);
+					$this->stmt->bindParam(3,$comentario,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+				}
+			}else if ( $edo == '2' ){ //cuando es acumulado 
+				#validar las variables necesarias 
+				if ( empty($_POST['expediente_id']) || empty($_POST['sp_uai_id']) ) {
+					throw new Exception("NECESITA SELECCIONAR UNA CLAVE DE EXPEDINTE Y UN SERVIDOR PÚBLICO.", 1);
+				}else{
+					$expediente_id = $_POST['expediente_id'];
+					#Actualizar el estado guarda de la queja
+					$this->sql = "UPDATE quejas SET estado = ? WHERE id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$edo,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#actualizar los turnos anteriores para descativarlos 
+					$this->sql = "UPDATE e_turnados SET estado = 2 WHERE queja_id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#Insertar el Exp. acumulado
+					$this->sql = "INSERT INTO quejas_acumuladas (id, q_original, q_acumulado) VALUES ('',?,?);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$expediente_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#insertar el nuevo turnado 
+					$sp = $_POST['sp_uai_id'];
+					$this->sql = "INSERT INTO e_turnados (id, queja_id, persona_id, t_tramite, estado,comentarios) VALUES ('',?,?,1,1,?);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$sp,PDO::PARAM_INT);
+					$this->stmt->bindParam(3,$comentario,PDO::PARAM_STR);
+					$this->stmt->execute();
+				}
+			}else if ( $edo == '4' ){ //cuando es incompetencia  
+				#validar las variables necesarias 
+				if ( empty($_POST['dependencia_f']) || empty($_POST['funcionario_f'])|| empty($_POST['oficio']) ) {
+					throw new Exception("LOS CAMPOS \"NOMBRE DE LA DEPENDENCIA, NOMBRE DEL FUNCIONARIO, NÚMERO DEL OFICIO.\" SON OBLIGATORIOS. ", 1);
+				}else{
+					$d = $_POST['dependencia_f'];
+					$f = mb_strtoupper($_POST['funcionario_f'],'utf-8');
+					$o = $_POST['oficio'];
+					#Actualizar el estado guarda de la queja
+					$this->sql = "UPDATE quejas SET estado = ? WHERE id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$edo,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#actualizar los turnos anteriores para descativarlos 
+					$this->sql = "UPDATE e_turnados SET estado = 2 WHERE queja_id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#insertar el nuevo turnado 
+					$sp = $_SESSION['id'];
+					$this->sql = "INSERT INTO e_turnados (id, queja_id, persona_id, t_tramite, estado,comentarios, oficio_cve, org_destino, n_funcionario,f_turno) VALUES ('',?,?,1,1,?,?,?,?,?);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$sp,PDO::PARAM_INT);
+					$this->stmt->bindParam(3,$comentario,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$o,PDO::PARAM_STR);
+					$this->stmt->bindParam(5,$d,PDO::PARAM_INT);
+					$this->stmt->bindParam(6,$f,PDO::PARAM_STR);
+					$this->stmt->bindParam(7,$f_turno,PDO::PARAM_STR);
+					$this->stmt->execute();
+				}
+			}else if ( $edo == '8' ){ //cuando es responsabilidades  
+				#validar las variables necesarias 
+				if ( empty($_POST['oficio_envio']) ) {
+					throw new Exception("SE DEBE DE ESPECIFICAR UN NÚMERO DE OFICIO.", 1);
+				}
+				if ( empty($_POST['persona_id']) || count($_POST['conductas']) == 0) {
+					throw new Exception("DEBE DE SELECCIONAR CONDUCTAS Y SELECCIONAR EL SERVIDOR PÚBLICO RESPONSABLE DEL EXPEDIENTE. ", 1);
+				}else{
+					
+					$d = $_POST['dependencia_f'];
+					$f = $_POST['funcionario_f'];
+					$o = $_POST['oficio_envio']; 
+					$persona_id = $_POST['persona_id'];
+					#Actualizar el estado guarda de la queja
+					$this->sql = "UPDATE quejas SET estado = ? WHERE id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$edo,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#actualizar los turnos anteriores para descativarlos 
+					$this->sql = "UPDATE e_turnados SET estado = 2 WHERE queja_id = ?;";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#Eliminar las presuntas conductas anteriores 
+					$this->sql = "DELETE FROM p_conductas WHERE queja_id = ? ";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					#insertar las nuevas presuntas conductas
+					for ($i=0; $i < count($_POST['conductas']) ; $i++) { 
+						$c = $_POST['conductas'][$i];
+						$this->sql = "INSERT INTO p_conductas (id, queja_id, conducta_id) VALUES ('',?,?);";
+						$this->stmt = $this->pdo->prepare($this->sql);
+						$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+						$this->stmt->bindParam(2,$c,PDO::PARAM_INT);
+						$this->stmt->execute();
+					}
+					#insertar el nuevo turnado 
+					$sp = $_POST['persona_id'];
+					$this->sql = "INSERT INTO e_turnados (id, queja_id, persona_id, t_tramite, estado,comentarios,f_turno,oficio_cve,origen_id) VALUES ('',?,?,1,3,?,?,?,?);";
+					$this->stmt = $this->pdo->prepare($this->sql);
+					$this->stmt->bindParam(1,$queja_id,PDO::PARAM_INT);
+					$this->stmt->bindParam(2,$sp,PDO::PARAM_INT);
+					$this->stmt->bindParam(3,$comentario,PDO::PARAM_STR);
+					$this->stmt->bindParam(4,$f_turno,PDO::PARAM_STR);
+					$this->stmt->bindParam(5,$o,PDO::PARAM_STR);
+					$this->stmt->bindParam(6,$area_id,PDO::PARAM_INT);
+					$this->stmt->execute();
+					
+				}
+			}
+			#sI EL ORIGEN ES DE LAS DEVOLUCIONES
+			if ( isset($_POST['origen']) ) {
+				if ( $_POST['origen'] >= 1 ) {
+					$dev = $_POST['origen'];
+					$sql_dev = "UPDATE devoluciones SET estado = 2 WHERE id = ?";
+					$this->stmt = $this->pdo->prepare($sql_dev);
+					$this->stmt->bindParam(1,$dev,PDO::PARAM_INT);
+					$this->stmt->execute();
+				}
+			}
+			return json_encode( array( 'status'=>'success','message'=>'EL TURNADO A SIDO GENERADO DE MANERA EXITOSA.' ) );
+			/*$this->sql = "";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$doc = $this->stmt->fetch(PDO::FETCH_OBJ);	
+*/
+		} catch (Exception $e) {
+			return json_encode( array( 'status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
+	//EXPEDIENTES DEVUELTOS DE RESPO A INVESTIGACION 
+	public function getDevoluciones()
+	{
+		try {
+			$this->sql = "
+			SELECT d.*,q.cve_exp FROM devoluciones AS d 
+			INNER JOIN quejas AS q ON q.id = d.queja_id
+			WHERE d.estado = 1
+			ORDER BY d.id DESC
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	//EXPEDIENTES PARA MIGRAR 
+	public function getExpedientesForMigrate()
+	{
+		try {
+			$wh = " 1=1 ";
+			$modo = $_POST['modo'];
+			if ($modo == 1) {
+				if (empty($_POST['sp_id'])) {
+					throw new Exception("NO SELECCINO SERVIDOR PÚBLICO DE ORIGEN.", 1);
+				}
+				if (empty($_POST['destino_id'])) {
+					throw new Exception("NO SELECCINO SERVIDOR PÚBLICO DESTINO.", 1);
+				}
+				$sp = $_POST['sp_id'];
+				$wh .= ' AND p.id = '.$sp;
+			}elseif ($modo == 2) {
+				$fi = $_POST['f_ini'];
+				$ff = $_POST['f_fin'];
+				$wh .= " AND DATE(q.created_at) BETWEEN '$fi' AND '$ff'";
+			}
+			if ( isset($_POST['orden']) ) {
+				if ($_POST['orden'] == 1) {
+					$order = "ORDER BY q.cve_exp DESC";
+				}
+				if ($_POST['orden'] == 2) {
+					$order = "ORDER BY q.cve_exp ASC";
+				}
+				if ($_POST['orden'] == 3) {
+					$order = "ORDER BY DESC";
+				}
+				if ($_POST['orden'] == 4) {
+					$order = "ORDER BY ASC";
+				}
+				if ($_POST['orden'] == 5) {
+					$order = "ORDER BY DESC";
+				}
+				if ($_POST['orden'] == 6) {
+					$order = "ORDER BY ASC";
+				}
+			}else{
+				$order = "";
+			}
+			$this->sql = "
+			SELECT q.id, q.cve_exp, ed.nombre, CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS full_name FROM quejas AS q
+			LEFT JOIN e_turnados AS e ON e.queja_id = q.id AND e.estado != 2
+			LEFT JOIN personal AS p ON p.id = e.persona_id
+			LEFT JOIN estado_guarda AS ed ON ed.id = q.estado
+			WHERE $wh $order
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode($this->result);
+		} catch (Exception $e) {
+			return $e->getMessage();
+		}
+	}
+	//EXPEDIENTES 
+	public function MigrateQuejas()
+	{
+		try {
+			session_start();
+			$logger = $_SESSION['id'];
+			$quejas = $_POST['quejas'];
+			$destino = $_POST['destino'];
+			$this->sql = "
+			UPDATE e_turnados SET persona_id = ?, t_tramite = 3 WHERE queja_id = ? AND estado != 'VENCIDO' ;
+			";
+			for ($i=0; $i < count($quejas) ; $i++) { 
+				$q = $quejas[$i];
+				$this->stmt = $this->pdo->prepare($this->sql);
+				$this->stmt->bindParam(1,$destino,PDO::PARAM_INT);
+				$this->stmt->bindParam(2,$q,PDO::PARAM_INT);
+				$this->stmt->execute();
+				##iNSERTAR LA PISTA DE AUDITORIA 
+
+				$desc = "SE ACTUALIZO EL TURNADO DE LA QUEJA CON ID:".$quejas." POR MEDIO DE LA MIGRACIÓN ";
+				$sis = 1;
+				$sql_pista = "INSERT INTO 
+				pista_auditoria (id, descripcion,person_id,tipo, sistema) 
+				VALUES 
+				('',?,?,4,?);";
+				$stmt = $this->pdo->prepare($sql_pista);
+				$stmt->bindParam(1,$desc,PDO::PARAM_STR);
+				$stmt->bindParam(2,$logger,PDO::PARAM_INT);
+				$stmt->bindParam(3,$sis,PDO::PARAM_INT);
+				$stmt->execute();
+			}
+			
+			return json_encode(array('status'=>'success','message'=>'EXPEDIENTES ACTUALIZADOS DE MANERA EXITOSA.'));
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	public function readExp($queja)
+	{
+		try {
+			$user = $_SESSION['id'];
+			$this->sql = "
+			UPDATE e_vistos SET estado = 2, p_visto = ? WHERE queja_id = ?;
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$user,PDO::PARAM_INT);
+			$this->stmt->bindParam(2,$queja,PDO::PARAM_INT);
+			$this->stmt->execute();
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	public function getOINs()
+	{
+		try {
+
+			$t = "%/".mb_strtoupper($_POST['tipo'])."/%";
+			$n_pdo = new PDO("mysql:dbname=inspeccion;host=127.0.0.1;charset=utf8","root", '');
+			$this->setPDO($n_pdo);
+			$this->sql = "
+			SELECT o.*, p.nom_completo,of.no_oficio,of.fecha_oficio FROM orden_inspeccion AS o
+			LEFT JOIN personal AS p ON p.id_person = o.despachador_id
+			LEFT JOIN oficios_generados AS of ON of.id_generado = o.oficio_id
+			WHERE o.clave LIKE '$t'
+			";
+			
+			$this->stmt = $this->getPDO()->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	public function contadorOINs()
+	{
+		try {
+			$this->sql = "
+			SELECT COUNT(id) AS cuenta, t_orden FROM orden_inspeccion 
+			GROUP BY t_orden
+			";
+			$this->stmt = $this->getPDO()->prepare($this->sql);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+	public function getOINBy()
+	{
+		try {
+
+			$t = $_POST['t'];
+			$this->sql = "
+			SELECT * FROM orden_inspeccion WHERE t_orden = ?
+			";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$t,PDO::PARAM_STR);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+			return json_encode( $this->result );
+		} catch (Exception $e) {
+			return json_encode(array('status'=>'error','message'=>$e->getMessage()));
+		}
+	}
+
+	public function getAsignaciones($queja)
+	{
+		try {
+			$this->sql = "SELECT e.*,CONCAT(p.nombre,' ',p.ap_pat,' ',p.ap_mat) AS turnado_a FROM e_turnados AS e 
+			INNER JOIN personal AS p ON p.id = e.persona_id
+			WHERE e.queja_id = ?";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$queja,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetchAll( PDO::FETCH_OBJ );
+			return $this->result;
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}
+	
+	
 } 	
 ?>

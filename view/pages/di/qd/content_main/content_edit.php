@@ -523,7 +523,7 @@ $vias = json_decode($q->getVias());
                                     
                                 </div>
                             </fieldset>
-                            <fieldset>
+                            <!-- <fieldset>
                                 <legend>DATOS DEL TURNADO</legend>
                                 <div class="row">
                                     <div class="col-md-12">
@@ -550,7 +550,7 @@ $vias = json_decode($q->getVias());
                                 		</p>
                                 	</div>
                                 </div>
-                            </fieldset>
+                            </fieldset> -->
                             <br>
                             <div class="row">
                                 <div class="col-md-4"></div>

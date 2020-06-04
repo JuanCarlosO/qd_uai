@@ -18,6 +18,10 @@ class DRController
 	{
 		return $this->model->getExpedientes();
 	}
+	public function getExpedientesAnalista()
+	{
+		return $this->model->getExpedientesAnalista();
+	}
 	public function saveEdoProcesal()
 	{
 		return $this->model->saveEdoProcesal();
@@ -90,6 +94,70 @@ class DRController
 	{
 		return $this->model->getResolucion();
 	}
-	
+	public function getTblCtrl()
+	{
+		return $this->model->getTblCtrl();
+	}
+	public function getExpedientesTC()
+	{
+		return $this->model->getExpedientesTC();
+	}
+	public function getCorrespondencia()
+	{
+		return $this->model->getCorrespondencia();
+	}
+	public function saveAcuse()
+	{
+		return $this->model->saveAcuse();
+	}
+	public function sendSAPA()
+	{
+		return $this->model->sendSAPA();
+	}
+	public function getDocumentoDevoluciones()
+	{
+		return $this->model->getDocumentoDevoluciones();
+	}
+	public function saveApersonamiento()
+	{
+		return $this->model->saveApersonamiento();
+	}
+	public function saveAcuseSapa()
+	{
+		return $this->model->saveAcuseSapa();
+	}
+	public function asignarPersonal()
+	{
+		return $this->model->asignarPersonal();
+	}
+	public function saveEProcesal()
+	{
+		return $this->model->saveEProcesal();
+	}
+	public function saveCulpable()
+	{
+		return $this->model->saveCulpable();
+	}
+	public function getEstadistica()
+	{
+		return $this->model->getEstadistica();
+	}
+	public function getClave($id)
+	{
+		return $this->model->getClave($id);
+	}
+	public function getAcusesSAPA()
+	{
+		return $this->model->getAcusesSAPA();
+	}
+	public function getAcuse($id)
+	{
+		return $this->model->getAcuse($id);
+	}
+	public function getContadoresByEdo()
+	{
+		return $this->model->getContadoresByEdo();
+	}
+		
 }
 ?>
