@@ -332,6 +332,9 @@ if ( isset($_POST['option']) ) {
 		case '99':
 			echo $r->getContadoresByEdo();
 			break;
+		case '100':
+			echo $i->saveAsignar();
+			break;
 				
 	}
 }elseif ( isset($_GET['option']) ) {

@@ -535,9 +535,8 @@ function alerta(div,estado,mensaje,modal)
 //Funcion para abrir un modal
 function open_modal(modal,value) {
 	$('#'+modal).modal('show');
-	if ( modal == 'modal_upload_file' ) {
-		$('#queja_id').val(value);
-	}
+	if ( modal == 'modal_upload_file' ) { $('#queja_id').val(value); }
+	if ( modal == 'modal_asignar' ){$('#turno_id').val(value);}
 	return false;
 }
 //Funcion de accion para el formulario de adjuntar documento al expediente.

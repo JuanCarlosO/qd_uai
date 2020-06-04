@@ -2,7 +2,8 @@
 	ul.ui-autocomplete.ui-menu { z-index:2147483647; }
 </style>
 <form action="#" method="post" id="frm_asignar">
-	<input type="hidden" name="option" value="">
+	<input type="hidden" name="option" value="100">
+	<input type="hidden" id="turno_id" name="turno_id" value="">
 	<div class="modal fade" id="modal_asignar">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
