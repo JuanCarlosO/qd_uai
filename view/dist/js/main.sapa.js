@@ -11,7 +11,8 @@ function getURL(url) {
 		load_catalogo('cargo','select',22);
 		autocomplete_input('jefe','jefe_id',3);
 		autocomplete_input('analista','analista_id',3);
-		autocomplete_input('oficio','oficio_id',10);
+		autocomplete_input('n_oficio','n_oficio_id',10);
+		autocomplete_input('oficio_a','oficio_a_id',10);
 		catalogo_conductas();
 		getExpedientes();
 		frm_add_seguimiento();
@@ -20,6 +21,7 @@ function getURL(url) {
 		frm_add_eprocesal();
 		frm_add_culpable();
 		actions_eprocesal();
+		frm_asignar();
 	}
 	if ( url == '?menu=estadistica' ) {
 		$('#option_2').addClass('active');
@@ -77,7 +79,7 @@ function getExpedientes() {
 	var opt ;
 	if (nivel == 'SUBDIRECTOR') {
 		opt = 9;
-	}else if (nivel == 'ANALISTA'){
+	}else if (nivel == 'ANALISTA' || nivel == 'JEFE'){
 		opt = 13;
 	}
 	
@@ -126,22 +128,31 @@ function getExpedientes() {
 					actions = [
 			            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
 			        ];
+				}else if(nivel == 'JEFE'){
+					if ( obj.analista == null ) {
+						actions = [
+				            { href: "javascript:open_modal('modal_asignar',"+obj.qd_res+",'queja_respo');", contenido: '<i class="fa fa-user"></i>Asignar a' },
+				            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
+				        ];
+					}else{
+						actions = [
+				            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
+				        ];
+					}
 				}else{
-					
 					var actions = [];
 					if( obj.jefe == null ){
 						a = [{ href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user-plus"></i>1. Asignar responsables' }]
 						Array.prototype.push.apply(actions, a);
 					}else{
 						actions = [
-				            //{ href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user-plus"></i>Asignar responsables' },
 				            { href: "javascript:open_modal('modal_add_eprocesal',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-book"></i>Definir estado porcesal' },
+				            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
 				            { href: "javascript:open_modal('modal_add_culpable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-plus"></i>Agregar servidor público' },
 				            { href: "index.php?menu=cedula&exp_id="+obj.queja_id, contenido: '<i class="fa fa-file-text-o"></i>Cédula' },
 				            { href: "index.php?menu=e_e_procesal&exp="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Editar Edo. Procesal' },
-				        ];
+				        ];				        
 					}
-					
 				}
 	            return anexGrid_dropdown({
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
@@ -768,6 +779,41 @@ function actions_eprocesal() {
 			$('#t_doc').addClass('hidden');
 			$('#div_conducta').addClass('hidden');
 		}
+	});
+	$('#autoridad').change(function(e) {
+		e.preventDefault();
+		if ( $(this).val() == '3' ) {
+			$('#div_conducta').addClass('hidden');
+			$('#div_motivo').removeClass('hidden');
+		}else{
+			$('#div_conducta').removeClass('hidden');
+			$('#div_motivo').addClass('hidden');
+		}
+	});
+	return false;
+}
+//Formulario para asigar 
+function frm_asignar(){
+	$('#frm_asignar').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_asignar"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache: false,
+			processData: false,
+            contentType: false,
+		})
+		.done(function(response) {
+			alerta('m_asignar',response.status,response.message,'modal_asignar');
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			console.log("Error: "+jqXHR.responseText);
+		});
+		
 	});
 	return false;
 }

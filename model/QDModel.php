@@ -367,16 +367,19 @@ class QDModel extends Connection
 				if ( $filter['columna'] != '' ) {
 					if ( $filter['columna'] == 'q.cve_ref' || $filter['columna'] == 'q.cve_exp' ) {
 						$wh .= " AND ".$filter['columna']." LIKE '%".$filter['valor']."%'";
+					}elseif ($filter['columna'] == 'pe.nombre') {
+						$wh .= " AND CONCAT(pe.nombre,' ',pe.ap_pat,' ',pe.ap_mat) LIKE '%".$filter['valor']."%'";
+					}elseif ($filter['columna'] == 'a.nombre') {
+						$wh .= " AND a.nombre LIKE '%".$filter['valor']."%'";
 					}else{
-						
 						$wh .= " AND ".$filter['columna'] ." = ".$filter['valor'];
 					}
 				}
 			}
 			$this->sql = "SELECT q.*,UPPER(m.nombre) AS municipio,
 			p.nombre AS procedencia, e.nombre AS n_estado, DATEDIFF(DATE(NOW()),DATE(q.created_at) ) AS fase,
-			CONCAT(pe.nombre,' ',pe.ap_pat,' ',pe.ap_mat) AS full_name, ev.estado AS visto, et.t_tramite, et.f_turno
-			 FROM quejas AS q
+			CONCAT(pe.nombre,' ',pe.ap_pat,' ',pe.ap_mat) AS full_name, ev.estado AS visto, et.t_tramite, et.f_turno,et.id AS turno_id, a.nombre AS n_area
+			FROM quejas AS q
 			INNER JOIN ubicacion_referencia AS u ON u.queja_id = q.id
 			INNER JOIN municipios AS m ON m.id = u.municipio
 			INNER JOIN procedencias AS p ON p.id = q.procedencia
@@ -384,7 +387,8 @@ class QDModel extends Connection
 			LEFT JOIN e_vistos AS ev ON ev.queja_id = q.id
 			LEFT JOIN e_turnados AS et ON et.queja_id = q.id
 			LEFT JOIN personal AS pe ON pe.id = et.persona_id
-			WHERE $wh ORDER BY q.$anexgrid->columna $anexgrid->columna_orden LIMIT $anexgrid->pagina , $anexgrid->limite";
+			LEFT JOIN areas AS a ON a.id = pe.area_id
+			WHERE $wh AND et.estado != 2 ORDER BY q.$anexgrid->columna $anexgrid->columna_orden LIMIT $anexgrid->pagina , $anexgrid->limite";
 			
 			$this->stmt = $this->pdo->prepare($this->sql);
 			$this->stmt->execute();
@@ -408,6 +412,8 @@ class QDModel extends Connection
 				$aux['visto'] = $qd->visto;
 				$aux['t_tramite'] = $qd->t_tramite;
 				$aux['f_turno'] = $qd->f_turno;
+				$aux['turno_id'] = $qd->turno_id;
+				$aux['n_area'] = $qd->n_area;
 				#Buscar las presuntas conductas de cada expediente
 				$sql_conductas = "SELECT cc.id,cc.nombre  FROM p_conductas AS pc
 				INNER JOIN catalogo_conductas AS cc ON cc.id = pc.conducta_id
@@ -1454,7 +1460,7 @@ class QDModel extends Connection
 			$stmt->bindParam(1,$desc,PDO::PARAM_STR);
 			$stmt->bindParam(2,$logger,PDO::PARAM_INT);
 			$stmt->execute();
-			return json_encode( array('status'=>'success','message'=>'SE HA INSERTADO LA INFORMACIÓN DE MANERA CORRECTA.('.$insertados.')') );
+			return json_encode( array('status'=>'success','message'=>'SE HA INSERTADO LA INFORMACIÓN DE MANERA CORRECTA.') );
 		} catch (Exception $e) {
 			#if( $e->getCode()  ){}
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
@@ -2622,7 +2628,45 @@ class QDModel extends Connection
 			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
 		}
 	}
-	
-	
+	public function saveAsignar()
+	{
+		try {
+			if ( empty($_POST['sp_id']) ) {
+				throw new Exception("DEBE SELECCIONAR UN NOMBRE DE SERVIDOR PÚBLICO.", 1);	
+			}
+			$turno = $_POST['turno_id'];
+			$sp_id = $_POST['sp_id'];
+			$this->sql = "SELECT * FROM e_turnados WHERE id = ? ; ";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$turno,PDO::PARAM_INT);
+			$this->stmt->execute();
+			$this->result = $this->stmt->fetch( PDO::FETCH_OBJ );
+			#EL TURNADO SE DEBE DAR DE BAJA
+			$this->sql = "UPDATE e_turnados SET estado = 2 WHERE id = ? ; ";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$turno,PDO::PARAM_INT);
+			$this->stmt->execute();
+			#AGREGAR LA NUEVA ASIGNACION 
+			$this->sql = "INSERT INTO e_turnados (id, queja_id, persona_id, origen_id, destino_id, oficio_cve, f_turno, comentarios, t_tramite, estado, f_sapa, of_sapa, org_destino, n_funcionario) VALUES ('',?,?,?,?,?,?,?,?,?,?,?,?,?);";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$this->result->queja_id,PDO::PARAM_INT);
+			$this->stmt->bindParam(2,$sp_id,PDO::PARAM_INT);
+			$this->stmt->bindParam(3,$this->result->origen_id,PDO::PARAM_INT);
+			$this->stmt->bindParam(4,$this->result->destino_id,PDO::PARAM_INT);
+			$this->stmt->bindParam(5,$this->result->oficio_cve,PDO::PARAM_STR);
+			$this->stmt->bindParam(6,$this->result->f_turno,PDO::PARAM_STR);
+			$this->stmt->bindParam(7,$this->result->comentarios,PDO::PARAM_STR);
+			$this->stmt->bindParam(8,$this->result->t_tramite,PDO::PARAM_STR);
+			$this->stmt->bindParam(9,$this->result->estado,PDO::PARAM_STR);
+			$this->stmt->bindParam(10,$this->result->f_sapa,PDO::PARAM_STR);
+			$this->stmt->bindParam(11,$this->result->of_sapa,PDO::PARAM_STR);
+			$this->stmt->bindParam(12,$this->result->org_destino,PDO::PARAM_STR);
+			$this->stmt->bindParam(13,$this->result->n_funcionario,PDO::PARAM_STR);
+			$this->stmt->execute();
+			return json_encode( array('status'=>'success','message'=>'ASIGANCIÓN CREADA DE MANERA EXITOSA') );
+		} catch (Exception $e) {
+			return json_encode( array('status'=>'error','message'=>$e->getMessage()) );
+		}
+	}	
 } 	
 ?>

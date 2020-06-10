@@ -149,7 +149,7 @@ if ( isset($_GET['menu']) ) {
 		case 'SAPA':
 			switch ($menu) {
 				case 'general':
-					if ( $_SESSION['nivel'] == 'SECRETARIA' ) {
+					if ( $_SESSION['nivel'] == 'SECRETARIA' || $_SESSION['nivel'] == 'SECRETARIA' ) {
 						include 'view/pages/dr/hinojosa/content_header/header_acuse.php';
 						include 'view/pages/dr/hinojosa/content_main/content_acuse.php';
 					}else{
@@ -164,6 +164,7 @@ if ( isset($_GET['menu']) ) {
 					include 'view/pages/dr/hinojosa/modals/modal_add_responsable.php';
 					include 'view/pages/dr/hinojosa/modals/modal_add_eprocesal.php';
 					include 'view/pages/dr/hinojosa/modals/modal_add_culpable.php';
+					include 'view/pages/dr/hinojosa/modals/modal_asignar.php';
 					break;
 				case 'e_procesal':
 					include 'view/pages/dr/hinojosa/content_header/header_e_procesal.php';

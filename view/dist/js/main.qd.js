@@ -309,10 +309,11 @@ function listado_qd() {
 	    columnas: [
 	    	{ leyenda: 'Acciones', class:'text-center', style: 'width:10px;',ordenable:true,columna:'id'},
 	        { leyenda: 'ID', class:'text-center', style: 'width:20px;',ordenable:true,columna:'id'},
-	        { leyenda: 'No. Folio',class:'text-center', style: 'width:100px;', columna:'q.cve_ref',ordenable:false,filtro:true},
-	        { leyenda: 'No. expediente',class:'text-center', style: 'width:100px;', columna:'q.cve_exp',ordenable:true,filtro:true},
-	        { leyenda: 'Abogado asignado',class:'text-center', style: 'width:100px;', columna:'',ordenable:false,filtro:false},
-	        { leyenda: 'Estado',class:'text-center', style: 'width:70px;', columna:'e.id',ordenable:false,filtro:function(){
+	        { leyenda: 'No. Folio',class:'text-center',  columna:'q.cve_ref',ordenable:false,filtro:true},
+	        { leyenda: 'No. expediente',class:'text-center', columna:'q.cve_exp',ordenable:true,filtro:true},
+	        { leyenda: 'Abogado asignado',class:'text-center', columna:'pe.nombre',ordenable:false,filtro:true},
+	        { leyenda: 'Adscripción',class:'text-center', columna:'a.nombre',ordenable:false,filtro:true},
+	        { leyenda: 'Estado',class:'text-center',  columna:'e.id',ordenable:false,filtro:function(){
 	        	return anexGrid_select({
     	            data: estados
     	        });
@@ -345,7 +346,7 @@ function listado_qd() {
                         { href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
                         { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
                         { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
-                        { href: "javascript:open_modal('modal_asignar',"+obj.id+");", contenido: '<i class="fa fa-user"></i> Asignar a un abogado' },
+                        { href: "javascript:open_modal('modal_asignar',"+obj.turno_id+");", contenido: '<i class="fa fa-user"></i> Asignar a un abogado' },
                     ];
 	    		}else{
 	    			acciones = [
@@ -386,6 +387,9 @@ function listado_qd() {
 	        }},
 	        {class:'text-center', formato: function(tr, obj, valor){
 	        	return obj.full_name;
+	        }}, 
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	return obj.n_area;
 	        }}, 
 	        {class:'text-center', formato: function(tr, obj, valor){
 	        	if (obj.n_estado == 'ARCHIVO') {
@@ -1684,7 +1688,7 @@ function frm_asignar() {
 			async:false,
 		})
 		.done(function(response) {
-			console.log("success");
+			alerta('m_asignar',response.status,response.message,'modal_asignar');
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			alerta('m_asignar',"error",jqXHR.responseText,'modal_asignar');

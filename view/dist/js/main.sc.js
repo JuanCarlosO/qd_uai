@@ -9,8 +9,8 @@ function getURL(url) {
 	if ( url == '?menu=general' ) {
 		$('#option_1').addClass('active');
 		getExpedientes();
-		autocomplete_input('sp','sp_id',3);
 		autocomplete_input('jefe','jefe_id',3);
+		autocomplete_input('oficio_a','oficio_a_id',10);
 		frm_add_responsable();
 	}
 	if ( url == '?menu=resolver' ) {
@@ -208,32 +208,26 @@ function getExpedientes() {
 function frm_add_responsable() {
 	$('#frm_add_responsable').submit(function(e) {
 		e.preventDefault();
-		var dataForm = $(this).serialize();
-		var sp_id = $('#sp_id').val();
-		if ( sp_id == '') {
+		var dataForm = new FormData(document.getElementById("frm_add_responsable"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			processData: false,
+            contentType: false,
+		})
+		.done(function(response) {
 			document.getElementById('frm_add_responsable').reset();
-			alerta('div_responsable','error','Debe de seleccionar un elemento de la lista del buscador de servidores públicos.','');
-		}else{
-			$.ajax({
-				url: 'controller/puente.php',
-				type: 'POST',
-				dataType: 'json',
-				data: dataForm,
-				async:false,
-				cache:false,
-			})
-			.done(function(response) {
-				document.getElementById('frm_add_responsable').reset();
-				$('#sp_id').val("");
-				alerta('div_responsable',response.status,response.message,'modal_add_responsable');
-			})
-			.fail(function(jqXHR,textStatus,errorThrow) {
-				document.getElementById('frm_add_responsable').reset();
-				$('#sp_id').val("");
-				alerta('div_responsable','error',jqXHR.responseText,'modal_add_responsable');
-			});
-			
-		}
+			alerta('div_responsable',response.status,response.message,'modal_add_responsable');
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			document.getElementById('frm_add_responsable').reset();
+			$('#sp_id').val("");
+			alerta('div_responsable','error',jqXHR.responseText,'modal_add_responsable');
+		});
 	});
 }
 //Agregar una resolucion al expediente

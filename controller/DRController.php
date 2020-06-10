@@ -158,6 +158,10 @@ class DRController
 	{
 		return $this->model->getContadoresByEdo();
 	}
+	public function saveAsignar()
+	{
+		return $this->model->saveAsignar();
+	}
 		
 }
 ?>

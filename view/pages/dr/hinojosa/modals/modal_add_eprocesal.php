@@ -48,8 +48,8 @@
 							<div class="col-md-4">
 								<div id="oficio" class="form-group hidden">
 									<label>Número de oficio</label>
-									<input type="text" name="oficio" value="" class="form-control ">
-									<input type="hidden" id="oficio_id" name="oficio_id" value="">
+									<input type="text" name="n_oficio" id="n_oficio" value="" class="form-control ">
+									<input type="hidden" id="n_oficio_id" name="n_oficio_id" value="">
 								</div>
 							</div>
 							<div class="col-md-4">
@@ -94,6 +94,17 @@
 										</span>
 									</div>
 								</div>
+								<div id="div_motivo" class="form-group hidden">
+									<label>Motivo del envio</label>
+									<select id="motivo" name="motivo"  class="form-control">
+										<option value="">...</option>
+										<option value="INCOMPETENCIA">INCOMPETENCIA</option>
+										<option value="ARCHIVO">ARCHIVO</option>
+										<option value="RESERVA">RESERVA</option>
+										<option value="IMPROCEDENCIA">IMPROCEDENCIA</option>
+									</select>
+								</div>
+
 							</div>
 						</div>
 					</fieldset>

@@ -24,7 +24,7 @@
 						<div class="col-md-4"></div>
 						<div class="col-md-4">
 							<button class="btn btn-success btn-flat btn-block">
-								<i class="fa fa-floppy-o"></i> Guardar comentario
+								<i class="fa fa-floppy-o"></i> Terminar proceso
 							</button>
 						</div>
 						<div class="col-md-4"></div>

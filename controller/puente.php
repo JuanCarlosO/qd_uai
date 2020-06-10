@@ -333,7 +333,7 @@ if ( isset($_POST['option']) ) {
 			echo $r->getContadoresByEdo();
 			break;
 		case '100':
-			echo $i->saveAsignar();
+			echo $r->saveAsignar();
 			break;
 				
 	}

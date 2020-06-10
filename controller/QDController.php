@@ -1,6 +1,6 @@
 <?php
 /**
- * Metodos de
+ * Metodos de QUEJAS Y DENUNCIAS 
  */
 include_once '../model/QDModel.php';
 class QDController
@@ -186,6 +186,14 @@ class QDController
 	public function getDocumentoByOficio($oficio)
 	{
 		return $this->model->getDocumentoByOficio($oficio);
+	}
+	public function getAsignaciones()
+	{
+		return $this->model->getAsignaciones();
+	}
+	public function saveAsignar()
+	{
+		return $this->model->saveAsignar();
 	}
 	
 }

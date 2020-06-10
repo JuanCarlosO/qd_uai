@@ -176,12 +176,13 @@
 							<i class="fa fa-upload"></i> <span>Subir acuse</span>
 						</a>
 					</li>	
-				<?php elseif ($_SESSION['nivel'] == 'ANALISTA'): ?>
+				<?php elseif ($_SESSION['nivel'] == 'ANALISTA' || $_SESSION['nivel'] == 'JEFE'): ?>
 					<li id="option_1" class="">
 						<a href="index.php?menu=general">
 							<i class="fa fa-list"></i> <span>Listado de exp.</span>
 						</a>
 					</li>
+
 				<?php elseif ($_SESSION['nivel'] == 'SUBDIRECTOR'): ?>
 					<li id="option_1" class="">
 						<a href="index.php?menu=general">

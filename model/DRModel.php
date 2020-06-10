@@ -78,7 +78,7 @@ class DRModel extends Connection
 				LEFT JOIN personal AS p1 ON p1.id = qr.jefatura
 				LEFT JOIN personal AS p2 ON p2.id = qr.analista
 			WHERE 
-				et.estado = 1 or qr.estado = 1  $wh 
+				(et.estado = 1 AND qr.estado = 1)  $wh 
 			ORDER BY q.$anexgrid->columna $anexgrid->columna_orden 
 			LIMIT $anexgrid->pagina , $anexgrid->limite
 			
@@ -181,7 +181,12 @@ class DRModel extends Connection
 			session_start();
 			$analista = $_SESSION['id'];
 			$anexgrid = new AnexGrid();
-			$wh = " AND 1=1 AND qr.analista = $analista";
+			if ( $_SESSION['nivel'] == 'JEFE') {
+				$wh = " AND 1=1 AND qr.jefatura = $analista";
+			}else{
+				$wh = " AND 1=1 AND qr.analista = $analista";
+			}
+			
 			#Los filtros 
 			foreach ($anexgrid->filtros as $filter) {
 				
@@ -207,8 +212,17 @@ class DRModel extends Connection
 			}
 			
 			$this->sql = "
-			SELECT q.id AS queja_id,q.*, t.nombre AS n_tramite , e.nombre AS n_estado, et.f_turno, p.nombre AS n_procedencia,
-				qr.e_procesal,qr.f_acuse, CONCAT(p1.nombre,' ',p1.ap_pat,' ', p1.ap_mat) AS jefe, CONCAT(p2.nombre,' ',p2.ap_pat,' ', p2.ap_mat) AS analista,qr.oficio, qr.id AS qd_res
+			SELECT 
+				q.id AS queja_id, q.*, 
+				t.nombre AS n_tramite , e.nombre AS n_estado, 
+				et.f_turno, 
+				p.nombre AS n_procedencia,
+				qr.e_procesal,
+				qr.f_acuse, 
+				CONCAT(p1.nombre,' ',p1.ap_pat,' ', p1.ap_mat) AS jefe, 
+				CONCAT(p2.nombre,' ',p2.ap_pat,' ', p2.ap_mat) AS analista, 
+				qr.oficio, 
+				qr.id AS qd_res
 			FROM quejas AS q 
 			LEFT JOIN quejas_respo AS qr ON qr.queja_id = q.id
 			LEFT JOIN personal AS p1 ON p1.id = qr.jefatura
@@ -217,8 +231,9 @@ class DRModel extends Connection
 			INNER JOIN tipos_tramite AS t ON t.id = q.t_tramite
 			INNER JOIN estado_guarda AS e ON e.id = q.estado
 			INNER JOIN procedencias AS p ON p.id = q.procedencia
-			WHERE et.estado = 3 $wh ORDER BY q.$anexgrid->columna $anexgrid->columna_orden LIMIT $anexgrid->pagina , $anexgrid->limite
+			WHERE et.estado != 2 $wh ORDER BY q.$anexgrid->columna $anexgrid->columna_orden LIMIT $anexgrid->pagina , $anexgrid->limite
 			";
+			#echo $this->sql;exit;
 			$this->stmt = $this->pdo->prepare($this->sql);
 			$this->stmt->execute();
 			$quejas = $this->stmt->fetchAll( PDO::FETCH_OBJ );
@@ -241,7 +256,7 @@ class DRModel extends Connection
 				$aux['jefe'] = $exp->jefe;		
 				$aux['analista'] = $exp->analista;		
 				$aux['oficio'] = $exp->oficio;		
-				$aux['qd_res'] = $exp->qd_res;		
+				$aux['qd_res'] = $exp->qd_res;			
 				#calcular los dias transcurridos
 				if (is_null($exp->f_acuse)) {
 					$sql_dias = "SELECT DATEDIFF(DATE(NOW()),? ) AS dias_t";
@@ -325,7 +340,7 @@ class DRModel extends Connection
 
 			$wh .= " AND queja_id IN ($aux_qd) ";
 			$this->sql = "
-			SELECT * FROM e_turnados WHERE $wh 
+			SELECT * FROM e_turnados WHERE $wh AND estado != 2
 			GROUP BY oficio_cve 
 			ORDER BY $anexgrid->columna $anexgrid->columna_orden LIMIT $anexgrid->pagina , $anexgrid->limite
 			";
@@ -2070,7 +2085,7 @@ class DRModel extends Connection
 			(id,oficio,f_oficio,f_acuse,comentario,archivo) 
 			VALUES ('',?,?,?,?,?);
 			";
-			$this->stmt = $this->getPDO()->prepare($this->sql);
+			$this->stmt = $this->pdo->prepare($this->sql);
 			$this->stmt->bindParam(1,$oficio,PDO::PARAM_STR);
 			$this->stmt->bindParam(2,$f_oficio,PDO::PARAM_STR);
 			$this->stmt->bindParam(3,$f_acuse,PDO::PARAM_STR);
@@ -2209,7 +2224,7 @@ class DRModel extends Connection
 		try {
 			$queja_id = $_POST['queja_id'];
 			$jefe = $_POST['jefe_id'];
-			$analista = $_POST['analista_id'];
+			//$analista = $_POST['analista_id'];
 			$this->sql = "INSERT INTO quejas_respo (id,queja_id, jefatura, analista, estado, e_procesal) VALUES ( '', :queja_id, :jefe, :analista, 1, 2 );";
 			$this->stmt = $this->pdo->prepare($this->sql);
 			$this->stmt->bindParam(':queja_id',$queja_id,PDO::PARAM_INT);
@@ -2224,18 +2239,21 @@ class DRModel extends Connection
 	public function saveEProcesal()
 	{
 		try {
-			$oficio = $_POST['oficio'];
+			$oficio = $_POST['n_oficio'];
 			$f_acuse = $_POST['f_acuse'];
 			$n_semana = $_POST['n_semana'];
 			$fojas = $_POST['fojas'];
 			$t_doc = $_POST['t_doc'];
-			$conducta = $_POST['conducta'];
+			$conducta = $_POST['conducta'] ;
 			$autoridad = $_POST['autoridad'];
 			$e_procesal = $_POST['e_procesal'];
+			$motivo = $_POST['motivo'];
+			$queja_id = $_POST['queja_id'];
 			$comentario = mb_strtoupper( $_POST['comentario'],'utf-8' ) ;
+			#print_r($_POST);
 			$this->sql = "
 			UPDATE quejas_respo 
-				SET 
+			SET 
 				oficio = :oficio,
 				comentarios = :comentario,
 				f_acuse = :f_acuse,
@@ -2244,14 +2262,17 @@ class DRModel extends Connection
 				t_doc = :t_doc,
 				c_respo = :conducta,
 				e_procesal = :e_procesal,
+				motivo = :motivo,
 				autoridad = :autoridad
 			WHERE queja_id = :queja_id AND estado = 1
 			;";
+
 			$this->stmt = $this->pdo->prepare($this->sql);
 			$this->stmt->bindParam(':queja_id',$queja_id,PDO::PARAM_INT);
 			$this->stmt->bindParam(':oficio',$oficio,PDO::PARAM_STR);
 			$this->stmt->bindParam(':comentario',$comentario,PDO::PARAM_STR);
 			$this->stmt->bindParam(':f_acuse',$f_acuse,PDO::PARAM_STR);
+			$this->stmt->bindParam(':motivo',$motivo,PDO::PARAM_STR);
 			$this->stmt->bindParam(':n_semana',$n_semana,PDO::PARAM_INT);
 			$this->stmt->bindParam(':fojas',$fojas,PDO::PARAM_INT);
 			$this->stmt->bindParam(':t_doc',$t_doc,PDO::PARAM_INT);
@@ -2408,5 +2429,72 @@ class DRModel extends Connection
 			return json_encode( array( 'status'=>'error','message'=>$e->getMessage() ) );
 		}
 	}
+	public function saveAsignar()
+	{
+		try {
+			#Validacion de los campos
+			if ( $_FILES['file']['error'] > 0 ) {
+				throw new Exception("DEBE DE SELECCIONAR UN DOCUMENTO.", 1);
+			}
+			if ( $_FILES['file']['size'] > 10485760 ) {
+				throw new Exception("EL DOCUMENTO EXCEDE EL TAMAÑO DE ARCHIVO ADMITIDO.", 1);
+			}
+			if ( $_FILES['file']['type'] != 'application/pdf' ) {
+				throw new Exception("EL FORMATO DE ARCHIVO NO ES ADMITIDO (SOLO PDF). ", 1);
+			}			
+			#Recuperar las variables necesarias
+			$doc_name = $_FILES['file']['name'];
+			$doc_type = $_FILES['file']['type'];
+			$doc_size = $_FILES['file']['size'];
+			$destino  = $_SERVER['DOCUMENT_ROOT'].'/qd_uai/uploads/';
+			#Mover el Doc
+			move_uploaded_file($_FILES['file']['tmp_name'],$destino.$doc_name);
+			#abrir el archivo
+			$file 		= fopen($destino.$doc_name,'r');
+			$content 	= fread($file, $doc_size);
+			$content 	= addslashes($content);
+			fclose($file);
+			#Eliminar  el archivo 
+			unlink($_SERVER['DOCUMENT_ROOT'].'/qd_uai/uploads/'.$doc_name);	
+			#Variables del POST
+			$oficio = $_POST['oficio_a'];
+			$f_oficio = $_POST['f_oficio'];
+			$f_acuse = $_POST['f_acuse'];
+			$analista = $_POST['analista_id'];
+			$asunto = mb_strtoupper($_POST['asunto'],'utf-8');
+			$obs = mb_strtoupper($_POST['obs'],'utf-8');
+			$queja_respo = $_POST['queja_respo'];
+			#eliminar los acuses
+			$this->sql = "DELETE FROM documentos_turno WHERE qd_res = ?";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$queja_respo,PDO::PARAM_INT);
+			$this->stmt->execute();
+			#insertar el documento 
+			$this->sql = "INSERT INTO documentos_turno 
+				(id, qd_res, oficio, f_oficio, f_acuse, asunto, comentario, archivo ) 
+			VALUES ('', ?, ?, ?, ?, ?, ?, ?);";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$queja_respo,PDO::PARAM_INT);
+			$this->stmt->bindParam(2,$oficio,PDO::PARAM_STR);
+			$this->stmt->bindParam(3,$f_oficio,PDO::PARAM_STR);
+			$this->stmt->bindParam(4,$f_acuse,PDO::PARAM_STR);
+			$this->stmt->bindParam(5,$asunto,PDO::PARAM_STR);
+			$this->stmt->bindParam(6,$obs,PDO::PARAM_STR);
+			$this->stmt->bindParam(7,$content,PDO::PARAM_LOB);
+			$this->stmt->execute();
+
+			$this->sql = "UPDATE quejas_respo SET analista = ? WHERE id = ?  ";
+			$this->stmt = $this->pdo->prepare($this->sql);
+			$this->stmt->bindParam(1,$analista,PDO::PARAM_INT);
+			$this->stmt->bindParam(2,$queja_respo,PDO::PARAM_INT);
+			$this->stmt->execute();
+			
+			#Insertar el abogado analista en 
+			return json_encode( array( 'status'=>'success','message'=>'ASIGNACIÓN CREADA DE MANERA EXITOSA.' ) );
+		} catch (Exception $e) {
+			return json_encode( array( 'status'=>'error','message'=>$e->getMessage() ) );
+		}
+	}
+	
 }
 ?>

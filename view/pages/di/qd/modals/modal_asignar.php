@@ -26,7 +26,9 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="submit" class="btn btn-success btn-flat pull-right">Guardar referencia</button>
+					<button type="submit" class="btn btn-success btn-flat pull-right">
+						Guardar referencia
+					</button>
 				</div>
 			</div>
 		</div>
