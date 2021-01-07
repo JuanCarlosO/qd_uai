@@ -34,9 +34,9 @@
 						
 					</div>
 					<div class="row">
-						<div class="col-md-4">
+						<div class="col-md-2">
 							<div class="form-group">
-								<label for="genero">Seleccione el genero</label>
+								<label for="genero">Género</label>
 								<select id="genero" name="genero" class="form-control">
 									<option value="">...</option>
 									<option value="1">Hombre</option>
@@ -45,15 +45,23 @@
 							</div>
 						</div>
 
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="form-group">
 								<label for="cargo">Seleccione el cargo</label>
-								<select id="cargo" name="cargo" class="form-control">
-									<option value=""></option>
-								</select>
+								<div class="input-group">
+									<select id="cargo" name="cargo" class="form-control cargos">
+										<option value="">...</option>
+									</select>
+									<span class="input-group-btn">
+										<button onclick="open_modal('modal_add_cargo','');" type="button" class="btn btn-info btn-flat" >
+											<i class="fa fa-plus"></i>
+										</button>
+									</span>
+								</div>
 							</div>
 						</div>
-						<div class="col-md-4">
+						
+						<div class="col-md-3">
 							<div class="form-group">
 								<label>Municipio</label>
 								<select id="municipios" name="municipios" class="form-control">
@@ -69,18 +77,26 @@
 								<label>Procedencia</label>
 								<select id="procedencia" name="procedencia" class="form-control">
 									<option value="">...</option>
-									<option value="1">ESTATAL</option>
-									<option value="2">CPRS</option>
 								</select>
 							</div>
 						</div>
-						
+						<div id="cprs" class="hidden">
+							<div class="col-md-3">
+								<div class="form-group">
+									<label>Listado de penales</label>
+									<select class="form-control" id="penales" name="penal">
+										<option value="">...</option>
+									</select>
+								</div>
+							</div>
+						</div>
+											
 					</div>
 					<div id="estatal" class="hidden">
 						<div class="row">
 							<div class="col-md-3">
 								<div class="form-group">
-									<label>Adscripción</label>
+									<label>Coordinación</label>
 									<input type="text" name="adscripcion" class="form-control">
 								</div>
 							</div>
@@ -112,34 +128,22 @@
 						</div>
 						
 					</div>
-					<div id="cprs" class="hidden">
-						<div class="row">
-							<div class="col-md-4">
-								<div class="form-group">
-									<label>Agencia</label>
-									<input type="text" name="agencia" class="form-control">
-								</div>
-							</div>
-							<div class="col-md-4">
-								<div class="form-group">
-									<label>Fiscalia</label>
-									<input type="text" name="fiscalia" class="form-control">
-								</div>
-							</div>
-							<div class="col-md-4">
-								<div class="form-group">
-									<label>Mesa</label>
-									<input type="text" name="mesa" class="form-control">
-								</div>
-							</div>
-							
-						</div>
-						<div class="row">
-							
-							<div class="col-md-4">
-								<div class="form-group">
-									<label>Turno</label>
-									<input type="text" id="turno" name="turno" class="form-control" value="" >
+					<div class="row">
+						<div class="col-md-5">
+							<div class="form-group">
+								<label for="a_presunto">
+								Adscripción del presunto (datos adicionales)
+								</label>
+								
+								<div class="input-group">
+									<select id="a_presunto" name="a_presunto" class="form-control">
+										<option value="">...</option>
+									</select>
+									<span class="input-group-btn">
+										<button onclick="open_modal('modal_add_adsp','');" type="button" class="btn btn-info btn-flat" >
+											<i class="fa fa-plus"></i>
+										</button>
+									</span>
 								</div>
 							</div>
 						</div>

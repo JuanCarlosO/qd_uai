@@ -27,6 +27,7 @@ function getURL(url) {
 		autocomplete_input('orden_i','orden_h',5);
 		autocomplete_input('personal','',3);
 		autocomplete_input('personal_a','',3);
+		load_catalogo('procedencia','select',4);
 		load_catalogo('municipio','select',10);
 		question();
 		frm_add_acta();
@@ -44,16 +45,24 @@ function getURL(url) {
 		$('#option_2').addClass('active');
 		getOrdenes();
 		frm_ot_upload();
+		frm_cancelar_ot();
 	}
 	if ( url == '?menu=reports' ) {
 		//alert('vamos a reportar')
 		$('#option_3').addClass('active');
 		load_catalogo('municipio','select',10);
+		load_catalogo('procedencia','select',4);
 		frm_reportes();
 	}
 	if ( url == '?menu=aviso' ) {
 		$('#option_4').addClass('active');
 	}
+	if ( url == '?menu=tablero' ) {
+		$('#option_6').addClass('active');
+		contador_actas();
+		getListadoAcutaciones();
+	}
+	
 	if ( url == '?menu=manual' ) {
 		$('#option_5').addClass('active');
 	}
@@ -67,6 +76,7 @@ function getURL(url) {
 		getDocumentos();
 		//Catalogos
 		load_catalogo('submarca','select',40);//Marcas de los vehiculos
+		load_catalogo('cargo','select',22);//Marcas de los vehiculos
 	}
 	return false; 
 }
@@ -96,41 +106,89 @@ function getOrdenes() {
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	    	{ leyenda: 'Acciones', style: 'width:100px;', columna: 'Sueldo' },
-	    	{ leyenda: 'ID', style:'width:20px;'},
-	        { leyenda: 'Clave de orden de trabajo', style: 'width:200px;', columna: 'clave'},
-	        { leyenda: 'Número de oficio', style: 'width:200px;', columna: 'clave'},
-	        { leyenda: 'Fecha', columna: 'fecha', filtro: false },
-	        { leyenda: 'Participantes', style: 'width:300px;', columna: 'Correo' },
-	        { leyenda: 'Estado', style: 'width:120px;', columna: 'Sexo'},
+	    	{ leyenda: 'ID', style:'width:20px;', columna: 'id', ordenable:true},
+	        { leyenda: 'Clave de orden de trabajo', style: 'width:200px;', columna: 'o.clave', filtro:true},
+	        { leyenda: 'Tipo de orden', style: 'width:100px;', columna: 'o.t_orden', filtro:function(){
+	        	return anexGrid_select({
+	                data: [
+	                    { valor: '', contenido: 'Todos' },
+	                    { valor: '1', contenido: 'INSPECCIÓN' },
+	                    { valor: '2', contenido: 'VERIFICACIÓN' },
+	                    { valor: '3', contenido: 'SUPERVISIÓN' },
+	                    { valor: '4', contenido: 'INVESTIGACIÓN' },
+	                ]
+	            });
+	        }},
+	        { leyenda: 'Número de oficio', style: 'width:200px;', columna: 'of.no_oficio',filtro:true},
+	        { leyenda: 'Fecha', columna: 'o.f_creacion', filtro: function(){
+        		return anexGrid_input({
+        			type: 'date',
+        			attr:[
+        				'name="f_ot"'
+        			]
+        	    });
+	        } },
+	        //{ leyenda: 'Participantes', style: 'width:300px;', columna: 'Correo' },
+	        { leyenda: 'Estado', style: 'width:120px;', columna: 'o.estatus', filtro:function(){
+	        	return anexGrid_select({
+	                data: [
+	                    { valor: '', contenido: 'Todos' },
+	                    { valor: '1', contenido: 'Cumplida' },
+	                    { valor: '2', contenido: 'Parcial sin resultado' },
+	                    { valor: '3', contenido: 'Parcial con resultado' },
+	                    { valor: '4', contenido: 'Cumplida sin resultado' },
+	                    { valor: '5', contenido: 'Cancelada' },
+	                ]
+	            });
+	        }},
 	        
 	    ],
 	    modelo: [
 	    	
 	    	{ class:'',formato: function(tr, obj, valor){
+	    		var acciones = [];
+	    		if (obj.estatus == 'Cancelada') {
+	    			acciones = [
+                        { href: "javascript:open_modal('modal_ot_upload',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento' },
+                        { href: "javascript:open_modal('modal_add_obs');", contenido: '<i class="glyphicon glyphicon-comment"></i>Agregar observaciones' },
+                        { href: 'index.php?menu=detalle&ot='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i>Ver detalle' },
+                    ];
+	    		}else{
+	    			acciones = [
+                        { href: "javascript:open_modal('modal_ot_upload',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento' },
+                        { href: "javascript:open_modal('modal_add_obs');", contenido: '<i class="glyphicon glyphicon-comment"></i>Agregar observaciones' },
+                        { href: 'index.php?menu=detalle&ot='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i>Ver detalle' },
+                        { href: "javascript:open_modal('modal_cancelar_ot',"+obj.id+");", contenido: '<i class="fa fa-ban text-red"></i><b class="text-red">Cancelar</b> '},
+                    ];
+	    		}
 	            return anexGrid_dropdown({
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
                     class: 'btn btn-primary ',
                     target: '_blank',
                     id: 'editar',
-                    data: [
-                        { href: "javascript:open_modal('modal_ot_upload',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento' },
-                        { href: "javascript:open_modal('modal_add_obs');", contenido: '<i class="glyphicon glyphicon-comment"></i>Agregar observaciones' },
-                        { href: 'index.php?menu=detalle&ot='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i>Ver detalle' },
-                    ]
+                    data: acciones
                 });
 	        }},
 	    	
-	        { propiedad: 'id' },
+	        { class:'',formato: function(tr, obj, valor){
+	    		var acciones = [];
+	    		if (obj.estatus == 'Cancelada') {
+	    			tr.addClass('bg-red-active');
+	    		}
+	            return obj.id;
+	        }},
 	        { propiedad: 'clave' },
+	        { propiedad: 't_orden' },
 	        { propiedad: 'oficio' },
 	        { propiedad: 'f_creacion' },
-	        { propiedad: 'id'},
+	        //{ propiedad: 'id'},
 	        { propiedad: 'estatus'}
 	        
 	        
 	    ],
 	    url: 'controller/puente.php?option=8',
-	    filtrable: false,
+	    filtrable: true,
+	    paginable: true,
 	    columna: 'id',
 	    columna_orden: 'DESC'
 	});
@@ -160,8 +218,8 @@ function getActas() {
     	                    { valor: '2', contenido: 'VERIFICACION' },
     	                    { valor: '3', contenido: 'SUPERVISIÓN' },
     	                    { valor: '4', contenido: 'INVESTIGACIÓN' },
-    	                    { valor: '5', contenido: 'USUARIO SIMULADO' },
-    	                    { valor: '6', contenido: 'AGENTE ENCUBIERTO' },
+    	                   /* { valor: '5', contenido: 'USUARIO SIMULADO' },
+    	                    { valor: '6', contenido: 'AGENTE ENCUBIERTO' },*/
     	                ]
     	            });
     	        }
@@ -182,7 +240,7 @@ function getActas() {
     	            data: aux
     	        });
 	        }},
-	        { class:'text-center', leyenda: 'Descripcion', style: 'width:300px;', columna: 'a.comentarios',filtro:true},
+	        { class:'text-center', leyenda: 'Descripción', style: 'width:300px;', columna: 'a.comentarios',filtro:true},
 	        
 	    ],
 	    modelo: [
@@ -195,7 +253,7 @@ function getActas() {
                     data: [
                         { href: 'index.php?menu=seguimiento&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-road"></i> Dar seguimiento' },
                         { href: 'index.php?menu=general&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-pencil"></i> Editar' },
-                        { href: 'index.php?menu=cedula&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i> Ver cedula' },
+                        { href: 'index.php?menu=cedula&acta='+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open"></i> Ver cédula' },
                         { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", 
                           contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento',
                         }
@@ -224,6 +282,8 @@ function open_modal(modal,id) {
 	//agregar el ID del acta al modal
 	if (modal == 'modal_ot_upload') {
 		$('[name="oin_id"]').val(id);
+	}else if(modal == 'modal_cancelar_ot'){
+		$('[name="ot_id"]').val(id);
 	}else{
 		$('[name="acta_id"]').val(id);
 	}
@@ -952,7 +1012,7 @@ function getDocumentos(){
 						val.comentarios+
 					'</td>'+
 					'<td>'+
-						'<a href="#" class="btn btn-default btn-flat" onclick="view_docs('+val.id+')">'+
+						'<a href="controller/puente.php?option=17&doc='+val.id+'&tbl=documentos_sira" class="btn btn-default btn-flat" target="__blank">'+
 							'<i class="fa fa-eye "></i>'+
 						'</a>'+
 					'</td>'+
@@ -994,9 +1054,11 @@ function delete_doc(element){
 }
 //GENERADOR DE REPORTE
 function frm_reportes() {
+
 	$('#frm_reportes').submit(function(e) {
 		e.preventDefault();
 		var dataForm = $(this).serialize();
+		
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
@@ -1006,19 +1068,19 @@ function frm_reportes() {
 			cache:false,
 		})
 		.done(function(response) {
-			if ( ! $.fn.DataTable.isDataTable( '#tbl_reporte_actas' ) ) {
-				tbl = applyDataTables('reporte');
-			}else{
-
-				tbl.rows().remove().draw();
-			}
-			$('#tbl_reporte_actas>tbody').html();
+			
+			$('#tbl_reporte_actas tbody').html("");
 			$.each(response, function(i, val) {
+				var t_actuacion = '';
+				if (val.t_actuacion == 'INSPECCION') {t_actuacion = 'INSPECCIÓN';}
+				if (val.t_actuacion == 'VERIFICACION') {t_actuacion = 'VERIFICACIÓN';}
+				if (val.t_actuacion == 'SUPERVISION') {t_actuacion = 'SUPERVISIÓN';}
+				if (val.t_actuacion == 'INVESTIGACION') {t_actuacion = 'INVESTIGACIÓN';}
 				$('#tbl_reporte_actas').append(
 					'<tr>'+
 						'<td>'+(++i)+'</td>'+
 						'<td>'+val.clave+'</td>'+
-						'<td>'+val.t_actuacion+'</td>'+
+						'<td>'+t_actuacion+'</td>'+
 						'<td>'+val.fecha+'</td>'+
 						'<td>'+val.procedencia+'</td>'+
 						'<td>'+val.n_municipio+'</td>'+
@@ -1026,7 +1088,9 @@ function frm_reportes() {
 					'</tr>'
 				);
 			});
-			applyDataTables('tbl_reporte_actas');
+			if ( ! $.fn.DataTable.isDataTable( '#tbl_reporte_actas' ) ) {
+				tbl = applyDataTables('tbl_reporte_actas');
+			}
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			console.log("error");
@@ -1096,12 +1160,12 @@ function getDashboard() {
 			if(val.t_actuacion == 'INVESTIGACION'){
 				$('#c_inv').text(val.cuenta);
 			}
-			if(val.t_actuacion == 'AGENTE ENCUBIERTO'){
+			/*if(val.t_actuacion == 'AGENTE ENCUBIERTO'){
 				$('#c_age').text(val.cuenta);
 			}
 			if(val.t_actuacion == 'USUARIO SIMULADO'){
 				$('#c_usi').text(val.cuenta);
-			}
+			}*/
 			
 		});
 	})
@@ -1110,4 +1174,160 @@ function getDashboard() {
 	});
 
 	return false;
+}
+function contador_actas() {
+	$('#tbl_ordenes tbody').html("");
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '87'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		var suma = 0;
+		$.each(response, function(i, val) {
+			var fila = "", t_orden = "";
+			suma += parseInt(val.cuenta);
+			if (val.t_orden == 'INS') { t_orden = 'INSPECCIÓN'; }
+			if (val.t_orden == 'VER') { t_orden = 'VERIFICACIÓN'; }
+			if (val.t_orden == 'SUP') { t_orden = 'SUPERVISIÓN'; }
+			if (val.t_orden == 'INV') { t_orden = 'INVESTIGACIÓN'; }
+			if (val.t_orden == 'AGE') { t_orden = 'AGENTE ENCUBIERTO'; }
+			if (val.t_orden == 'USI') { t_orden = 'USUARIO SIMULADO'; }
+			fila += '<tr>';
+				fila += '<td>'+t_orden+'</td>';
+				fila += '<td>'+val.cuenta+'</td>';
+				fila += '<td>';
+				fila += '';
+					//fila += '<button class="btn btn-flat btn-success" onclick="verOIN('+"'"+val.t_orden+"'"+')"> <i class="fa fa-eye"></i> Mostrar </button>';
+				fila += '</td>';
+			fila += '</tr>';
+			$('#tbl_ordenes tbody').append(fila)
+		});
+		var fila = "";
+		fila += '<tr>';
+			fila += '<td>TOTAL: </td>';
+			fila += '<td colspan="2">'+suma+'</td>';
+			
+		fila += '</tr>';
+		$('#tbl_ordenes tbody').append(fila)
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("error");
+	});
+	
+	return false;
+}
+function getListadoAcutaciones(actuacion) {
+	$('#actas').removeClass('hidden');
+	$('#qd_estado').addClass('hidden');
+	$('#div_oins').addClass('hidden');
+	$('#tbl_actas tbody').html("");
+	var year = $('#year').val();
+	
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '57',y:year,a:actuacion},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		var total = 0;
+		$.each(response, function(i, val) {
+			var t_actua = "", fila = "";
+			console.log(val.t_actuacion);
+			if (val.t_actuacion == "INSPECCION") { t_actua = 'INSPECCIÓN'  }
+			if (val.t_actuacion == "VERIFICACION") { t_actua = 'VERIFICACIÓN'  }
+			if (val.t_actuacion == "SUPERVISION") { t_actua = 'SUPERVISIÓN'  }
+			if (val.t_actuacion == "INVESTIGACION") { t_actua = 'INVESTIGACIÓN'  }
+			total = total + parseInt(val.cuenta);
+			fila += '<tr>';
+				fila += '<td>'+t_actua+'</td>';
+				fila += '<td>'+val.cuenta+'</td>';
+			fila += '</tr>';
+
+			$('#tbl_actas').append(fila);
+			
+		});
+		fila = "";
+		fila += '<tr>';
+			fila += '<td>TOTAL: </td>';
+			fila += '<td>'+total+' </td>';
+		fila += '</tr>';
+		$('#tbl_actas').append(fila);
+
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("error");
+	});	
+}
+function contador_actas() {
+	$('#tbl_ordenes tbody').html("");
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '87'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		var suma = 0;
+		$.each(response, function(i, val) {
+			var fila = "", t_orden = "";
+			suma += parseInt(val.cuenta);
+			if (val.t_orden == 'INS') { t_orden = 'INSPECCIÓN'; }
+			if (val.t_orden == 'VER') { t_orden = 'VERIFICACIÓN'; }
+			if (val.t_orden == 'SUP') { t_orden = 'SUPERVISIÓN'; }
+			if (val.t_orden == 'INV') { t_orden = 'INVESTIGACIÓN'; }
+			if (val.t_orden == 'AGE') { t_orden = 'AGENTE ENCUBIERTO'; }
+			if (val.t_orden == 'USI') { t_orden = 'USUARIO SIMULADO'; }
+			fila += '<tr>';
+				fila += '<td>'+t_orden+'</td>';
+				fila += '<td>'+val.cuenta+'</td>';
+				//fila += '<td>';
+					//fila += '<button class="btn btn-flat btn-success" onclick="verOIN('+"'"+val.t_orden+"'"+')"> <i class="fa fa-eye"></i> Mostrar </button>';
+				//fila += '</td>';
+			fila += '</tr>';
+			$('#tbl_ordenes tbody').append(fila)
+		});
+		var fila = "";
+		fila += '<tr>';
+			fila += '<td>TOTAL: </td>';
+			fila += '<td colspan="2">'+suma+'</td>';
+			
+		fila += '</tr>';
+		$('#tbl_ordenes tbody').append(fila)
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("error");
+	});
+	
+	return false;
+}
+function frm_cancelar_ot() {
+	$('#frm_cancelar_ot').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			cache:false,
+			async:false,
+		})
+		.done(function(response) {
+			getOrdenes();
+			alerta('m_cancelar_ot',response.status, response.message,'modal_cancelar_ot');
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			alerta('m_cancelar_ot','error',jqXHR.responseText ,'modal_cancelar_ot');
+		});
+		
+	});
 }

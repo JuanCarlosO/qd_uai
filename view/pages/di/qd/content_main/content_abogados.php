@@ -33,7 +33,7 @@ $r = $q->getExpAbogados();
                                     <tbody>
                                         <?php $i = 1; foreach ($r as $key => $abogado): ?>
                                             <tr class="text-center">
-                                                <td> <?=$i?> </td>
+                                                <td> <?=($i++)?> </td>
                                                 <td><?=$abogado['nombre']?></td>
                                                 <td>
                                                     <ol>
@@ -55,7 +55,7 @@ $r = $q->getExpAbogados();
                                                     </ol>
                                                 </td>
                                                 <td>
-                                                    <a href="index.php?menu=expedientes&person=1">
+                                                    <a href="index.php?menu=expedientes&person=<?=$abogado['person_id']?>">
                                                         <?=$abogado['total']?>
                                                     </a>
                                                 </td>

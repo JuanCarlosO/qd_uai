@@ -15,7 +15,7 @@
                                     <th width="70px">Oficios nuevos:</th>
                                     <td class="bg-green" width="100px"></td>
                                     <td></td>
-                                    <th width="70px">Oficios enviados:</th>
+                                    <th width="70px">Oficios enviados a la S.A.G.:</th>
                                     <td class="bg-aqua" width="100px"></td>
                                 </tr>
                             </table>

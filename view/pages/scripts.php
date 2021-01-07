@@ -51,7 +51,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js" type="text/javascript" ></script>
 <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js " type="text/javascript" ></script>
 <?php
-if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'QDNP' ) {
+if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'ESPECIAL' ) {
 	echo '<script src="view/dist/js/main.qd.js"></script>';
 }elseif ( $_SESSION['perfil'] == 'SIRA' ) {
 	echo '<script src="view/dist/js/main.sira.js"></script>';

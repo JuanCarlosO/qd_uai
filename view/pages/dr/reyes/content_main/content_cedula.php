@@ -1,4 +1,5 @@
 <?php
+#error_reporting(0);
 #generar la consulta de la info
 require_once 'model/Connection.php';
 require_once 'model/DRModel.php';
@@ -13,7 +14,7 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
 if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
     $c_primer_ap       = $q->operacionesFechas('-',$data['apersonamiento'][0]->f_apersonamiento,$data['f_turno'])->resta;
 }else{
-    $c_primer_ap = "NO ESTA DEFINIDA";
+    $c_primer_ap = "NO ESTÁ DEFINIDA";
 }
 ?>
 <section class="content container-fluid">
@@ -53,7 +54,7 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                     </tr>
                                     <tr class="text-center">
                                         <th class="bg-gray">Contador Fecha apersonamiento hasta fecha resolución</th>
-                                        <td class="bg-info"><?=( empty($data['conta_2']) ? '0' : $data['conta_2'])?></td>
+                                        <td class="bg-info"><?#( empty($data['conta_2']) ? '0' : $data['conta_2'])?></td>
                                     </tr>
                                 </thead>
                             </table>
@@ -74,14 +75,22 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                         <?php if ( $data['demandas'] == false ): ?>
                                             <h1>SIN DATOS PARA MOSTRAR</h1>
                                         <?php else: ?>
-                                            <tr>
-                                                <td class="bg-gray" width="200px">Fecha del primer apersonamiento:</td>
-                                                <?php if ( !empty($data['apersona_uno']->f_apersonamiento) ): ?>
-                                                    <td><?=$data['apersona_uno']->f_apersonamiento ?></td>
-                                                <?php else: ?>
+                                                
+                                            <?php if ( $data['apersonamientos'] == NULL ): ?>
+                                                <tr>
+                                                    <td class="bg-gray" width="200px">Apersonamientos:</td>
                                                     <td> SIN APERSONAMIENTO </td>
-                                                <?php endif ?>
-                                            </tr>
+                                                </tr>
+                                            <?php else: ?>
+                                                <?php $i = 1; foreach ($data['apersonamientos'] as $key => $aper): ?>
+                                                    <tr>
+                                                        <td class="bg-gray" width="200px">Apersonamiento #<?=($i++)?>:</td>
+                                                        <td><?=$aper->f_apersonamiento; ?></td>
+                                                    </tr>
+                                                <?php endforeach ?>
+                                                
+                                            <?php endif ?>
+                                            
                                             <tr>
                                                 <td class="bg-gray">Resolución de la Comisión de Honor y Justicia:</td>
                                                 <?php if ( !empty($data['resolucion_ape']->fecha) ): ?>
@@ -97,7 +106,7 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                                 <?php endif ?>
                                             </tr>
                                             <tr>
-                                                <td class="bg-gray">Situación de demandas del TRIJAEM:</td>
+                                                <td class="bg-gray">Medios de Impugnación del TRIJAEM:</td>
                                                 <?php if ( $data['demandas'] != false): ?>
                                                     <td>
                                                     <?php foreach ($data['demandas'] as $key => $dem): ?>
@@ -128,9 +137,11 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                                 
                                             </tr>
                                             <tr>
-                                                <td class="bg-gray">CONTADOR DESDE LA RESOLUCIÓN DE LA PRIMER DEMANDA HASTA LA SEGUNDA DEMANDA</td>
-                                                <?php if ( $data['c_rdem_dem2'] != false ): ?>
-                                                    <td><?php print_r("sex".$data['c_rdem_dem2']);?></td>
+                                                <td class="bg-gray">CONTADOR DESDE LA RESOLUCIÓN DE IMPUGNACIÓN SALA REGIONAL HASTA IMPUGNACIÓN SALA SUPERIOR</td>
+                                                <?php if ( isset($data['c_rdem_dem2']) ): ?>
+                                                    <?php if ( $data['c_rdem_dem2'] != false ): ?>
+                                                        <td><?php print_r("sex".$data['c_rdem_dem2']);?></td>
+                                                    <?php endif ?>
                                                 <?php else: ?>
                                                     <td>SIN DEFINIR</td>
                                                 <?php endif ?>
@@ -138,7 +149,8 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                             </tr>
                                             <tr>
                                                 <td class="bg-gray">CONTADOR DESDE LA FECHA DE LA SEGUNDA DEMANDA HASTA LA RESOLUCIÓN DE LA MISMA</td>
-                                                <?php if ( $data['c_rdem2_res2'] != false ): ?>
+                                                
+                                                <?php if ( isset($data['c_rdem2_res2']) && $data['c_rdem2_res2'] != false ): ?>
                                                     <td><?=$data['c_rdem2_res2']?></td>
                                                 <?php else: ?>
                                                     <td>SIN DEFINIR</td>
@@ -163,18 +175,27 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                 <dt>Presuntas conductas</dt>
                                 <dd>
                                     <ol>
+                                        <?php if (count($data['p_conductas']) > 0): ?>
                                         <?php
                                         foreach ($data['p_conductas'] as $key => $conducta) {
                                             echo '<li>'.$conducta->n_conducta.'</li>';
                                         }
-                                        ?>
+                                        ?>    
+                                        <?php else: ?>
+                                            <li>CONDUCTA NO ESPECIFICADA EN LA LEY DE SEGURIDAD</li>
+                                        <?php endif ?>
+                                        
                                     </ol>
                                 </dd>
 
                                 <dt>Ley aplicada</dt>
-                                <dd> <?=$data['p_conductas'][0]->n_ley?> </dd>
+                                <?php if ( count($data['p_conductas']) > 0): ?>
+                                    <dd> <?=$data['p_conductas'][0]->n_ley?> </dd>    
+                                <?php else: ?>
+                                    <dd> LEY NO APLICABLE </dd>
+                                <?php endif ?>
 
-                                <dt>Via(s) de recepcion</dt>
+                                <dt>Vía(s) de recepcion</dt>
                                 <dd>
                                     <?php
                                     foreach ($data['vias'] as $key => $via) {
@@ -182,7 +203,7 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                     }
                                     ?>
                                 </dd>
-                                <dt>Descripcion de los hechos</dt>
+                                <dt>Descripción de los hechos</dt>
                                 <dd class="text-justify"> <?=$data['queja']->descripcion?> </dd>
 
                                 <dt>Estado del expediente</dt>
@@ -246,13 +267,16 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($data['opiniones'] as $key => $opinion): ?>
-                                            <tr class="bg-gray">
-                                                <td><?=$opinion->created_at?></td>
-                                                <td><?=$opinion->abogado?></td>
-                                                <td><?=$opinion->comentario?></td>
-                                            </tr>
-                                            <?php endforeach ?>
+                                            <?php if ($data['opiniones'] != 0): ?>
+                                                <?php foreach ($data['opiniones'] as $key => $opinion): ?>
+                                                <tr class="bg-gray">
+                                                    <td><?=$opinion->created_at?></td>
+                                                    <td><?=$opinion->abogado?></td>
+                                                    <td><?=$opinion->comentario?></td>
+                                                </tr>
+                                                <?php endforeach ?>    
+                                            <?php endif ?>
+                                            
                                         </tbody>
                                     </table>
                                 </div>
@@ -311,7 +335,7 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                                     <tr class="bg-gray">
                                         <td> <?=$i;$i++;?> </td>
                                         <td>
-                                            <a href="index.php?menu=cedula&exp_id=<?=$acumulado->acumulado_id?>" target="_blank">
+                                            <a href="index.php?menu=cedula&exp=<?=$acumulado->acumulado_id?>" target="_blank">
                                                 <?=$acumulado->acumulado?>
                                             </a>
                                         </td>
@@ -322,25 +346,22 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h1> <center>Documentos del expediente</center> </h1>
-                        </div>
-                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="table-responsive">
                                 <table class="table table-hover table-condensed table-bordered">
-                                    <thead>
+                                    <caption class="text-center bg-gray"><center>Documentos del expediente</center></caption>
+                                    <thead class="bg-gray">
                                         <tr>
                                             <th width="30%">Nombre de documento</th>
-                                            <th width="60%">Descripcion del documento</th>
+                                            <th width="60%">Descripción del documento</th>
                                             <!-- <th width="10%" class="text-center"><i class="fa fa-trash"></i></th> -->
                                         </tr>
                                     </thead>
                                     <tbody>
                                     <?php foreach ($data['documentos'] as $file): ?>
-                                        <tr id="file_<?=$file->id?>" class="bg-gray">
+                                        <tr id="file_<?=$file->id?>" class="">
                                             <td>
                                                 <a href="controller/puente.php?option=4&file=<?=$file->id?>" target="__blank">
                                                     <?=$file->nombre?>  
@@ -365,7 +386,43 @@ if (!empty($data['apersonamiento'][0]->f_apersonamiento)) {
                             </ol>
                         </div>
                     </div>
-                            
+                        <div class="row">
+                            <div class="col-md-8">
+                                <table class="table table-hover table-bordered">
+                                    <caption class="bg-gray text-center">
+                                        Documentos de asignación de la Subdirección de Análisis y Procedimientos Administrativos.
+                                    </caption>
+                                    <thead>
+                                        <tr class="bg-gray">
+                                            <th width="25%">Número de oficio</th>
+                                            <th width="15%">Fecha del oficio</th>
+                                            <th width="15%">Fecha del acuse</th>
+                                            <th width="45%">Comentario</th>
+                                            <th width="45%">Origen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if ( isset($documentos['doc_sc'])): ?>
+                                            <?php foreach ($documentos['doc_sc'] as $key => $doc): ?>
+                                                <tr>
+                                                    <td>
+                                                        <a href="controller/puente.php?option=17&doc=<?=$doc->id?>&tbl=documentos_sc" target="_blank"><?=$doc->oficio?></a>
+                                                    </td>
+                                                    <td><?=$doc->f_oficio?></td>
+                                                    <td><?=$doc->f_acuse?></td>
+                                                    <td><?=$doc->comentario?></td>
+                                                    <td>Subdirección de lo Contencioso</td>
+                                                </tr>
+                                            <?php endforeach ?>
+                                        
+                                        <?php endif ?>
+                                        
+                                                                                
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>        
                 </div>
             </div>
         </div>

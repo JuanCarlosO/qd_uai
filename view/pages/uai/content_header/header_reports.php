@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Filtros de formulario
+		UAI - ACTAS
 		<small>Quejas y Denuncias</small>
 	</h1>
 	<ol class="breadcrumb">

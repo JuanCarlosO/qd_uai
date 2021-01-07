@@ -8,15 +8,15 @@
 				<h4 class="modal-title">Enviar el conjunto de expedientes a S.A.P.A.</h4>
 			</div>
 			<div class="modal-body">
-				<div id="div_acuse"></div>
-				<form id="frm_send_sapa" action="#">
-					<input type="hidden" id="option" name="option" value="90">
-					<input type="hidden" id="oficio" name="oficio" value="">
+				<div id="div_sapa"></div>
+				<form id="frm_send_sapa" action="#" enctype="multipart/form-data">
+					<input type="hidden" id="option" name="option" value="92">
+					<input type="hidden" id="oficio_inv" name="oficio" value="">
 					<div class="row">
 						<div class="col-md-4">
 							<div class="form-group">
-								<label>Fecha del oficio</label>
-								<input type="date" name="f_oficio" value="" class="form-control">
+								<label>Asunto del documento</label>
+								<input type="text" id="asunto" name="asunto" value="" placeholder="Ej: Expediente completo..." class="form-control">
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -33,10 +33,13 @@
 						</div>
 					</div>
 					<div class="row">
+						
+					</div>
+					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
 								<label>Observaciones</label>
-								<textarea name="obs" id="obs" class="form-control" rows="3" style="resize: vertical;max-height: 200px;"></textarea>
+								<textarea name="observaciones" id="observaciones" class="form-control" rows="3" style="resize: vertical;max-height: 200px;"></textarea>
 							</div>
 						</div>
 					</div>
@@ -44,7 +47,7 @@
 						<div class="col-md-4"></div>
 						<div class="col-md-4">
 							<button class="btn btn-success btn-flat btn-block">
-								<i class="fa fa-floppy-o"></i> Guardar acuse
+								<i class="fa fa-floppy-o"></i> Enviar y Guardar
 							</button>
 						</div>
 						<div class="col-md-4"></div>

@@ -14,7 +14,7 @@
                 		<div class="row">
                 			<div class="col-md-3">
                 				<div class="form-group">
-                					<label>Buscar oficio que envio la Dir. de Responsabilidades</label>
+                					<label>Buscar oficio que envió la Dir. de Responsabilidades en A. I.</label>
                 					<input type="text" name="oficio" id="oficio" value="" class="form-control">
                 					<input type="hidden" id="oficio_id" name="oficio_id" value="">
                 				</div>

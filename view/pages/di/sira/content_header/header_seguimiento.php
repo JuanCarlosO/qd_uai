@@ -1,7 +1,7 @@
 <section class="content-header">
 	<h1>
-		Seguimiento de Acta 
-		<small>Alta y Consulta</small>
+		SISTEMA DE INSPECCIONES Y SUPERVISIONES
+		<small>Seguimiento de Acta</small>
 	</h1>
 	<ol class="breadcrumb">
 		<li><a href="General"><i class="fa fa-dashboard"></i> Inicio</a></li>

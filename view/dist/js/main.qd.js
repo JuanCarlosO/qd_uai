@@ -1,4 +1,6 @@
 var rescate;var url;
+var estados = [{'valor': '','contenido':'TODOS'}];
+var municipios = [{'valor': '','contenido':'TODOS'}];
 $(document).ready(function() {
 	
 	url = window.location.search;
@@ -16,23 +18,28 @@ $(document).ready(function() {
 		container: 'body'
 	}); 
 	$('[data-mask]').inputmask();
-	
 });
 
 function getURL(url) {
 	if ( url == '?menu=list_queja' ) {
 		$('#option_1').addClass('active');
 		$('#option_1_2').addClass('active');
-		listado_qd();
+		load_catalogo('','json',12);
+		$.each(rescate, function(i, val) {
+			estados.push({'valor': val.id,'contenido':val.nombre});
+		});
+		load_catalogo('','json',10);
+		$.each(rescate, function(i, val) {
+			municipios.push({'valor': val.id,'contenido':val.nombre});
+		});
+		getListadoQD();
 		autocomplete_input('sp','sp_id');
-		frm_upload_file();
+		autocomplete_input('jefe_depto','jefe_depto_id');
 		frm_asignar();
 	}
 	if ( url == '?menu=general' ) {
 		var nivel = $('#nivel').val();
 		$('#option_1').addClass('active');
-
-		
 		if ( nivel == 'ANALISTA' || nivel == 'JEFE' ) {
 			$('#option_1_2').addClass('active');
 			autocomplete_input('sp','sp_id');
@@ -42,37 +49,103 @@ function getURL(url) {
 			$('#option_1_1').addClass('active');
 			frm_add_queja();
 		}
-		
-		frm_add_referencia();
-		load_catalogo('t_ref','select',2);
-		load_catalogo('procedencia','select',4);
-		load_catalogo('t_tra','select',5);
-		load_catalogo('t_ley','select',7);
-		load_catalogo('vias_r','select',9);
-		load_catalogo('municipios','select',10);
-		load_catalogo('estado','select',12);
-		change_TR();
-		autocomplete_input('sp','sp_id');
-		$('#pregunta').change(function(e) {
-			e.preventDefault();
-			if( $(this).val() == '2' ){
-				$('#cant_person').removeClass('hidden');
-				
+		$('#d_ano').change(function(e) {
+			if ( $('#d_ano').is(':checked')  ) {
+				$('#d_quejoso').addClass('hidden');
 			}else{
-				$('#cant_person').addClass('hidden');
-				$('#cantidad').val("");
+				$('#d_quejoso').removeClass('hidden');
 			}
 		});
 		
+		frm_add_opinion();
+		frm_add_referencia();
+		eventNormatividad();
+		load_catalogo('t_ref','select',2);
+		load_catalogo('procedencia','select',4);
+		load_catalogo('t_tra','select',5);
+		load_catalogo('t_ley','select','7A');
+
+		load_catalogo('vias_r','select',9);
+		load_catalogo('municipios','select',10);
+		load_catalogo('estado','select',12);
+		
+		load_cargos();
+		change_TR();
+		autocomplete_input('sp','sp_id');
+		frm_add_cargo();
+		$('#pregunta').change(function(e) {
+			e.preventDefault();			
+			if( $(this).val() == '2' ){
+				$('#cant_person').removeClass('hidden');
+				$('#ind_presuntos').addClass('hidden');
+			}else{
+				$('#cant_person').addClass('hidden');
+				$('#cantidad').val("");
+				$('#ind_presuntos').addClass('hidden');
+			}
+		});
+		//cuando eliga un tipo de asunto
+		$('#t_asunto').change(function(e) {
+			e.preventDefault();
+			if ( $(this).val() == '1' ) {
+				load_catalogo('procedencia','select',4);
+			}
+			if ( $(this).val() == '2' ) {
+				load_catalogo('procedencia','select',4);
+			}
+		});
+		//Preguntar si se desea agregar un semoviente 
+		$('#add_semo').change(function(e) {
+			e.preventDefault();
+			if( $(this).val() == 1 ){
+				$('#info_semo').removeClass('hidden');
+			}else if ( $(this).val() == 2 ) {
+				$('#info_semo').addClass('hidden');
+				$('#t_animal').val('');
+				$('#raza').val('');
+				$('#edad').val('');
+				$('#color').val('');
+				$('#n_animal').val('');
+				$('#inventario').val('');
+			}else{
+				alerta('div_alert','error','NO SE HA ENCONTRADO UNA ACCIÓN PARA LA OPCIÓN SELECCNADA.','');
+			}
+		});
+		//cuando se pregunta si desea agregar una unidad
+		$('#question_unidad').change(function(e) {
+			e.preventDefault();
+			if ($(this).val() === '1') {
+				$('#data_unidad').removeClass('hidden');
+			}else{
+				$('#data_unidad').addClass('hidden');
+			}
+		});
+		//Cambios del 07/01/2021
+		//Cuando cambie el tipo de afectado cambie el formulario
+		$('#procedencia_quejoso').change(function(e) {
+			e.preventDefault();
+			$('#area_1,#area_2,#area_3,#area_4').addClass('hidden');
+			$('#area').html('');
+			$('#area').append('<option value="">...</option>');
+			if ($(this).val() == '1') {
+				$('#area').append('<option value="3">Dirección General de Prevención y Reinserción Social</option>');
+			}else if ($(this).val() == '2') {
+				$('#area').append('<option value="1">Operativos Secretaría de Seguridad</option>');
+				$('#area').append('<option value="2">Dirección de Policía de Tránsito</option>');
+				$('#area').append('<option value="4">Personal Administrativo</option>');
+			}
+		});
+		//Cuando seleccione procedencia quejoso
+		eventOrganigrama();
 	}
 	if ( url == '?menu=reports' ) {
 		$('#option_2').addClass('active');
 		load_catalogo('municipio','select',10);
-		load_catalogo('t_ref','select',2);
+		//load_catalogo('t_ref','select',2);
 		load_catalogo('estado','select',12);
 		load_catalogo('procedencia','select',4);
 		load_catalogo('t_tra','select',5);
-		load_catalogo('t_ley','select',7);
+		load_catalogo('t_ley','select','7A');
 		load_catalogo('vias_r','select',9);
 		frm_reportes();
 	}
@@ -84,13 +157,28 @@ function getURL(url) {
 	}
 	if ( url == '?menu=devoluciones' ) {
 		$('#option_4').addClass('active');
+		//getDevoluciones();
 		tbl = applyDataTables('tbl_devoluciones');
 	}
 	if ( url == '?menu=m_queja' ) {
-		console.log('Edición de la queja');
-		load_catalogo('t_ley','select',7);
-		autocomplete_input('sp','sp_id');	
+		load_catalogo('t_ley','select','7A');
 		frm_edit_queja();
+		frm_add_quejoso();
+		eventNormatividad();
+		eventOrganigrama();
+		$('#procedencia').change(function(e) {
+			e.preventDefault();
+			$('#area_1,#area_2,#area_3,#area_4').addClass('hidden');
+			$('#area').html('');
+			$('#area').append('<option value="">...</option>');
+			if ($(this).val() == '1') {
+				$('#area').append('<option value="3">Dirección General de Prevención y Reinserción Social</option>');
+			}else if ($(this).val() == '2') {
+				$('#area').append('<option value="1">Operativos Secretaría de Seguridad</option>');
+				$('#area').append('<option value="2">Dirección de Policía de Tránsito</option>');
+				$('#area').append('<option value="4">Personal Administrativo</option>');
+			}
+		});
 	}
 	if ( url == '?menu=seguimiento' ) {
 		load_catalogo('municipios','select',10);
@@ -98,67 +186,37 @@ function getURL(url) {
 		load_catalogo('subdir','select',23);
 		load_catalogo('region','select',25);
 		load_catalogo('agrupamiento','select',24);
+		load_catalogo('procedencia','select',4);
+		load_catalogo('a_presunto','select',4);
+		load_catalogo('penales','select',109);
 		
+		load_adsp();
 		frm_add_unidad();
 		change_procedencia();
-		frm_add_quejoso();
+		
 		frm_add_presunto();
+		frm_add_adsp();
 	}
 	if ( url == '?menu=expedientes' ) {
 		tbl = applyDataTables('tbl_abogado');
 	}
-	if ( url == '?menu=turnar' ) {
-		//load_catalogo('estado','select',12);
-		load_catalogo('t_ley','select',7);
-		load_catalogo('dependencia_f','select',77);
+	if ( url == '?menu=enviar' ) {
+		load_catalogo('t_ley','select','7A');
 		frm_add_turno();
-		autocomplete_input('sp','sp_id');
-		autocomplete_input('sp_uai','sp_uai_id');
-		autocomplete_input('persona','persona_id');
-		autocomplete_input('expediente','expediente_id');
-		autocomplete_input('oficio','oficio_id');
 		autocomplete_input('oficio_envio','oficio_e_id');
-		
-		$('#estado').change(function(e) {
+		eventNormatividad();
+		$('#question').change(function(e) {
 			e.preventDefault();
-			var e = $(this).val();
-			//cuando es tramite
-			if ( e == '1' || e == '9'  ) {
-				$('#contenedor_0').removeClass('hidden');
-				$('#contenedor_1,#contenedor_2,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
-			}
-			//cuando es archivo o imporcedencia
-			if ( e == '3' ) {
-				$('#contenedor_1').removeClass('hidden');
-				$('#contenedor_0,#contenedor_2,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
-			}
-			//Cuando es respo
-			if ( e == '8' ) {
-				$('#contenedor_2').removeClass('hidden');
-				$('#contenedor_0,#contenedor_1,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
-			}
-			//Cuando es incompetencia
-			if ( e == '4' ) {
-				$('#contenedor_3').removeClass('hidden');
-				$('#contenedor_0,#contenedor_2,#contenedor_1,#contenedor_4,#contenedor_5').addClass('hidden');
-			}
-			//Cuando es acumulado
-			if ( e == '2' ) {
-				$('#contenedor_4').removeClass('hidden');
-				$('#contenedor_0,#contenedor_2,#contenedor_3,#contenedor_1,#contenedor_5').addClass('hidden');
-			}
-			//Cuando es reserva e improcedencia 
-			if ( e == '10' || e == '11' ) {
-				alerta('div_turno','error','NO CUENTAS CON EL PERFIL PARA REALIZAR TURNOS CON EL ESTADO SELECCIONADO.','');
-				$('#btn_turnar').addClass('hidden');
+			if ( $(this).val() !=3 ) {
+				$('#div_conductas').removeClass('hidden');
 			}else{
-				$('#btn_turnar').removeClass('hidden');
+				$('#div_conductas').addClass('hidden');
 			}
 		});
 	}
 	if ( url == '?menu=turnado_multi' ) {
 		load_catalogo('estado','select',12);
-		load_catalogo('t_ley','select',7);
+		load_catalogo('t_ley','select','7A');
 		load_catalogo('dependencia_f','select',77);
 		frm_add_turno_multi();
 		autocomplete_input('sp','sp_id');
@@ -181,7 +239,7 @@ function getURL(url) {
 				$('#contenedor_0,#contenedor_2,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
 			}
 			//Cuando es respo
-			if ( e == '8' ) {
+			if ( e == '7' ) {
 				$('#contenedor_2').removeClass('hidden');
 				$('#contenedor_0,#contenedor_1,#contenedor_3,#contenedor_4,#contenedor_5').addClass('hidden');
 			}
@@ -289,6 +347,151 @@ function add_aver_prev() {
             '</div>';
 	$('#otras_aver').append(html);
 }
+function getListadoQD() {
+	var datos = {
+	    class: 'table-striped table-bordered table-hover',
+	    columnas: [
+	    	{ leyenda: 'Acciones', class:'text-center', style: 'width:10px;',ordenable:true,columna:'id'},
+	        { leyenda: 'ID', class:'text-center', style: 'width:10px;',ordenable:true,columna:'id'},
+	        { leyenda: 'No. expediente',class:'text-center', columna:'q.cve_exp',ordenable:true,filtro:true},
+	        { leyenda: 'Equipo de trabajo',class:'text-center', columna:'',ordenable:false,filtro:true,style: 'width:400px;'},
+	        { leyenda: 'Estado',class:'text-center',  columna:'e.id',ordenable:false,filtro:function(){
+	        	return anexGrid_select({
+    	            data: estados
+    	        });
+	        }},
+	        { leyenda: 'Procedencia',class:'text-center', style: 'width:100px;', columna:'',ordenable:false},
+	        { leyenda: 'Fecha/Hora de hechos',class:'text-center', style: 'width:100px;', columna:'',ordenable:false},
+	        { leyenda: 'Municipio',class:'text-center', style: 'width:100px;', columna:'m.id',ordenable:false,filtro:function(){
+	        	return anexGrid_select({
+    	            data: municipios
+    	        });
+	        }},
+	        { leyenda: 'Probable conducta', class: 'text-center', columna:'',ordenable:false },
+	        { leyenda: 'Fecha_apertura', class: 'text-center', columna:'',ordenable:false },
+	        { leyenda: 'Contadores', class: 'text-center', columna:'',ordenable:false },
+	        { leyenda: '', class: 'text-center', columna:'',ordenable:false },
+	    ],
+	    modelo: [
+	    	{ class:'',formato: function(tr, obj, valor){
+	    		var acciones = [];
+	    		var nivel = $('#nivel').val();
+	    		acciones = [
+		    				{ href: "javascript:open_modal('modal_add_opinion',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Agregar opinión' },
+	                        { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
+	                        { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
+	                        { href: 'index.php?menu=m_queja&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Modificar' },
+	                        //{ href: 'index.php?menu=turnar&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Enviar' },
+	                    ];
+	                
+	            if ( obj.jefe == 'NO ASIGNADO' ) {
+	            	acciones.push({ href: "javascript:open_modal('modal_asignar',"+obj.id+");", contenido: '<i class="fa fa-user"></i> Asignar equipo de trabajo' });
+	            }
+	            if ( obj.edo_id != '7' ) {
+	            	acciones.push({ href: "index.php?menu=enviar&queja="+obj.id, contenido: '<i class="fa fa-user"></i> Turnar a D. R. en A. I.' });
+	            }
+	            if(nivel == 'SECRETARIA'){
+	    			acciones = [
+	    				{ href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
+                    ];
+	    		}
+	            return anexGrid_dropdown({
+                    contenido: '<i class="glyphicon glyphicon-cog"></i>',
+                    class: 'btn btn-primary opciones',
+                    target: '__blank',
+                    id: 'editar-' + obj.id,
+                    data: acciones
+                });
+	        }}, 
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	if ( obj.fase >= 0 && obj.fase <=70) { tr.addClass('bg-green'); }
+	        	if ( obj.fase >= 71 && obj.fase <=88) { tr.addClass('bg-yellow'); }
+	        	if ( obj.fase >= 89 && obj.fase <=90) { tr.addClass('bg-red'); }
+	        	if ( obj.fase >= 91 ) { tr.addClass('bg-purple'); }
+	            return obj.id;
+	        }}, 
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	var fila = "";
+	        	if (obj.multiple_id != '0' && obj.multiple_id != null) {
+	        		fila = "<ol>"+
+	        			"<li>"+obj.cve_exp+"</li>"+
+	        			"<li> F-"+obj.multiple_id+"</li>"+
+	        		"</ol>";
+	        	}else{
+	        		fila = obj.cve_exp;
+	        	}
+	        	
+	            return fila;
+	        }},
+	        {class:'text-left', formato: function(tr, obj, valor){
+	        	var personal = "", subd = "", jefe = "", abogado = "";
+	        	if(obj.jefe != 'NO ASIGNADO' ){ jefe = obj.jefe; }else{ jefe = 'NO ASIGNADO' }
+	        	if(obj.full_name != 'NO ASIGNADO' ){ abogado = obj.full_name; }else{ abogado = 'NO ASIGNADO' }
+	        	personal = '<b>JEFE DE DEPTO.:</b> '+jefe+'<br>'+'<b>ABOGADO:</b> '+abogado;
+	        	return personal;
+	        }},
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	return obj.n_estado;
+	        }}, 
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	return obj.procedencia;
+	        }}, 
+	        {class:'', formato: function(tr, obj, valor){
+	            return obj.f_hechos+
+	            	'\n'+
+	            	obj.h_hechos;
+	        }}, 
+	        {class:'text-center', formato: function(tr, obj, valor){
+	            return obj.municipio;
+	        }}, 
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	return 'Conducta resumida';
+	        }},
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	return obj.f_alta;
+	        }},
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	var contadores = "";
+	        	contadores += "<b>Desde alta:</b> "+obj.fase+" días <br>";
+	        	contadores += "<b>Desde los hechos:</b> "+obj.resta+" días ";
+	        	return contadores;
+	        }},
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	var icono = "";
+	        	var resta = parseInt(obj.resta);
+	        	if( resta >= 1 && resta < 457 ){ icono = '<i class="fa fa-smile-o" style="font-size: 25px;"></i>'; }
+	        	if( resta >= 457 && resta < 640 ){ icono = '<i class="fa  fa-exclamation-triangle" style="font-size: 25px;"></i>'; }
+	        	if( resta >= 640 && resta < 823 ){ icono = '<i class="fa  fa-ban" style="font-size: 25px;"></i>'; }
+	        	if( resta >= 823 && resta < 1095 ){ icono = '<i class="fa fa-thumbs-o-down" style="font-size: 25px;"></i>'; }
+	        	//Agregar el icono del estatus
+	        	if (obj.n_estado == 'ARCHIVO') {
+	        		return icono+' <i class="fa fa-archive" style="font-size: 25px;"></i>';
+	        	}else if (obj.n_estado == 'RESPONSABILIDADES') {
+	        		return icono+' <i class="fa fa-balance-scale" style="font-size: 25px;"></i>';
+	        	}else if (obj.n_estado == 'PRESCRITO') {
+	        		return icono+' <i class="fa fa-file-o" style="font-size: 25px;"></i>';
+	        	}else{
+	        		return icono +"  ";
+	        	}
+	        	return icono;
+	        }},
+	        
+	         
+	    ],
+	    url: 'controller/puente.php?option=1',
+	    columna: 'id',
+	    columna_orden: 'DESC',
+	    ordenable: true,
+	    type:'POST',
+	    paginable:true,
+	    limite:[25,50,100,200,500],
+	    filtrable:true
+	    
+	};
+	var tabla = $("#lista_qd").anexGrid(datos);
+	
+	return false;
+}
 function listado_qd() {
 	
 	load_catalogo('','json',10);
@@ -308,55 +511,85 @@ function listado_qd() {
 	    class: 'table-striped table-bordered table-hover',
 	    columnas: [
 	    	{ leyenda: 'Acciones', class:'text-center', style: 'width:10px;',ordenable:true,columna:'id'},
-	        { leyenda: 'ID', class:'text-center', style: 'width:20px;',ordenable:true,columna:'id'},
-	        { leyenda: 'No. Folio',class:'text-center',  columna:'q.cve_ref',ordenable:false,filtro:true},
+	        { leyenda: 'ID', class:'text-center', style: 'width:10px;',ordenable:true,columna:'id'},
+	        //{ leyenda: 'Número_Folio',class:'text-center',style: 'width:200px;',  columna:'q.cve_ref',ordenable:false,filtro:true},
 	        { leyenda: 'No. expediente',class:'text-center', columna:'q.cve_exp',ordenable:true,filtro:true},
-	        { leyenda: 'Abogado asignado',class:'text-center', columna:'pe.nombre',ordenable:false,filtro:true},
 	        { leyenda: 'Adscripción',class:'text-center', columna:'a.nombre',ordenable:false,filtro:true},
+	        { leyenda: 'Abogado_asignado',class:'text-center', columna:'pe.nombre',ordenable:false,filtro:true,style: 'width:400px;'},
+	        { leyenda: 'Jefe_de_Depto.',class:'text-center', columna:'pe.nombre',ordenable:false,filtro:true,style: 'width:400px;'},
 	        { leyenda: 'Estado',class:'text-center',  columna:'e.id',ordenable:false,filtro:function(){
 	        	return anexGrid_select({
     	            data: estados
     	        });
 	        }},
 	        { leyenda: 'Fecha/Hora de hechos',class:'text-center', style: 'width:100px;', columna:'',ordenable:false},
-	        { leyenda: 'Infracción(es)',class:'text-center', style: 'width:100px;', columna:'',ordenable:false},
+	        { leyenda: 'Presunta(s)_Infracción(es)',class:'text-center', columna:'',ordenable:false, style: 'width:400px;' },
 	        { leyenda: 'Municipio',class:'text-center', style: 'width:100px;', columna:'m.id',ordenable:false,filtro:function(){
 	        	return anexGrid_select({
 	        		//class:'select2',
     	            data: aux
     	        });
 	        }},
-	        { leyenda: 'Procedencia',class:'text-center', style: 'width:100px;', columna:'',ordenable:false},
+	        //{ leyenda: 'Procedencia',class:'text-center', style: 'width:100px;', columna:'',ordenable:false},
 	        { leyenda: 'Fase', class: 'text-center', style: 'width:10px;', columna:'',ordenable:false },
 	        { leyenda: 'Condición', class: 'text-center', columna:'',ordenable:false },
+	        { leyenda: 'Fecha_apertura', class: 'text-center', columna:'',ordenable:false },
+	        { leyenda: 'Información_extraordinaria', class: 'text-center', columna:'',ordenable:false },
 	    ],
 	    modelo: [
 	    	{ class:'',formato: function(tr, obj, valor){
 	    		var acciones = [];
 	    		var nivel = $('#nivel').val();
-	    		if (nivel == 'SECRETARIA') {
+	    		if(nivel == 'DIRECTOR'){
+                    if ( obj.n_estado == 'RESPONSABILIDADES' ) {
+		    			acciones = [
+		    				{ href: "javascript:open_modal('modal_add_opinion',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Agregar opinión' },
+	                        { href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
+	                        { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
+	                        { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
+	                        //{ href: 'index.php?menu=m_queja&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Modificar' },
+	                        //{ href: 'index.php?menu=turnar&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Enviar' },
+	                        { href: "javascript:open_modal('modal_asignar',"+obj.id+");", contenido: '<i class="fa fa-user"></i> Asignar a un abogado' },
+	                    ];
+                    }else{
+		    			acciones = [
+		    				{ href: "javascript:open_modal('modal_add_opinion',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Agregar opinión' },
+	                        { href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
+	                        { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
+	                        { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
+	                        //{ href: 'index.php?menu=m_queja&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Modificar' },
+	                        { href: 'index.php?menu=turnar&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Enviar' },
+	                        { href: "javascript:open_modal('modal_asignar',"+obj.id+");", contenido: '<i class="fa fa-user"></i> Asignar a un abogado' },
+	                    ];
+                    }
+	    		}else if(nivel == 'SUBDIRECTOR'){
+	    			if ( obj.n_estado == 'RESPONSABILIDADES' ) {
+	    				acciones = [
+		    				{ href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
+		    				{ href: "javascript:open_modal('modal_add_opinion',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Agregar comentario' },
+		    				{ href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
+		    				{ href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
+		    				{ href: "javascript:open_modal('modal_asignar',"+obj.id+");", contenido: '<i class="fa fa-user"></i> Asignar a un abogado' },
+                    	];
+	    			}else{
+	    				acciones = [
+		    				{ href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
+		    				{ href: "javascript:open_modal('modal_add_opinion',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Agregar comentario' },
+		    				{ href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
+		    				{ href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
+		    				{ href: 'index.php?menu=turnar&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Enviar' },
+		    				{ href: "javascript:open_modal('modal_asignar',"+obj.id+");", contenido: '<i class="fa fa-user"></i> Asignar a un abogado' },
+	                    ];
+	    			}
+	    		}else if(nivel == 'SECRETARIA'){
 	    			acciones = [
-                        { href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
-                        { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
-                        { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
-                        { href: 'index.php?menu=m_queja&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Modificar' },
+	    				{ href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
                     ];
-	    		}else if(nivel == 'JEFE'){
+	    		}else if(nivel == 'JEFE' || nivel == 'ANALISTA'){
 	    			acciones = [
-                        { href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
-                        { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
-                        { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
-                        { href: "javascript:open_modal('modal_asignar',"+obj.turno_id+");", contenido: '<i class="fa fa-user"></i> Asignar a un abogado' },
+	    				{ href: "javascript:open_modal('modal_add_opinion',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Agregar comentario' },
+	    				{ href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
                     ];
-	    		}else{
-	    			acciones = [
-                        { href: "index.php?menu=seguimiento&queja="+obj.id, contenido: '<i class="fa fa-folder"></i> Datos de presuntos y quejosos' },
-                        { href: "javascript:open_modal('modal_upload_file',"+obj.id+");", contenido: '<i class="glyphicon glyphicon-cloud"></i> Adjuntar documento al expediente' },
-                        { href: "index.php?menu=cedula&queja="+obj.id, contenido: '<i class="glyphicon glyphicon-eye-open "></i>Ver cédula' },
-                        { href: 'index.php?menu=m_queja&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Modificar' },
-                        { href: 'index.php?menu=turnar&queja='+obj.id, contenido: '<i class="fa fa-pencil"></i> Enviar' },
-                    ];
-	    			
 	    		}
 	            return anexGrid_dropdown({
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
@@ -369,12 +602,12 @@ function listado_qd() {
 	        {class:'text-center', formato: function(tr, obj, valor){
 	            return obj.id;
 	        }}, 
-	        {class:'text-center', formato: function(tr, obj, valor){
+	        /*{class:'text-center', formato: function(tr, obj, valor){
 	            return obj.cve_ref;
-	        }}, 
+	        }},*/ 
 	        {class:'text-center', formato: function(tr, obj, valor){
 	        	var fila = "";
-	        	if (obj.multiple_id != '0') {
+	        	if (obj.multiple_id != '0' && obj.multiple_id != null) {
 	        		fila = "<ol>"+
 	        			"<li>"+obj.cve_exp+"</li>"+
 	        			"<li> F-"+obj.multiple_id+"</li>"+
@@ -386,11 +619,19 @@ function listado_qd() {
 	            return fila;
 	        }},
 	        {class:'text-center', formato: function(tr, obj, valor){
+	        	return obj.n_area;
+	        }}, 
+	        {class:'text-center', formato: function(tr, obj, valor){
 	        	return obj.full_name;
 	        }}, 
 	        {class:'text-center', formato: function(tr, obj, valor){
-	        	return obj.n_area;
+	        	if ( obj.jefe_name !== '') {
+	        		return 'NO ASIGNADO';
+	        	}else{
+	        		return obj.jefe_name;
+	        	}
 	        }}, 
+	        
 	        {class:'text-center', formato: function(tr, obj, valor){
 	        	if (obj.n_estado == 'ARCHIVO') {
 	        		return obj.n_estado+"<br>"+'<i class="fa fa-archive" style="font-size: 25px;"></i>';
@@ -403,12 +644,10 @@ function listado_qd() {
 	        	}
 	            
 	        }}, 
-	        {class:'text-center', formato: function(tr, obj, valor){
-	            return '<ol>'+
-	            	'<li>'+obj.f_hechos+'</li>'+
-	            	'<li>'+obj.h_hechos+'</li>'+
-	            	''+
-	            '</ol>';
+	        {class:'', formato: function(tr, obj, valor){
+	            return obj.f_hechos+
+	            	'\n'+
+	            	obj.h_hechos;
 	        }}, 
 	        {class:'text-justify', formato: function(tr, obj, valor){
 	        	
@@ -422,11 +661,12 @@ function listado_qd() {
 	        {class:'text-center', formato: function(tr, obj, valor){
 	            return obj.municipio;
 	        }}, 
-	        {class:'text-center', formato: function(tr, obj, valor){
+	        /*{class:'text-center', formato: function(tr, obj, valor){
 	            return obj.procedencia;
-	        }},
+	        }},*/
 	        {class:'text-center', formato: function(tr, obj, valor){
 	        	var fase = parseInt(obj.fase);
+
 	        	var icono = '';
 	        	var resta = parseInt(obj.resta);
 	        	if( resta >= 1 && resta < 457 ){ icono = '<i class="fa fa-smile-o" style="font-size: 25px;"></i>'; }
@@ -434,28 +674,42 @@ function listado_qd() {
 	        	if( resta >= 640 && resta < 823 ){ icono = '<i class="fa  fa-ban" style="font-size: 25px;"></i>'; }
 	        	if( resta >= 823 && resta < 1095 ){ icono = '<i class="fa fa-thumbs-o-down" style="font-size: 25px;"></i>'; }
 
-	        	icono += obj.t_tramite+' Fecha de turnado: '+obj.f_turno+' ('+obj.f_reasignado+')';
+	        	//icono += obj.t_tramite+' Fecha de turnado: '+obj.f_turno+' ('+obj.f_reasignado+')';
 	            if (fase >= 0 && fase < 70) {
 					tr.addClass('bg-green');
-	            	return 'INVESTIGAR ('+fase+')'+icono;
+	            	return 'DÍAS('+fase+')'+icono;
 	            }
 	            if (fase > 70 && fase < 88) {
 	            	tr.addClass('bg-yellow');
-	            	return 'COMPLEMENTO DE INVESTIGACIÓN('+fase+')'+icono;
+	            	return 'DÍAS('+fase+')'+icono;
 	            }
 	            if (fase > 88 && fase <= 90) {
 	            	tr.addClass('bg-red-active');
-	            	return 'DETERMINACIÓN ('+fase+')'+icono;
+	            	return 'DÍAS('+fase+')'+icono;
 	            }
 	            if (fase > 90) {
 	            	tr.addClass('bg-purple');
-	            	return 'CRÍTICA ('+fase+')'+icono;
+	            	return 'DÍAS('+fase+')'+icono;
 	            }
 
 	        }}, 
 	        {class:'text-center', formato: function(tr, obj, valor){
 	        	return obj.visto;
-	        }}, 
+	        }},
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	return obj.f_alta;
+	        }},
+	        {class:'text-center', formato: function(tr, obj, valor){
+	        	var lista = "";
+	        	lista += "<ol align='left'>";
+	        		//lista += "<li>Tipo de trámite: <br>"+obj.t_tramite+"</li>";
+	        		lista += "<li>Fecha de turnado: <br>"+obj.f_turno+"</li>";
+	        		lista += "<li>¿Reasignación?: <br>"+obj.f_reasignado+"</li>";
+	        	lista += "</ol>";
+
+	        	return lista;
+	        }},
+	         
 	    ],
 	    url: 'controller/puente.php?option=1',
 	    columna: 'id',
@@ -479,6 +733,7 @@ function frm_add_queja() {
 		var r = smart_ajax(dataForm);
 		console.log(r);
 		alerta('div_alert',r.status,r.message,'');
+		//location.reload();
 	});
 }
 //Formulario de alta de tipo de referencia
@@ -497,7 +752,7 @@ function frm_add_referencia() {
 //Creador de alertas automatico
 function alerta(div,estado,mensaje,modal)
 {
-	var clase,icono,msj,edo;
+	var clase, icono, msj,edo;
 	if ( estado == 'error' ) {
 		icono = "fa-times";
 		clase = "alert-danger";
@@ -509,7 +764,7 @@ function alerta(div,estado,mensaje,modal)
 			time = 5000;
 		}
 	}
-	if ( estado == 'success') {
+	if ( estado == 'success' ) {
 		icono = "fa-check";
 		clase = "alert-success";
 		msj = mensaje;
@@ -534,13 +789,21 @@ function alerta(div,estado,mensaje,modal)
 			$('#'+modal).modal('hide');
 		}
 	},time);
+	if ((div == 'div_turno' && estado == 'success') || div == 'div_alert') {
+		setInterval(function(){
+			location.href = 'index.php?menu=list_queja';
+		},time);
+	}
 	return false;
 }
 //Funcion para abrir un modal
 function open_modal(modal,value) {
 	$('#'+modal).modal('show');
+	//alert('Modal: '+modal+' valor: '+value);
 	if ( modal == 'modal_upload_file' ) { $('#queja_id').val(value); }
-	if ( modal == 'modal_asignar' ){$('#turno_id').val(value);}
+	if ( modal == 'modal_add_opinion' ) { $('[name="queja_id"]').val(value); }
+	if ( modal == 'modal_asignar' ){$('[name="queja_id"]').val(value);}
+	if ( modal == 'modal_aviso' ){$('[id="conducta_id"]').val(value);}
 	return false;
 }
 //Funcion de accion para el formulario de adjuntar documento al expediente.
@@ -631,11 +894,28 @@ function generate_code(element) {
 }
 function load_catalogo(element,type,option){
 	var result;
-	if( element == 'conductas' ){
-		var data = $('#t_ley').val();
-	}else{
-		var data = '0';
+	var data = $('#capitulos').val();
+	//var data = $('#t_ley').val();
+	var art = $('#art').val();
+	var sec = $('#secciones').val();
+	var fracciones = $('#fracciones').val();
+	/*if( element == 'conductas' || element == 'art' || element == 'secciones' || element == 'fracciones' ){
+		var data = $('#capitulos').val();
+		//var data = $('#t_ley').val();
+		var art = $('#art').val();
+		var sec = $('#secciones').val();
+		var fracciones = $('#fracciones').val();
 	}
+	else */if(element == 'procedencia'){
+		var data = $('#t_asunto').val();
+	}else if (element == 'capitulos'){
+		var data = $('#t_ley').val();
+	}/*else{
+		var data = '0';
+		var art = $('#art').val();
+		var sec = $('#secciones').val();
+		var fracciones = $('#fracciones').val();
+	}*/
 	if ( element != '' ) {
 		$('#'+element).html('');
 	}
@@ -643,19 +923,18 @@ function load_catalogo(element,type,option){
 		url: 'controller/puente.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {option: option, data:data},
+		data: {option: option, data:data,art:art,sec:sec,fra:fracciones },
 		async:false,
 		cache:false,
 	})
 	.done(function(response) {
 		if ( type == 'select') {
-			if( element == 'conductas' ){
-				$('#conductas').attr('multiple', '');
-				$('#conductas').select2();
-			}
+			if(element == 'art'){$('#art').select2();}
 			$('#'+element).append('<option value="" >...</option>');
 			$.each(response, function(index, val) {
-				$('#'+element).append('<option value="'+val.id+'">'+val.nombre+'</option>');
+				if(val.id !== null){
+					$('#'+element).append('<option value="'+val.id+'">'+val.nombre+'</option>');
+				}
 			});
 			result = false;
 		}else{
@@ -664,20 +943,12 @@ function load_catalogo(element,type,option){
 		}
 	})
 	.fail(function() {
-		alert('Ocurrio un error al cargar el catalogo de opcion: '+option)
+		alert('Ocurrio un error al cargar el catalogo de opcion: '+option);
 	});
-
 	//Generar la clave del expediente
 	if ( element == 't_tra' ) {
 		generate_code(element);
-	}
-	if ( element == 't_ley' ) {
-		$('#'+element).change(function(e){
-			e.preventDefault();
-			load_catalogo( 'conductas', 'select', 8);
-		});
-	}
-		
+	}		
 }
 // Setear un array de municipios 
 function setInfo( json ) { rescate = json; }
@@ -831,14 +1102,14 @@ function change_procedencia() {
 	$('#procedencia').change(function(e) {
 		e.preventDefault();
 		var valor = $(this).val();
-		if (valor == 1 ) {
+		if (valor == 2) {
 			$('#estatal').removeClass('hidden');
 			$('#cprs').addClass('hidden');
-		}else if (valor == '' ) {
+		}else if (valor == 1 || valor == 3) {
 			$('#estatal').addClass('hidden');
-			$('#cprs').addClass('hidden');
-		}else{
 			$('#cprs').removeClass('hidden');
+		}else{
+			$('#cprs').addClass('hidden');
 			$('#estatal').addClass('hidden');
 		}
 	});
@@ -885,6 +1156,7 @@ function frm_edit_queja() {
 	$('#frm_edit_queja').submit(function(e) {
 		e.preventDefault();
 		var dataForm = $(this).serializeArray();
+		console.log(dataForm);
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
@@ -894,7 +1166,7 @@ function frm_edit_queja() {
 			cache:false,
 		})
 		.done(function(r) {
-			alerta('div_alert',r.status,r.message,'');
+			alerta('edit_alert',r.status,r.message,'');
 			setTimeout(function(){
 				window.location.reload();
 			},3000);
@@ -996,8 +1268,10 @@ function frm_reportes(){
 			cache: false,
 		})
 		.done(function(response) {
+			console.log(response);
 			if (response.status == 'error') {
 				alerta('alert_reporte','error',response.message,'');
+				tbl.rows().remove().draw();
 			}else{
 				if ( ! $.fn.DataTable.isDataTable( '#reporte' ) ) {
 					tbl = applyDataTables('reporte');
@@ -1025,7 +1299,8 @@ function frm_reportes(){
 			            val.f_hechos +' / '+ val.h_hechos,
 			           	'<ol>'+conductas+'</ol>',
 			            val.municipio ,
-			            val.procedencia
+			            val.procedencia,
+			            val.d_hechos
 			        ] ).draw( false );
 				});
 			}			
@@ -1067,9 +1342,9 @@ function addPresuntos() {
 		for (var i = 0; i < cantidad; i++) {
 			var formulario = "";
 			
-			formulario +=  '<div class="row">'+
+			formulario +=  '<div id="frm_presunto_'+conta+'" class="row">'+
 			    '<div class="col-md-12">'+
-			        '<h3>FORMULARIO PRESUNTO RESPONSABLE '+conta+'</h3>'+
+			        '<h3>FORMULARIO PRESUNTO RESPONSABLE '+conta+' <button class="btn btn-danger btn-flat" type="button" onclick="remove_frm('+"'frm_presunto_"+conta+"'"+')"> <i class="fa fa-trash"></i> </button> </h3>'+
 			        '<div class="row">'+
 			            '<div class="col-md-4">'+
 			                '<div class="form-group">'+
@@ -1090,10 +1365,55 @@ function addPresuntos() {
 			                '</div>'+
 			            '</div>'+
 			        '</div>'+
-			        '<div class="row">'+
+			       	'<div class="row">'+
+			       		'<div class="col-md-3">'+
+			       			'<div class="form-group">'+
+			       				'<label>RFC</label>'+
+			       				'<input type="text" id="rfc" name="rfc[]" class="form-control" value="">'+
+			       			'</div>'+
+			       		'</div>'+
+			       		'<div class="col-md-3">'+
+			       			'<div class="form-group">'+
+			       				'<label>CURP</label>'+
+			       				'<input type="text" id="curp" name="curp[]" class="form-control" value="">'+
+			       			'</div>'+
+			       		'</div>'+
+			       		'<div class="col-md-3">'+
+			       			'<div class="form-group">'+
+			       				'<label>CUIP</label>'+
+			       				'<input type="text" id="cuip" name="cuip[]" class="form-control" value="">'+
+			       			'</div>'+
+			       		'</div>'+
+			       		'<div class="col-md-3">'+
+			       			'<div class="form-group">'+
+			       				'<label>Tipo de puesto</label>'+
+			       				'<select id="t_puesto" name="t_puesto[]" class="form-control">'+
+			       					'<option value="">...</option>'+
+			       					'<option value="1">Administrativo</option>'+
+			       					'<option value="2">Operativo</option>'+
+			       				'</select>'+
+			       			'</div>'+
+			       		'</div>'+
+			       	'</div>'+
+ 			        '<div class="row">'+
+        	            '<div class="col-md-4">'+
+        	            	'<div class="form-group">'+
+        	            		'<label>Selecciona un cargo</label>'+
+        		            	'<div class="input-group">'+
+        		            		'<select id="cargo" name="cargo[]" class="form-control cargos">'+
+        		            			'<option value="">...</option>'+
+        		            		'</select>'+
+        		            		'<span class="input-group-btn">'+
+        		            			'<button onclick="open_modal('+"'modal_add_cargo'"+",''"+');" type="button" class="btn btn-info btn-flat" >'+
+        		            				'<i class="fa fa-plus"></i>'+
+        		            			'</button>'+
+        		            		'</span>'+
+        		            	'</div>'+
+        	            	'</div>'+
+        	            '</div>'+
 			            '<div class="col-md-4">'+
 			                '<div class="form-group">'+
-			                    '<label for="ge">Seleccione el genero</label>'+
+			                    '<label for="ge">Seleccione el género</label>'+
 			                    '<select id="ge" name="ge[]" class="form-control">'+
 			                        '<option value="">...</option>'+
 			                        '<option value="1">Hombre</option>'+
@@ -1103,96 +1423,20 @@ function addPresuntos() {
 			            '</div>'+
 			            '<div class="col-md-4">'+
 			                '<div class="form-group">'+
-			                    '<label for="cargo">Seleccione el cargo</label>'+
-			                    '<select id="cargo" name="cargo[]" class="form-control">'+
-			                        '<option value=""></option>'+
-			                    '</select>'+
-			                '</div>'+
-			            '</div>'+
-			            '<div class="col-md-4">'+
-			                '<div class="form-group">'+
-			                    '<label>Municipio</label>'+
-			                    '<select id="mun" name="mun[]" class="form-control">'+
-			                        '<option value="">...</option>'+
-			                    '</select>'+
-			                '</div>'+
-			            '</div>'+
-			        '</div>'+
-			        '<div class="row">'+
-			            '<div class="col-md-4">'+
-			                '<div class="form-group">'+
 			                    '<label>Procedencia</label>'+
 			                    '<select id="procedencia" name="pro[]" class="form-control">'+
 			                        '<option value="">...</option>'+
-			                        '<option value="1">ESTATAL</option>'+
-			                        '<option value="2">CPRS</option>'+
+			                        '<option value="1">CPRS</option>'+
+			                        '<option value="2">Secretaría de Seguridad</option>'+
+			                        '<option value="3">Administrativo</option>'+
 			                    '</select>'+
 			                '</div>'+
 			            '</div>'+
+			            			            
 			        '</div>'+
-			        '<div id="estatal" class="">'+
-			            '<div class="row">'+
-			                '<div class="col-md-3">'+
-			                    '<div class="form-group">'+
-			                        '<label>Adscripción</label>'+
-			                        '<input type="text" name="adscripcion[]" class="form-control">'+
-			                    '</div>'+
-			                '</div>'+
-			                '<div class="col-md-3">'+
-			                    '<div class="form-group">'+
-			                        '<label>Subdirección</label>'+
-			                        '<select id="subdir" name="subdir[]" class="form-control">'+
-			                            '<option value="">...</option>'+
-			                        '</select>'+
-			                    '</div>'+
-			                '</div>'+
-			                '<div class="col-md-3">'+
-			                    '<div class="form-group">'+
-			                        '<label>Region</label>'+
-			                        '<select id="region" name="region[]" class="form-control">'+
-			                            '<option value="">...</option>'+
-			                        '</select>'+
-			                    '</div>'+
-			                '</div>'+
-			                '<div class="col-md-3">'+
-			                    '<div class="form-group">'+
-			                        '<label>Agrupamiento</label>'+
-			                        '<select id="agrupamiento" name="agrupamiento[]" class="form-control">'+
-			                            '<option value="">...</option>'+
-			                        '</select>'+
-			                    '</div>'+
-			                '</div>'+
-			            '</div>'+
-			        '</div>'+
+			        
 			        '<div id="cprs" class="">'+
-			            '<div class="row">'+
-			                '<div class="col-md-4">'+
-			                    '<div class="form-group">'+
-			                        '<label>Agencia</label>'+
-			                        '<input type="text" name="agencia[]" class="form-control">'+
-			                    '</div>'+
-			                '</div>'+
-			                '<div class="col-md-4">'+
-			                    '<div class="form-group">'+
-			                        '<label>Fiscalia</label>'+
-			                        '<input type="text" name="fiscalia[]" class="form-control">'+
-			                    '</div>'+
-			                '</div>'+
-			                '<div class="col-md-4">'+
-			                    '<div class="form-group">'+
-			                        '<label>Mesa</label>'+
-			                        '<input type="text" name="mesa[]" class="form-control">'+
-			                    '</div>'+
-			                '</div>'+
-			            '</div>'+
-			            '<div class="row">'+
-			                '<div class="col-md-4">'+
-			                    '<div class="form-group">'+
-			                        '<label>Turno</label>'+
-			                        '<input type="text" id="turno" name="turno[]" class="form-control" value="" >'+
-			                    '</div>'+
-			                '</div>'+
-			            '</div>'+
+			            
 			        '</div>'+
 			        '<div class="row">'+
 			            '<div class="col-md-12">'+
@@ -1211,6 +1455,10 @@ function addPresuntos() {
 	}else{
 		alert('NO');
 	}
+	load_cargos();
+}
+function remove_frm(frm) {
+	$('#'+frm).remove();
 }
 function load_municicios(name) {
 	$.ajax({
@@ -1234,14 +1482,59 @@ function load_municicios(name) {
 	});
 	return false;
 }
+//cargos para  formularios de multiple de adminision
+function load_cargos() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: 22},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		var options = "";
+		options += '<option value="" >...</option>';
+		$.each(response, function(index, val) {
+			options += '<option value="'+val.id+'">'+val.nombre+'</option>';
+		});
+		$('.cargos').html(options);
+	})
+	.fail(function() {
+		alert('Ocurrio un error al cargar el catalogo de opcion: '+option)
+	});
+	return false;
+}
+function load_adsp() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: 102},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		var options = "";
+		options += '<option value="" >...</option>';
+		$.each(response, function(index, val) {
+			options += '<option value="'+val.id+'">'+val.nombre+'</option>';
+		});
+		$('#a_presunto').html(options);
+	})
+	.fail(function() {
+		alert('Ocurrio un error al cargar el catalogo de opcion: '+option)
+	});
+	return false;
+}
 // 
 function frm_add_turno() {
 	$('#frm_add_turno').submit(function(e) {
 		e.preventDefault();
 		var dataForm;
-		if ( $('#estado').val() == '3' ) {
-			dataForm = new FormData(document.getElementById("frm_add_turno"));
-			p_ajax = {
+		dataForm = new FormData(document.getElementById("frm_add_turno"));
+		console.log(dataForm);
+		p_ajax = {
 			url: 'controller/puente.php',
 			type: 'POST',
 			dataType: 'json',
@@ -1250,38 +1543,15 @@ function frm_add_turno() {
 			cache:false,
 			processData: false,
             contentType: false,
-		};
-		}else if($('#estado').val() == '8'){
-			dataForm = $(this).serializeArray();
-			p_ajax = {
-				url: 'controller/puente.php',
-				type: 'POST',
-				dataType: 'json',
-				data: dataForm,
-				async:false,
-				cache:false,
-			};
-		}else{
-			dataForm = $(this).serialize();
-			p_ajax = {
-				url: 'controller/puente.php',
-				type: 'POST',
-				dataType: 'json',
-				data: dataForm,
-				async:false,
-				cache:false,
-			};
-		}
-		
+		};		
 		$.ajax(p_ajax)
 		.done(function(response) {
 			alerta('div_turno',response.status, response.message,'');
 		})
 		.fail(function(jqXHR,textStatus,errorThrown) {
-			alerta('div_turno',response.status,jqXHR.responseText,'');
+			alerta('div_turno','error',jqXHR.responseText,'');
 		});	
 	});//fin de submit
-	
 	return false;
 }
 
@@ -1359,15 +1629,32 @@ function tablero_ctrl() {
 			var fila = "";
 			suma += parseInt(val.cuenta);
 			fila += '<tr>';
-				fila += '<td>'+val.full_name+'</td>';
+				if (val.full_name != null) {
+					fila += '<td>'+val.full_name+'</td>';
+				}else{
+					fila += '<td>SIN ASIGNAR</td>';
+				}
+				if (val.n_area != null) {
+					fila += '<td>'+val.n_area+'</td>';
+				}else{
+					fila += '<td>SIN ASIGNAR</td>';
+				}
+				
+				
 				fila += '<td>'+val.cuenta+'</td>';
-				fila += '<td>';
-					fila += '<button type="button" class="btn btn-success btn-flat" onclick="verExpedientes('+"'abogado'"+','+val.id+');"> <i class="fa fa-eye" ></i> </button>';
-				fila += '</td>';
+				if (val.full_name != null) {
+					fila += '<td>';
+						fila += '<button type="button" class="btn btn-success btn-flat" onclick="verExpedientes('+"'abogado'"+','+val.id+');"> <i class="fa fa-eye" ></i> </button>';
+					fila += '</td>';
+				}else{
+					fila += '<td>SIN ASIGNACIONES</td>';
+				}
+				
 			fila += '</tr>';
 			$('#tbl_abogados').append(fila);
 		});
 		fila += '<tr>';
+			fila += '<td></td>';
 			fila += '<td class="text-right">TOTAL GENERAL</td>';
 			fila += '<td>'+suma+'</td>';
 			fila += '<td></td>';
@@ -1454,7 +1741,7 @@ function verExpedientes(tipo,num) {
 			c = i+1;
 			fila += "<tr>";
 				fila += "<td>"+c+"</td>";
-				fila += "<td><a href='index.php?menu=cedula&exp="+val.id+"'>"+val.cve_exp+"</a></td>";
+				fila += "<td><a href='index.php?menu=cedula&queja="+val.id+"'>"+val.cve_exp+"</a></td>";
 				fila += "<td>"+val.n_estado+"</td>";
 				fila += "<td>"+val.n_procedencia+"</td>";
 				fila += "<td>"+val.t_asunto+"</td>";
@@ -1693,6 +1980,189 @@ function frm_asignar() {
 		.fail(function(jqXHR,textStatus,errorThrown) {
 			alerta('m_asignar',"error",jqXHR.responseText,'modal_asignar');
 		});
+	});
+	return false;
+}
+//frm_add_cargo
+function frm_add_cargo() {
+	$('#frm_add_cargo').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			load_cargos();
+			alerta('m_cargo',response.status,response.message,'modal_add_cargo');
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('m_cargo',"error",jqXHR.responseText,'modal_add_cargo');
+		});
+		
+	});
+	return false;
+}
+function frm_add_adsp() {
+	$('#frm_add_adsp').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			load_adsp();
+			alerta('m_adsp',response.status,response.message,'modal_add_adsp');
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('m_adsp',"error",jqXHR.responseText,'modal_add_adsp');
+		});
+	});
+	return false;
+}
+function frm_add_opinion() {
+	$('#frm_add_opinion').submit(function(e) {
+		e.preventDefault();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: $(this).serialize(),
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('m_opinion',response.status,response.message,'modal_add_opinion');
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('m_opinion','error',jqXHR.responseText,'modal_add_opinion');
+		});
+	});
+}
+
+function eventNormatividad(){
+	$('#t_ley').change(function(e){
+		e.preventDefault();
+		load_catalogo( 'capitulos', 'select', '4X');
+		load_catalogo( 'conducta', 'select', 8);
+	});
+	$('#capitulos').change(function(e){
+		e.preventDefault();
+		$('#art,#secciones,#fracciones').html('');
+		load_catalogo( 'art', 'select', '7B');
+		load_catalogo( 'conducta', 'select', 8);
+
+	});
+	$('#art').change(function(e){
+		e.preventDefault();
+		$('#secciones,#fracciones').html('');
+		load_catalogo( 'secciones', 'select','7C');
+		load_catalogo( 'conducta', 'select', 8);
+	});
+	$('#secciones').change(function(e){
+		e.preventDefault();
+		$('#fracciones').html('');
+		load_catalogo( 'fracciones', 'select', '7D');
+		load_catalogo( 'conducta', 'select', 8);
+	});
+	$('#fracciones').change(function(e){
+		e.preventDefault();
+		load_catalogo( 'conducta', 'select', 8);
+	});
+}
+//funcion de eliminacio n de vias de recepcion asignadas a un expediente 
+function deleteVia( via_id ) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '21', via:via_id},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		alerta('edit_alert',response.status,response.message,'');
+		$('tr#'+via_id).hide('2500', function() {
+			console.log('Via de recepcion eliminada');		
+		});
+	})
+	.fail(function() {
+		alerta('edit_alert',response.status,response.message,'');
+	});
+	return false;
+}
+//eliminación de quejosos 
+function deleteQuejoso(quejoso_id) {
+	$('#quejoso_'+quejoso_id).hide(3000);
+	return false;
+}
+function deleteConducta(presunta,tipo) {
+	if (tipo == 'PRINCIPAL') {
+		open_modal('modal_aviso', presunta);
+	}else{
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {option: '14', presunta:presunta},
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('edit_alert',response.status,response.message,'');
+			$('tr#c_'+presunta).hide('2500', function() {
+				console.log('Via de recepcion eliminada');		
+			});
+		})
+		.fail(function() {
+			alerta('edit_alert',response.status,response.message,'');
+		});
+	}
+	
+	return false;
+}
+// confirmar la eliminación de la conducta PRINCIPAL
+function frm_aviso() {
+	$('#frm_aviso').submit(function(e) {
+		e.preventDefault();
+		var presunta = $('#conducta_id').val();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: {option: '14', presunta:presunta},
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('edit_alert',response.status,response.message,'');
+			$('tr#c_'+presunta).hide('2500', function() {
+				console.log('Via de recepcion eliminada');		
+			});
+		})
+		.fail(function() {
+			alerta('edit_alert',response.status,response.message,'');
+		});
+	});
+}
+//eventos de los controles de catalogo de area del presunto responsable 
+function eventOrganigrama() {
+	$('#area').change(function(e) {
+		e.preventDefault();
+		$('#area_'+$(this).val()).removeClass('hidden');
+		if ($(this).val() == 1) {$('#area_2,#area_3,#area_4').addClass('hidden');}
+		if ($(this).val() == 2) {$('#area_1,#area_3,#area_4').addClass('hidden');}
+		if ($(this).val() == 3) {$('#area_2,#area_1,#area_4').addClass('hidden');}
+		if ($(this).val() == 4) {$('#area_2,#area_3,#area_1').addClass('hidden');}
 	});
 	return false;
 }

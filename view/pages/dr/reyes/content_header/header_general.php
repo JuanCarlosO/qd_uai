@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Listado General de Expedientes 
+		UAI - ACTAS
 		<small>Listado de estatus de expedientes.</small>
 	</h1>
 	<ol class="breadcrumb">

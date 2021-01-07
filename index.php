@@ -19,9 +19,9 @@ if (!isset($_SESSION['id']) AND empty($_SESSION['id'])) {
     <?php include 'view/pages/principal.php';?>
 
     <!-- Main content -->
-    <section class="content">
+    <!-- <section class="content">
       
-    </section>
+    </section> -->
   </div>
   <!-- /.content-wrapper -->
   <?php include 'view/pages/footer.php'; ?>

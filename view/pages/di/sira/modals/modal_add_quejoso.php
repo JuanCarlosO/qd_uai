@@ -1,6 +1,6 @@
 <form action="#" id="frm_add_quejoso" method="post" >
 	<input type="hidden" name="option" value="36">
-	<input type="hidden" name="acta_id" value="<?=$_GET['acta']?>">
+	<input type="hidden" name="acciones_id" value="<?=$_GET['ac']?>">
 	<div class="modal fade" id="modal_add_quejoso">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -38,7 +38,7 @@
 							<input type="text" id="phone" name="phone" class="form-control" data-inputmask='"mask": "(999) 999-9999"' data-mask>
 						</div>
 						<div class="col-md-3">
-							<label>Genero</label>
+							<label>Género</label>
 							<select name="genero" class="form-control" required>
 								<option value="">...</option>
 								<option value="1">Hombre</option>
@@ -55,7 +55,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<label>Direccion</label>
+								<label>Dirección</label>
 								<textarea id="direccion" name="direccion" class="form-control" style="resize: vertical; max-height: 300px;"></textarea>
 							</div>
 						</div>

@@ -65,14 +65,14 @@ if ( isset($_GET['acta']) ) {
                     <!-- /.box-header -->
                     <div class="box-body">
                         <div id="div_alert"></div>
-                    	<form <?=$input_id_frm?> method="post" action="#">
-                    		<?php if ( isset($_GET['acta']) ): ?>
+                        <form <?=$input_id_frm?> method="post" action="#">
+                            <?php if ( isset($_GET['acta']) ): ?>
                                 <input type="hidden" id="option" name="option" value="32">
                                 <input type="hidden" id="acta_id" name="acta_id" value="<?=$r['actas']->id?>">
                             <?php else: ?>
                                 <input type="hidden" id="option" name="option" value="30">
                             <?php endif ?>
-                    		<div class="row">
+                            <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Área ejecutora<i class="fa fa-asterisk text-red"></i></label>
@@ -121,12 +121,12 @@ if ( isset($_GET['acta']) ) {
                                         <label>Tipo de actuación</label>
                                         <select name="t_actuacion" id="" class="form-control">
                                             <option value="">...</option>
-                                            <option value="1">INSPECCIÓN</option>
+                                            <!-- --><option value="1">INSPECCIÓN</option>
                                             <option value="2">VERIFICACIÓN</option>
                                             <option value="3">SUPERVISIÓN</option>
                                             <option value="4">INVESTIGACIÓN</option>
-                                            <option value="5">USUARIO SIMULADO</option>
-                                            <option value="6">AGENTE ENCUBIERTO</option>
+                                            <!-- <option value="5">USUARIO SIMULADO</option>
+                                            <option value="6">AGENTE ENCUBIERTO</option> -->
                                         </select>
                                     </div>
                                 </div>
@@ -142,7 +142,7 @@ if ( isset($_GET['acta']) ) {
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label>Accion(es) realizadas <i class="fa fa-asterisk text-red"></i></label>
+                                        <label>Acción(es) realizadas <i class="fa fa-asterisk text-red"></i></label>
                                         <textarea name="accion" id="accion" class="form-control" required style="resize: vertical;max-height: 300px;"><?=$accion?></textarea>
                                     </div>
                                 </div>
@@ -212,7 +212,7 @@ if ( isset($_GET['acta']) ) {
                             </fieldset>
                             <div class="row">
                                 <div class="col-md-5">
-                                    <label class="pull-right">¿El acta esta relacionada a una Orden ?</label>
+                                    <label class="pull-right">¿El acta está relacionada a una Orden de Trabajo ?</label>
                                 </div>
                                 <div class="col-md-2">
                                     <select id="question" name="question" class="form-control">
@@ -241,7 +241,7 @@ if ( isset($_GET['acta']) ) {
                                 </div>
                                 <div class="col-md-4"></div>
                             </div>
-                    	</form>
+                        </form>
                     </div>
                 </div>
             </div>

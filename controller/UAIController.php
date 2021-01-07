@@ -34,6 +34,26 @@ class UAIController
 	{
 		return $this->model->getCoincidencias();
 	}
+	public function countSendCHyJ()
+	{
+		return $this->model->countSendCHyJ();
+	}
+	public function getExpByDemanda()
+	{
+		return $this->model->getExpByDemanda();
+	}
+	public function getExpByResCom()
+	{
+		return $this->model->getExpByResCom();
+	}
+	public function getExpByEdoDem()
+	{
+		return $this->model->getExpByEdoDem();
+	}
+	public function getExpedientesEstadoNP()
+	{
+		return $this->model->getExpedientesEstadoNP();
+	}
 	
 }
 ?>

@@ -1,5 +1,6 @@
 var rescate;
 $(document).ready(function() {
+
 	url = window.location.search;
 	url = url.split('&');
 	getURL(url[0]);
@@ -8,20 +9,30 @@ $(document).ready(function() {
 function getURL(url) {
 	if ( url == '?menu=general' ) {
 		$('#option_1').addClass('active');
+		getExpedientes();
+		actions_eprocesal();
 		load_catalogo('cargo','select',22);
-		autocomplete_input('jefe','jefe_id',3);
+		autocomplete_input('jefe_sapa','jefe_sapa_id',3);
 		autocomplete_input('analista','analista_id',3);
 		autocomplete_input('n_oficio','n_oficio_id',10);
+		
 		autocomplete_input('oficio_a','oficio_a_id',10);
 		catalogo_conductas();
-		getExpedientes();
+		
 		frm_add_seguimiento();
 		//formularios nuevos
 		frm_add_responsable();		
 		frm_add_eprocesal();
 		frm_add_culpable();
-		actions_eprocesal();
+		
 		frm_asignar();
+		//para las sanciones 
+		autocomplete_input('oficio_sa','oficio_sa_id',10);
+		frm_add_sancion();
+		frm_add_verificacion();
+		eventNormatividad();
+		load_catalogo('t_ley','select','7A');
+
 	}
 	if ( url == '?menu=estadistica' ) {
 		$('#option_2').addClass('active');
@@ -51,29 +62,17 @@ function getURL(url) {
 			}
 		});
 	}
-	if ( url == '?menu=e_e_procesal' ) {
+	if ( url == '?menu=modificar' ) {
 		frm_edit_edo_procesal();
+		autocomplete_input('jefe','jefe_id',3);
+		autocomplete_input('analista','analista_id',3);	
 		autocomplete_input('oficio','oficio_id',10);
-		$('#e_procesal').change(function (e) {
-			e.preventDefault();
-			if ( $(this).val() == 3 ) {
-				$('#motivo').removeClass('hidden');
-			}else{
-				$('#motivo').addClass('hidden');
-			}
-		});
-		$('#autoridad').change(function(e) {
-			e.preventDefault();
-			if ( $(this).val() == '3' ) {
-				$('#motivo_sc').removeClass('hidden');
-			}else{
-				$('#motivo_sc').addClass('hidden');
-			}
-		});
+		actions_eprocesal();
 	}
 	return false; 
 }
 function getExpedientes() {
+	//alert('Todo bien hasta aqui ');
 	var nivel = $('#nivel').val();
 	var actions = [];
 	var opt ;
@@ -91,7 +90,6 @@ function getExpedientes() {
 	        { leyenda: 'Expediente', filtro:true, columna:'q.cve_ref'},
 	        { leyenda: 'Procedencia'},
 	        { leyenda: 'Presunto(s)'},
-	        { leyenda: 'Oficio de recepción', filtro:true, columna:'et.of_sapa'},
 	        { leyenda: 'Origen de queja'},	        
 	        { leyenda: 'Turnado a (Jefe de Depto.)', filtro:true, columna:'qr.jefatura'},	        
 	        { leyenda: 'Asignado a (Abogado Analista)', filtro:true, columna:'qr.analista'},
@@ -99,11 +97,10 @@ function getExpedientes() {
             	return anexGrid_select({
     	            data: [
     	                { valor: '', contenido: 'Todos' },
-    	                { valor: '2', contenido: 'TRÁMITE' },
-    	                { valor: '3', contenido: 'DEVUELTO D.I.' },
-    	                { valor: '5', contenido: 'PROYECTO ELABORADO' },
-    	                { valor: '4', contenido: 'EN FIRMA' },
     	                { valor: '1', contenido: 'ENVIADO' },
+    	                { valor: '4', contenido: 'RESUELTO' },
+    	                { valor: '3', contenido: 'DEVUELTO' },
+    	                { valor: '2', contenido: 'TRÁMITE' },
     	            ]
     	        });
             }},	        
@@ -124,36 +121,24 @@ function getExpedientes() {
 	    modelo: [
 	    	
 	    	{ class:'',formato: function(tr, obj, valor){
-	    		if (nivel == 'ANALISTA') {
-					actions = [
-			            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
-			        ];
-				}else if(nivel == 'JEFE'){
-					if ( obj.analista == null ) {
-						actions = [
-				            { href: "javascript:open_modal('modal_asignar',"+obj.qd_res+",'queja_respo');", contenido: '<i class="fa fa-user"></i>Asignar a' },
-				            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
-				        ];
-					}else{
-						actions = [
-				            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
-				        ];
+	    		//console.log(  ) ;
+	    		var actions = [];
+    			if( obj.jefe == null ){
+    				actions.push({ href: "javascript:open_modal('modal_asignar',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user-plus"></i> Asignar equipo de trabajo' });
+    			}else{
+					actions.push({ href: "javascript:open_modal('modal_add_culpable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-plus"></i>Agregar responsable' });
+					actions.push({ href: "javascript:open_modal('modal_add_seguimiento',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' });
+					actions.push({ href: "javascript:open_modal('modal_add_eprocesal',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-book"></i>Definir estado procesal' });
+					actions.push({ href: "index.php?menu=cedula&exp_id="+obj.queja_id, contenido: '<i class="fa fa-file-text-o"></i>Cédula' }); 
+					actions.push({ href: "javascript:open_modal('modal_add_sancion',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-plus"></i> Registrar sanción' });
+					if (nivel == 'SUBDIRECTOR') {
+						actions.push({ href: "index.php?menu=modificar&queja_id="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Modificar' }); 
 					}
-				}else{
-					var actions = [];
-					if( obj.jefe == null ){
-						a = [{ href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user-plus"></i>1. Asignar responsables' }]
-						Array.prototype.push.apply(actions, a);
-					}else{
-						actions = [
-				            { href: "javascript:open_modal('modal_add_eprocesal',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-book"></i>Definir estado porcesal' },
-				            { href: "javascript:open_modal('modal_add_seguimiento',"+obj.id+",'qd_res');", contenido: '<i class="fa fa-plus"></i>Agregar seguimiento' },
-				            { href: "javascript:open_modal('modal_add_culpable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-plus"></i>Agregar servidor público' },
-				            { href: "index.php?menu=cedula&exp_id="+obj.queja_id, contenido: '<i class="fa fa-file-text-o"></i>Cédula' },
-				            { href: "index.php?menu=e_e_procesal&exp="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Editar Edo. Procesal' },
-				        ];				        
-					}
-				}
+    			}
+
+				var valor = tabla.obtener(tr.data('fila'));
+				//x = [];
+				//Array.prototype.push.apply(actions, x);
 	            return anexGrid_dropdown({
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
                     class: 'btn btn-primary ',
@@ -175,13 +160,7 @@ function getExpedientes() {
             	lista += "</ol>";
             	return lista;
         	}},
-	        { formato:function(tr,obj,valor){
-	        	if (obj.e_procesal == null){
-	        		return 'AÚN NO SE REGISTRA';
-	        	}else{
-	        		return obj.of_sapa;
-	        	}
-	        }},
+	        
 	        { propiedad: 'categoria'},
 	        
 	        { formato: function(tr, obj, valor){
@@ -200,14 +179,15 @@ function getExpedientes() {
 	        	}
 	        }},
 	        { formato:function(tr,obj,valor){
+	        	
 	        	if(obj.e_procesal == 'ENVIADO'){tr.addClass('bg-green');}
-	        	if(obj.e_procesal == 'TRAMITE'){tr.addClass('bg-yellow');}
+	        	if(obj.e_procesal == 'RESUELTO'){tr.addClass('bg-yellow');}
 	        	if(obj.e_procesal == 'DEVUELTO'){tr.addClass('bg-gray');}
 	        	if (obj.e_procesal == null) {
 	        		tr.addClass('bg-teal disabled');
 	        		return 'AÚN NO SE REGISTRA';
 	        	}else{
-	        		tr.addClass('bg-teal disabled');
+	        		//tr.addClass('bg-teal disabled');
 	        		return obj.e_procesal;
 	        	}
 	        }},
@@ -279,11 +259,16 @@ function evento(element,type){
 	return false;
 }
 function open_modal( modal, val, name){
+	//console.log(val);
 	if (name != '') {
 		$('[name="'+name+'"]').val(val);
 	}
 	if (name == 'queja_id') {
 		getClave(val,modal);
+	}
+
+	if (modal == 'modal_add_verificacion') {
+		load_catalogo('sanciones','select','1X');
 	}
 	$('#'+modal).modal('show');
 	return false;
@@ -323,7 +308,13 @@ function autocomplete_input(input,hidden,option){
 }
 //Carga de catalogos 
 function load_catalogo(element,type,option){
-	var result, data='0'; 
+	var result;
+	
+	var result, data=$('#capitulos').val(); 
+	var art = $('#art').val();
+	var sec = $('#secciones').val();
+	var fracciones = $('#fracciones').val();
+	if ( element == 'sanciones' ) { data = $('#v_queja_id').val(); }
 	if ( element != '' ) {
 		$('#'+element).html('');
 	}
@@ -331,7 +322,7 @@ function load_catalogo(element,type,option){
 		url: 'controller/puente.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {option: option, data:data},
+		data: {option: option, data:data,art:art,sec:sec,fra:fracciones },
 		async:false,
 		cache:false,
 	})
@@ -428,8 +419,8 @@ function delete_responsable(id) {
 function frm_edit_edo_procesal() {
 	$('#frm_edit_edo_procesal').submit(function(e) {
 		e.preventDefault();
-		//var dataForm = $(this).serialize();
-		var dataForm = new FormData(document.getElementById("frm_edit_edo_procesal"));
+		var dataForm = $(this).serialize();
+		
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
@@ -437,8 +428,6 @@ function frm_edit_edo_procesal() {
 			data: dataForm,
 			async:false,
 			cache:false,
-			processData: false,
-            contentType: false,
 		})
 		.done(function(response) {
 			alerta('div_edo',response.status,response.message,'');
@@ -465,7 +454,8 @@ function frm_add_seguimiento() {
 		})
 		.done(function(response) {
 			alerta('div_seguimiento',response.status,response.message,'modal_add_seguimiento');
-			document.getElementId("frm_add_seguimiento").reset();
+			$('#frm_add_seguimiento').trigger('trigger');
+			//document.getElementId("frm_add_seguimiento").reset();
 		})
 		.fail(function(jqXHR,textStatus,errorThrow) {
 			console.log("Error: "+jqXHR.responseText);
@@ -519,10 +509,13 @@ function catalogo_conductas() {
 		$.each(response, function(i, con) {
 			$('#conducta').append('<option value="'+con.id+'">'+con.nombre+'</option>');
 		});
+		$('#conducta').select2({
+			width: '100%'//necesidad de anular el cambio predeterminado
+		});
 	})
 	.fail(function(jqXHR,textStatus,errorThrow) {
 		console.log("Error: "+jqXHR.responseText);
-	});
+	}) ;
 	
 }
 
@@ -638,10 +631,12 @@ function frm_estadistica() {
 			async:false,
 		})
 		.done(function(response) {
+			
 			if ( $.fn.DataTable.isDataTable( '#tbl_estadistica' ) ){
 				var t = $('#tbl_estadistica').DataTable();
 				t.destroy();
 			}
+			$('#tbl_estadistica tbody').html("");
 			var c = 0;
 			$.each(response, function(i, val) {
 				c = i+1;
@@ -658,7 +653,7 @@ function frm_estadistica() {
 				var autoridad  = (val.autoridad == null) ? "NO DEFINIDO" :val.autoridad ;
 				tr += "<tr>";
 					tr += "<td>"+c+"</td>";
-					tr += "<td>"+cve+"</td>";
+					tr += "<td>"+val.cve_exp+"</td>";
 					tr += "<td>"+val.n_procedencia+"</td>";
 					tr += "<td>"+oficio+"</td>";
 					tr += "<td>"+categoria+"</td>";
@@ -687,11 +682,12 @@ function frm_estadistica() {
 }
 function getContadoresByEdo(edo) {
 	$('#div_contadores').html('');
+
 	$.ajax({
 		url: 'controller/puente.php',
 		type: 'POST',
 		dataType: 'json',
-		data: {option: '99',edo:edo},
+		data: {option: '99',edo:edo,fi: $('#f_ini').val(), ff:$('#f_fin').val() },
 		async:false,
 		cache: false,
 	})
@@ -722,7 +718,7 @@ function applyDataTables(t) {
 		dom: 'Bfrtip',
 		buttons:{
 		    buttons: [
-		        { extend: 'pdf', className: 'btn btn-flat btn-warning',text:' <i class="fa  fa-file-pdf-o"></i>PDF' },
+		        //{ extend: 'pdf', className: 'btn btn-flat btn-warning',text:' <i class="fa  fa-file-pdf-o"></i>PDF' },
 		        { extend: 'excel', className: 'btn btn-success btn-flat',text:' <i class="fa fa-file-excel-o"></i>Excel' }
 		    ]
 		},
@@ -755,6 +751,7 @@ function getClave(id,modal) {
 function actions_eprocesal() {
 	$('#e_procesal').change(function(e) {
 		e.preventDefault();
+		//alert($(this).val());
 		if( $(this).val() == 3 ){
 			$('#oficio').removeClass('hidden');
 			$('#f_acuse').removeClass('hidden');
@@ -762,6 +759,9 @@ function actions_eprocesal() {
 			$('#fojas').removeClass('hidden');
 			$('#t_doc').removeClass('hidden');
 			$('#div_conducta').addClass('hidden');
+			$('#div_auto').addClass('hidden');
+			$('#resuelto').addClass('hidden');
+			$('#div_normatividad').addClass('hidden');	
 		}
 		if( $(this).val() == 1 ){
 			$('#oficio').removeClass('hidden');
@@ -770,15 +770,23 @@ function actions_eprocesal() {
 			$('#fojas').removeClass('hidden');
 			$('#t_doc').removeClass('hidden');
 			$('#div_conducta').removeClass('hidden');
+			$('#div_auto').removeClass('hidden');
+			$('#resuelto').addClass('hidden');	
+			$('#div_normatividad').removeClass('hidden');
+				
 		}
-		if( $(this).val() == 4 || $(this).val() == 5  ){
+		if( $(this).val() == 4 ){
 			$('#oficio').addClass('hidden');
 			$('#f_acuse').addClass('hidden');
 			$('#n_semana').addClass('hidden');
 			$('#fojas').addClass('hidden');
 			$('#t_doc').addClass('hidden');
 			$('#div_conducta').addClass('hidden');
+			$('#div_auto').addClass('hidden');			
+			$('#resuelto').removeClass('hidden');	
+			$('#div_normatividad').addClass('hidden');		
 		}
+
 	});
 	$('#autoridad').change(function(e) {
 		e.preventDefault();
@@ -816,4 +824,77 @@ function frm_asignar(){
 		
 	});
 	return false;
+}
+
+function frm_add_sancion() {
+	$('#frm_add_sancion').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('a_sancion',response.status,response.message,'modal_add_sancion');
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			alerta('a_sancion','error',jqXHR.responseText,'modal_add_sancion');
+		});
+		
+	});
+}
+function frm_add_verificacion() {
+	$('#frm_add_verificacion').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('a_verificacion',response.status,response.message,'modal_add_verificacion');
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			alerta('a_verificacion','error',jqXHR.responseText,'modal_add_verificacion');
+		});
+		
+	});
+}
+function eventNormatividad(){
+	$('#t_ley').change(function(e){
+		e.preventDefault();
+		load_catalogo( 'capitulos', 'select', '4X');
+		load_catalogo( 'conducta', 'select', 8);
+	});
+	$('#capitulos').change(function(e){
+		e.preventDefault();
+		$('#art,#secciones,#fracciones').html('');
+		load_catalogo( 'art', 'select', '7B');
+		load_catalogo( 'conducta', 'select', 8);
+
+	});
+	$('#art').change(function(e){
+		e.preventDefault();
+		$('#secciones,#fracciones').html('');
+		load_catalogo( 'secciones', 'select','7C');
+		load_catalogo( 'conducta', 'select', 8);
+	});
+	$('#secciones').change(function(e){
+		e.preventDefault();
+		$('#fracciones').html('');
+		load_catalogo( 'fracciones', 'select', '7D');
+		load_catalogo( 'conducta', 'select', 8);
+	});
+	$('#fracciones').change(function(e){
+		e.preventDefault();
+		load_catalogo( 'conducta', 'select', 8);
+	});
 }

@@ -28,8 +28,8 @@
 								<label> Estado del resultado </label>
 								<select name="edo" id="edo" class="form-control">
 									<option value="">...</option>
-									<option value="1">CON RESOLUCIÓN SATISFACTORIA</option>
-									<option value="2">CON RESOLUCIÓN INSATISFACTORIA</option>
+									<option value="1">CON RESOLUCIÓN VALIDEZ</option>
+									<option value="2">CON RESOLUCIÓN INVALIDEZ</option>
 								</select>
 							</div>
 						</div>

@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Editar el estado procesal del expediente.
+		UAI - ACTAS
 		<small>Edición</small>
 	</h1>
 	<ol class="breadcrumb">

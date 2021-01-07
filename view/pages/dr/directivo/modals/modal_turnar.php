@@ -18,7 +18,7 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<label>Número de expediente con el que envia los expedientes</label>
+								<label>Número de oficio con el que envia</label>
 								<input type="text" id="oficio_dr" name="oficio_dr" value="" class="form-control" required>
 								<input type="hidden" id="oficio_dr_id" name="oficio_dr_id" value="">
 							</div>

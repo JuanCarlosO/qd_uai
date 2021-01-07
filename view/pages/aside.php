@@ -11,8 +11,13 @@
 			</div>
 		</div>
 		<ul class="sidebar-menu" data-widget="tree">
+			<?php if ( $_SESSION['perfil'] == 'SIRA' ): ?>
+			<li class="header">PERFIL: SIS</li>
+			<?php else: ?>
 			<li class="header">PERFIL: <?=mb_strtoupper($_SESSION['perfil'],'utf-8')?></li>
-			<?php if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'QDNP' ): ?>
+			<?php endif ?>
+			
+			<?php if ( $_SESSION['perfil'] == 'QDP' || $_SESSION['perfil'] == 'ESPECIAL' ): ?>
 				<li id="option_1" class=" treeview">
 					<a href="#">
 						<i class="fa fa-dashboard"></i> <span>Quejas y Denuncias</span>
@@ -38,6 +43,11 @@
 							<i class="fa fa-file-excel-o"></i> <span>Reportes</span>
 						</a>
 					</li>
+					<li id="option_4" class="">
+						<a href="index.php?menu=devoluciones">
+							<i class="fa  fa-exchange"></i> <span>Devoluciones</span>
+						</a>
+					</li>
 				<?php endif ?>
 				
 				<?php if ($_SESSION['nivel'] == 'SUBDIRECTOR'): ?>
@@ -46,11 +56,7 @@
 							<i class="fa fa-user-secret"></i> <span>Abogados</span>
 						</a>
 					</li>
-					<li id="option_4" class="">
-						<a href="index.php?menu=devoluciones">
-							<i class="fa  fa-exchange"></i> <span>Devoluciones</span>
-						</a>
-					</li>
+					
 					<li id="option_6" class="">
 						<a href="index.php?menu=tablero">
 							<i class="fa fa-table"></i> <span>Tablero de Ctrl.</span>
@@ -58,12 +64,13 @@
 					</li>
 					<li id="option_7" class="">
 						<a href="index.php?menu=migracion">
-							<i class="fa fa-refresh"></i> <span>Transferencia multiple.</span>
+							<i class="fa fa-refresh"></i> <span>Transferencia múltiple.</span>
 						</a>
 					</li>
 				<?php endif ?>
 			<?php elseif ( $_SESSION['perfil'] == 'DI'): ?>
 				<?php if ($_SESSION['nivel'] == 'DIRECTOR'): ?>
+				<li id="option_3"><a href="index.php?menu=list_queja"><i class="fa fa-list"></i> Listado </a></li>
 				<li id="option_1" class="">
 					<a href="index.php?menu=general">
 						<i class="fa fa-table"></i> <span>Tablero de Ctrl.</span>
@@ -76,10 +83,14 @@
 				</li>
 				<li id="option_7" class="">
 					<a href="index.php?menu=migracion">
-						<i class="fa fa-refresh"></i> <span>Transferencia multiple.</span>
+						<i class="fa fa-refresh"></i> <span>Transferencia múltiple.</span>
 					</a>
 				</li>
-				
+				<li id="option_4" class="">
+					<a href="index.php?menu=devoluciones">
+						<i class="fa  fa-exchange"></i> <span>Devoluciones</span>
+					</a>
+				</li>
 				<li id="option_5" class="">
 					<a href="index.php?menu=aviso">
 						<i class="fa fa-file-pdf-o"></i> <span>Aviso de privacidad</span>
@@ -106,7 +117,7 @@
 				</li>
 				<li id="option_2" class="">
 					<a href="index.php?menu=ordenes">
-						<i class="fa fa-edit"></i> <span>Ordenes de trab.</span>
+						<i class="fa fa-edit"></i> <span>Órdenes de trab.</span>
 						<span class="pull-right-container">
 						</span>
 					</a>
@@ -118,6 +129,11 @@
 						</span>
 					</a>
 				</li>
+				<li id="option_6" class="">
+						<a href="index.php?menu=tablero">
+							<i class="fa fa-table"></i> <span>Tablero de Ctrl.</span>
+						</a>
+					</li>
 				<li id="option_4" class="">
 					<a href="index.php?menu=aviso">
 						<i class="fa fa-file-pdf-o"></i> <span>Aviso de privacidad</span>
@@ -191,7 +207,7 @@
 					</li>
 					<li id="option_2" class="">
 						<a href="index.php?menu=estadistica">
-							<i class="fa fa-line-chart"></i> <span>Estadistica </span>
+							<i class="fa fa-line-chart"></i> <span>Estadística </span>
 						</a>
 					</li>
 					<li id="option_3" class="">
@@ -201,22 +217,53 @@
 					</li>
 				<?php endif ?>
 			<?php elseif ($_SESSION['perfil'] == 'SC'): ?>
+				<?php if ($_SESSION['nivel'] == 'SUBDIRECTOR' || $_SESSION['nivel'] == 'JEFE'): ?>
+					<li id="option_1" class="">
+						<a href="index.php?menu=general">
+							<i class="fa fa-list"></i> <span>Listado de exp.</span>
+						</a>
+					</li>
+					<li id="option_2" class="">
+						<a href="index.php?menu=reportes">
+							<i class="fa fa-line-chart"></i> <span>Reportes</span>
+						</a>
+					</li>
+					<li id="option_3" class="">
+						<a href="index.php?menu=tablero">
+							<i class="fa fa-table"></i> <span>Tablero de control</span>
+						</a>
+					</li>
+				<?php elseif($_SESSION['nivel'] == 'SECRETARIA'): ?>
 				<li id="option_1" class="">
-					<a href="index.php?menu=general">
-						<i class="fa fa-list"></i> <span>Listado de exp.</span>
-					</a>
-				</li>
-				<li id="option_2" class="">
-					<a href="index.php?menu=reportes">
-						<i class="fa fa-line-chart"></i> <span>Reportes</span>
-					</a>
-				</li>
+						<a href="index.php?menu=add_acuse">
+							<i class="fa fa-list"></i> <span>SUBIR ACUSE</span>
+						</a>
+					</li>
+				<?php else: ?>
+					<li id="option_1" class="">
+						<a href="index.php?menu=general">
+							<i class="fa fa-list"></i> <span>Listado de exp.</span>
+						</a>
+					</li>
+				<?php endif ?>
+				
 			<?php elseif ($_SESSION['perfil'] == 'TITULAR'): ?>
 				<li id="option_1" class="">
 					<a href="index.php?menu=general">
-						<i class="fa fa-list"></i> <span>Listado de exp.</span>
+						<i class="fa fa-list"></i> <span>Buscador de exp.</span>
 					</a>
 				</li>
+				<li id="option_3" class="">
+					<a href="index.php?menu=di">
+						<i class="fa fa-calculator"></i> <span>Dir. Investigación</span>
+					</a>
+				</li>
+				<li id="option_2" class="">
+					<a href="index.php?menu=dr">
+						<i class="fa fa-balance-scale"></i> <span>Dir. Responsabilidades en Asuntos Internos</span>
+					</a>
+				</li>
+				
 			<?php endif ?>
 		</ul>
 	</section>

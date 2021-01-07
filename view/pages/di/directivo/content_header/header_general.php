@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Tablero de control
+		UAI - ACTAS
 		<small></small>
 	</h1>
 	<ol class="breadcrumb">

@@ -1,6 +1,6 @@
 <form action="#" method="post" id="frm_add_quejoso">
 	<input type="hidden" name="option" value="18">
-	<input type="hidden" name="queja_id" value="<?=$r[0]['id']?>">
+	<input type="hidden" name="queja_id" value="<?=$_GET['queja']?>">
 	<div class="modal fade" id="modal_add_quejoso">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
@@ -35,19 +35,19 @@
 					<div class="row">
 						<div class="col-md-4">
 							<div class="form-group">
-								<label>Telefono</label>
+								<label>Teléfono</label>
 								<input type="text" name="phone" value="" class="form-control" data-inputmask='"mask": "(999) 999-9999"' data-mask>
 							</div>
 						</div>
 						<div class="col-md-4">
 							<div class="form-group">
-								<label>Correo electronico</label>
+								<label>Correo electrónico</label>
 								<input type="email" name="mail" value="" class="form-control">
 							</div>
 						</div>
 						<div class="col-md-4">
 							<div class="form-group">
-								<label>Genero</label>
+								<label>Género</label>
 								<select id="genero" name="genero" class="form-control">
 									<option value="">...</option>
 									<option value="1">HOMBRE</option>
@@ -63,37 +63,29 @@
 								<label>Municipio</label>
 								<select id="municipio" name="municipio" class="form-control">
 									<option value="">...</option>
-									<?php foreach ($municipios as $municipio): ?>
-									<option value="<?=$municipio->id?>">
-										<?=$municipio->nombre?>
-									</option>
+									<?php foreach ($municipios as $key => $mun): ?>
+									<option value="<?=$mun->id?>"><?=$mun->nombre?></option>
 									<?php endforeach ?>
 								</select>
 							</div>
 						</div>
 						<div class="col-md-3">
 							<div class="form-group">
-								<label>Codigo postal</label>
+								<label>Código postal</label>
 								<input type="text" name="cp" value="" class="form-control">
 							</div>
 						</div>
 						<div class="col-md-3">
 							<div class="form-group">
-								<label>Num. Int.</label>
+								<label>Núm. Int.</label>
 								<input type="text" name="n_int" value="" class="form-control">
 							</div>
 						</div>
 						<div class="col-md-3">
 							<div class="form-group">
-								<label>Num. Ext.</label>
+								<label>Núm. Ext.</label>
 								<input type="text" name="n_ext" value="" class="form-control">
 							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12">
-							<label>Comentarios</label>
-							<textarea name="comentario" class="form-control" style="resize: vertical; max-height: 250px;"></textarea>
 						</div>
 					</div>
 				</div>

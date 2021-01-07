@@ -24,15 +24,6 @@
 							</div>
 						</div>
 					</div>
-					<!-- <div class="row">
-						<div class="col-md-12">
-							<div class="form-group">
-								<label>Nombre del abogado analista </label>
-								<input type="text" id="analista" name="analista" value="" class="form-control" required>
-								<input type="hidden" id="analista_id" name="analista_id" value="">
-							</div>
-						</div>
-					</div> -->
 				</div>
 				<div class="modal-footer">
 					<button type="submit" class="btn btn-success btn-flat pull-right">

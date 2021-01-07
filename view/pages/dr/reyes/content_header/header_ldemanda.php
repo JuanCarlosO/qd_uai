@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Listado de Demandas
+		UAI - ACTAS
 		<small>Resolución de demandas</small>
 	</h1>
 	<ol class="breadcrumb">

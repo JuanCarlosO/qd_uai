@@ -24,8 +24,8 @@ $clave = $q->getClave($queja_id);
 	                        	<label>Tipo de demanda</label>
 	                        	<select name="t_demanda" id="" class="form-control">
 	                        		<option value="">...</option>
-	                        		<option value="1">1ra Demanda</option>
-	                        		<option value="2">Recurso de revisión</option>
+	                        		<option value="1">Impugnación sala regional</option>
+	                        		<option value="2">Impugnación sala superior</option>
 	                        	</select>
 	                        </div>
 	                        <div class="col-md-5">
@@ -44,7 +44,7 @@ $clave = $q->getClave($queja_id);
 	                    		<input type="date" name="f_acuse" value="" class="form-control">
 	                    	</div>
 	                    	<div class="col-md-4">
-	                    		<label>Nombre de la Dependencia</label>
+	                    		<label>Nombre de la Autoridad</label>
 	                    		<input type="text" id="dep" name="dep" value="" class="form-control">
 	                    	</div>
 	                    </div>

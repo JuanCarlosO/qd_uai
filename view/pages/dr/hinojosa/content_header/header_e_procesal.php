@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Formulario de seguimiento de estado procesal
+		UAI - ACTAS
 		<small>Alta</small>
 	</h1>
 	<ol class="breadcrumb">

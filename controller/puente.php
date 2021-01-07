@@ -17,15 +17,16 @@ if ( isset($_POST['option']) ) {
 			$access = $u->validateAccess();
 			
 			if ( is_object($access) ) {
-				
+					
 				session_start();
-				$_SESSION['id']			= $access->person_id;
+				$_SESSION['id']			= $access->personal_id;
 				$_SESSION['name'] 		= $access->name;
 				$_SESSION['n_completo'] = $access->n_completo;
 				$_SESSION['perfil'] 	= $access->perfil;
 				$_SESSION['area_id'] 	= $access->area_id;
 				$_SESSION['n_area'] 	= $access->n_area;
 				$_SESSION['nivel'] 		= $access->nivel;
+				
 				if ( isset($_SESSION) ) {
 					header('Location: ../index.php?menu=general');
 				}
@@ -47,14 +48,27 @@ if ( isset($_POST['option']) ) {
 		case '4':
 			echo $i->getProcedencias();
 			break;
+		case '4X':
+			echo $i->getCapitulos();
+			break;
+			
 		case '5':
 			echo $i->getTT();
 			break;
 		case '6':
 			echo $i->getCode();
 			break;
-		case '7':
+		case '7A':
 			echo $i->getLeyes();
+			break;
+		case '7B':
+			echo $i->getArticulos();
+			break;
+		case '7C':
+			echo $i->getSecciones();
+			break;
+		case '7D':
+			echo $i->getFracciones();
 			break;
 		case '8':
 			echo $i->getConductas();
@@ -83,9 +97,7 @@ if ( isset($_POST['option']) ) {
 		case '16':
 			echo $i->saveUnidad();
 			break;
-		case '17':
-			echo $i->savePresunto();
-			break;
+		#CASE 17 DISPONIBLE
 		case '18':
 			echo $i->saveQuejoso();
 			break;
@@ -251,6 +263,10 @@ if ( isset($_POST['option']) ) {
 		case '72':
 			echo $uai->getExpedientesEstado();
 			break;
+		case '72B':
+			echo $uai->getExpedientesEstadoNP();
+			break;
+			
 		case '73':
 			echo $uai->getDashboardActas();
 			break;
@@ -272,7 +288,7 @@ if ( isset($_POST['option']) ) {
 		case '79':#Obtener exédientes del tablero de control
 			echo $r->getExpedientesTC();
 			break;
-		case '80':#Contar expe
+		case '80':#
 			echo $i->getTblCtrl();
 			break;
 		case '81':#Contar expe
@@ -333,9 +349,228 @@ if ( isset($_POST['option']) ) {
 			echo $r->getContadoresByEdo();
 			break;
 		case '100':
-			echo $r->saveAsignar();
+			session_start();
+			if ( $_SESSION['perfil'] == 'SAPA' ) {
+				echo $r->saveAsignar();
+			}else{
+				echo $i->saveAsignar();
+			}
+			
 			break;
-				
+		case '101':
+			echo $i->saveCargo();
+			break;
+		case '102':
+			echo $i->getProcedenciasP();
+			break;
+		case '103':
+			echo $i->saveProcedenciasP();
+			break;
+		case '104':
+			echo $r->getSituacionSC();
+			break;
+		case '105':
+			echo $uai->countSendCHyJ();
+			break;
+		case '106':
+			echo $uai->getExpByDemanda();
+			break;
+		case '107':
+			echo $uai->getExpByResCom();
+			break;
+		case '108':
+			echo $uai->getExpByEdoDem();
+			break;
+		case '109':
+			echo $i->getPenales();
+			break;
+		case '110':
+			echo $i->saveOpinion();
+			break;
+		case '111':
+			echo $r->save_acuse();
+			break;
+		case '112':
+			echo $i->getColores();
+			break;
+		case '113':
+			echo $r->getExpSapaByEdo();
+			break;
+		case '114':
+			echo $s->saveCancelaOT();
+			break;
+		case '115':
+			echo $i->getExpTipo();
+			break;
+		case '116':
+			echo $i->getListadoTipo();
+			break;
+		case '117':
+			echo $s->saveRespuesta();
+			break;
+		case '118':
+			echo $s->saveResponder();
+			break;
+		case '119':
+			echo $s->Responder_Comisionados();
+			break;
+		case '120':
+			echo $s->Responder_Turnos();
+			break;
+		case '121':
+			echo $s->Responder_Armas();
+			break;
+		case '122':
+			echo $s->Responder_Gas();
+			break;
+		case '123':
+			echo $s->Responder_Vehiculo();
+			break;
+		case '124':
+			echo $s->saveRecomendacion();
+			break;
+		case '125':
+			echo $s->saveDocObs();
+			break;
+		case '126':
+			echo $s->saveRecordatorioObs();
+			break;
+		case '127':
+			echo $s->saveSeguimiento();
+			break;
+		case '128':
+			echo $s->getCoordinaciones();#obtener el catálogo de grupos de bienes 
+			break;
+		case '129':			
+			echo $s->getSubdirecciones( $_POST['coord'] ); 
+			break;
+		case '130':			
+			echo $s->getRegiones( $_POST['subd'] ); 
+			break;
+		case '131':			
+			echo $s->getAgrupamientos( $_POST['region'] ); 
+			break;
+		case '132':			
+			echo $s->saveReco_respuesta(); 
+			break;
+		case '133':
+			echo $s->getCoordinacionesT();#obtener el catálogo de grupos de bienes 
+			break;
+		case '134':			
+			echo $s->getAgrupamientosT( $_POST['coord_t'] ); 
+			break;
+		case '135':			
+			echo $s->getAgrupamientosCPRS(); 
+			break;
+		case '136':			
+			echo $s->graphic_censo($_POST['n_pregunta'], $_POST['question_a'], $_POST['question_a2'], $_POST['agrupamiento'], $_POST['agrupamiento_t'], $_POST['agrupamiento_cprs'], $_POST['niv5']);
+			break;
+		case '137':
+			echo $s->getDetalle($_POST['pe']);
+			break;
+		case '138':
+			echo $s->getOficio($_POST['o']);
+			break;
+		case '139':
+			echo $s->graphic_actuaciones($_POST['f_inicio'],$_POST['f_fin']);
+			break;
+		case '140':
+			echo $s->graphic_ordenes($_POST['f_inicio'],$_POST['f_fin']);
+			break;
+		case '141':
+			echo $s->getAreaPersonal($_POST['p']);
+			break;
+		case '142':
+			echo $s->getPreguntasCenso(); 
+			break;
+		case '143A':
+			echo $s->getOperativos_Est(); 
+			break;
+		case '143B':
+			echo $s->getTransito_Est(); 
+			break;
+		case '143C':
+			echo $s->getCPRS_Est(); 
+			break;
+		case '143D':
+			echo $s->getAdmin_Est(); 
+			break;
+		case '144':
+			echo $s->tabla_actuaciones($_POST['fi'],$_POST['ff']);
+			break;
+		case '145':
+			echo $s->editCenso();
+			break;
+		case '146':
+			echo $s->saveEditRecomendacion();
+			break;
+		case '147':
+			echo $s->saveActaAdministrativa();
+			break;
+		case '148':
+			#echo json_encode( ['message'=>'success','count'=>3] );die();
+			echo $s->EnviarActa();
+			break;
+		case '149':
+			#echo json_encode( ['message'=>'success','count'=>3] );die();
+			echo $s->CancelarActa();
+			break;
+		case '150':
+			echo $s->generateReporteI();
+			break;
+		case '151':
+			echo $s->getNivel1();#obtener el catálogo de grupos de bienes 
+			break;
+		case '152':			
+			echo $s->getNivel2( $_POST['niv1'] ); 
+			break;
+		case '153':			
+			echo $s->getNivel3( $_POST['niv2'] ); 
+			break;
+		case '154':			
+			echo $s->getNivel4( $_POST['niv3'] ); 
+			break;
+		case '155':			
+			echo $s->getNivel5( $_POST['niv4'] ); 
+			break;
+		case '156'://115
+			echo $s->saveCenso();
+			break;
+		case '157'://116
+			echo $s->saveRecordatorio();
+			break;
+		case '158':
+			echo $s->saveEstatus();
+			break;
+		case '159':
+			echo $s->saveComentario();
+			break;
+		case '160':
+			echo $s->getDashboard_OT();
+			break;
+		case '161':
+			echo $s->saveAcciones();
+			break;
+		case '162':
+			echo $s->generateReporteOT();
+			break;
+		#Funcionalidadd desarrollada en el noviembre 2020
+		case '1X':
+			echo $r->getSanciones();
+			break;
+		case '2X':
+			echo $r->saveSancion();
+			break;
+		case '3X':
+			echo $r->saveVerificacion();
+			break;	
+		case '4X':
+			echo $i->getCapitulos();
+			break;	
+		case '5X':
+			echo $r->editSanVer();
+			break;	
+									
 	}
 }elseif ( isset($_GET['option']) ) {
 	$o = $_GET['option'];	
@@ -405,7 +640,51 @@ if ( isset($_POST['option']) ) {
 			header("Content-type: application/pdf");
 			echo $r->getAcuse($_GET['doc']);
 			break;	
-		
+		case '17':
+			header("Content-type: application/pdf");
+			echo $r->viewDoc($_GET['doc'],$_GET['tbl']);
+			break;	
+		case '18':
+			#Buscar los censos
+			echo $s->getListCenso();
+			break;
+		case '19':#Recuperar el catálogo de preguntas
+			echo $s->getPreguntas();
+			break;
+		case '20':#Recuperar las preguntas del censo
+			echo $s->getCuestionario();
+			break;
+		case '21':#Recuperar las preguntas del censo
+			echo $s->getRecomendaciones();
+			break;
+		case '22':
+			#Buscar Numeros de oficio del Sistema de Oficina digital
+			echo $s->getOFsRes();
+			break;
+		case '23':
+			header("Content-type: application/pdf");	
+			echo $s->getAcuse_Irr($_GET['file']);
+			break;
+		case '24':
+			#Buscar los censos
+			echo $s->getListActaAdmin();
+			break;
+		case '25':
+			#Buscar los censos
+			echo $i->getListActaAdmin_enviadas();
+			break;
+		case '26':
+			header("Content-type: application/pdf");	
+			echo $s->getAcuse_Acta($_GET['file']);
+			break;	
+		case '27':
+			header("Content-type: application/pdf");	
+			echo $s->getAcuse_OIN($_GET['file']);
+			break;		
+		case '28':
+			echo $s->getPersonalApoyo();
+			break;
+			
 					
 		default:
 			echo json_encode( array("status"=>'error','message'=>'La ruta seleccionada no existe. Verifique con el Depto. de Desarrollo de Sistemas.') );

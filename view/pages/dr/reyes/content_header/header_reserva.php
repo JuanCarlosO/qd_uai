@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Cambiar estado del expediente
+		UAI - ACTAS
 		<small>Mandar a reserva</small>
 	</h1>
 	<ol class="breadcrumb">

@@ -162,6 +162,38 @@ class DRController
 	{
 		return $this->model->saveAsignar();
 	}
+	public function viewDoc($doc,$tbl)
+	{
+		return $this->model->viewDoc($doc,$tbl);
+	}
+	public function getSituacionSC()
+	{
+		return $this->model->getSituacionSC();
+	}
+	public function save_acuse()
+	{
+		return $this->model->save_acuse();
+	}
+	public function getExpSapaByEdo()
+	{
+		return $this->model->getExpSapaByEdo();
+	}
+	public function getSanciones()
+	{
+		return $this->model->getSanciones();
+	}
+	public function saveSancion()
+	{
+		return $this->model->saveSancion();
+	}
+	public function saveVerificacion()
+	{
+		return $this->model->saveVerificacion();
+	}
+	public function editSanVer()
+	{
+		return $this->model->editSanVer();
+	}
 		
 }
 ?>

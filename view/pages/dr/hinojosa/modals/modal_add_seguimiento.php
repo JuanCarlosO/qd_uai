@@ -12,10 +12,11 @@
 				<form id="frm_add_seguimiento" action="#">
 					<input type="hidden" name="option" value="58">
 					<input type="hidden" name="qd_res" value="">
+					<input type="hidden" id="queja_id" name="queja_id" value="">
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<label> Comentario de conclución de expediente </label>
+								<label> Comentario final del abogado </label>
 								<textarea name="comentario" id="comentario" class="form-control" style="resize: vertical; max-height: 200px;"></textarea>
 							</div>
 						</div>

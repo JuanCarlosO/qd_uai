@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Detalle de la queja
+		UAI - ACTAS
 		<small>Cédula</small>
 	</h1>
 	<ol class="breadcrumb">

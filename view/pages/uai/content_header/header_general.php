@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		MENÚ PRINCIPAL 
+		UAI - ACTAS
 		<small>Unidad de Asuntos Internos</small>
 	</h1>
 	<ol class="breadcrumb">

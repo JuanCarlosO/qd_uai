@@ -5,16 +5,22 @@ require_once 'model/DRModel.php';
 $queja_id = $_GET['exp_id'];
 $q = new DRModel;
 $data = $q->getCedula($queja_id);
+#generar consulta de sanciones y verificaciones
+$san = $q->getFullSanciones($queja_id);
+$ver = $q->getFullVerificaciones($queja_id);
+
 #echo "<pre>";print_r($data);echo "</pre>";
 if ($data['qr']->e_procesal == 'DEVUELTO') {
     $mayor = date('Y-m-d');
     $menor = $data['devolucion']->f_devolucion;
     $resta = $q->operacionesFechas('-',$mayor,$menor);
-    
 }
 $hoy = date('Y-m-d');
 $c_apertura     = $q->operacionesFechas('-',$hoy,$data['queja']->f_apertura);
 $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
+$documentos     = $q->getDocumentos($queja_id);
+
+
 ?>
 <section class="content container-fluid">
     <div class="row">
@@ -42,11 +48,11 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                 <thead>
                                     <tr class="text-center">
                                         <th class="bg-gray">Días transcurridos desde la fecha de apertura</th>
-                                        <td class="bg-info"><?=$c_apertura->resta?></td>
+                                        <td class="bg-gray"><?=$c_apertura->resta?></td>
                                     </tr>
                                     <tr class="text-center">
                                         <th class="bg-gray">Días transcurridos desde la fecha de hechos</th>
-                                        <td class="bg-info"><?=$c_hechos->resta?></td>
+                                        <td class="bg-gray"><?=$c_hechos->resta?></td>
                                     </tr>
                                 </thead>
                             </table>
@@ -65,18 +71,26 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                 <dt>Presuntas conductas</dt>
                                 <dd>
                                     <ol>
+                                        <?php if (count($data['p_conductas']) > 0): ?>
                                         <?php
                                         foreach ($data['p_conductas'] as $key => $conducta) {
                                             echo '<li>'.$conducta->n_conducta.'</li>';
                                         }
-                                        ?>
+                                        ?>    
+                                        <?php else: ?>
+                                            <li>CONDUCTA NO ESPECIFICADA EN LA LEY DE SEGURIDAD</li>
+                                        <?php endif ?>
                                     </ol>
                                 </dd>
 
                                 <dt>Ley aplicada</dt>
-                                <dd> <?=$data['p_conductas'][0]->n_ley?> </dd>
+                                <?php if ( isset($r[0]['conductas'][0]->n_ley) ): ?>
+                                    <?=$r[0]['conductas'][0]->n_ley?>    
+                                <?php else: ?>
+                                    <dd>LEY NO APLICABLE</dd>
+                                <?php endif ?>
 
-                                <dt>Via(s) de recepcion</dt>
+                                <dt>Vía(s) de recepción</dt>
                                 <dd>
                                     <?php
                                     foreach ($data['vias'] as $key => $via) {
@@ -84,7 +98,7 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                     }
                                     ?>
                                 </dd>
-                                <dt>Descripcion de los hechos</dt>
+                                <dt>Descripción de los hechos</dt>
                                 <dd class="text-justify"> <?=$data['queja']->descripcion?> </dd>
 
                                 <dt>Estado del expediente</dt>
@@ -108,7 +122,7 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                         <div class="col-md-12">
                             <table class="table table-condesed table-hover">
                                 <thead>
-                                    <tr class="bg-info">
+                                    <tr class="bg-gray">
                                         <th>#</th>
                                         <th>MUNICIPIO</th>
                                         <th>CALLE PRINCIPAL</th>
@@ -126,7 +140,7 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                         <td><?=mb_strtoupper($data['ubicacion']->y_calle)?></td>
                                         <td>
                                             <ol>
-                                                <li> <label>Edificacion: </label> <?=mb_strtoupper($data['ubicacion']->edificacion)?></li>
+                                                <li> <label>Edificación: </label> <?=mb_strtoupper($data['ubicacion']->edificacion)?></li>
                                                 <li><label>Número: </label><?=mb_strtoupper($data['ubicacion']->numero)?></li>
                                             </ol>
                                         </td>
@@ -142,7 +156,7 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                     </div>
                     <table class="table table-condesed table-hover">
                         <thead>
-                            <tr class="bg-info">
+                            <tr class="bg-gray">
                                 <th>#</th>
                                 <th>NOMBRE COMPLETO</th>
                                 <th>GÉNERO</th>
@@ -166,10 +180,10 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                         <li> <label>Municipio: </label> <?=mb_strtoupper($quejoso->n_municipio)?></li>
                                         <li><label>Número: </label><?=mb_strtoupper($data['ubicacion']->numero)?></li>
                                         <li>
-                                            <label>Númmero Interior: </label> <?=mb_strtoupper($quejoso->n_int)?>
+                                            <label>Número Interior: </label> <?=mb_strtoupper($quejoso->n_int)?>
                                         </li>
                                         <li>
-                                            <label>Númmero Exterior: </label> <?=mb_strtoupper($quejoso->n_ext)?> 
+                                            <label>Número Exterior: </label> <?=mb_strtoupper($quejoso->n_ext)?> 
                                         </li>
                                     </ol>
                                 </td>
@@ -183,9 +197,9 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                         </div>
                     </div>
                     <div id="p_responsables">
-                        <table class="table table-condesed table-hover">
+                        <table class="table table-condesed table-hover table-bordered">
                             <thead>
-                                <tr class="bg-info">
+                                <tr class="bg-gray">
                                     <th>#</th>
                                     <th>NOMBRE COMPLETO</th>
                                     <th>PROCEDENCIA</th>
@@ -195,10 +209,10 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                             </thead>
                             <tbody>
                                 <?php foreach ($data['presuntos'] as $key => $presunto): ?>
-                                <tr class="bg-gray">
+                                <tr class="">
                                     <td><?=(++$key)?></td>
                                     <td><?=mb_strtoupper($presunto->nombre)?></td>
-                                    <td><?=mb_strtoupper($presunto->procedencia)?></td>
+                                    <td><?=mb_strtoupper($presunto->n_procedencia)?></td>
                                     <td><?=mb_strtoupper($presunto->n_municipio)?></td>
                                     <td>
                                         <?=mb_strtoupper($presunto->n_cargo)?>
@@ -213,17 +227,20 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                         <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h1> <center>Datos de las unidades</center> </h1>
+                                    <h1>  </h1>
                                 </div>
                             </div>
                             <table class="table table-condesed table-hover">
+                                <caption>
+                                    <center>Datos de las unidades</center>
+                                </caption>
                                 <thead>
-                                    <tr class="bg-info">
+                                    <tr class="bg-gray">
                                         <th>#</th>
                                         <th>PROCEDENCIA</th>
                                         <th>TIPO </th>
                                         <th>PLACAS</th>
-                                        <th>NÚMERO ECONOMICO</th>
+                                        <th>NÚMERO ECONÓMICO</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -243,25 +260,19 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                             
                         </div>
                         <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h1> <center>Actuaciones (Oficios generados).</center> </h1>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <dl class="dl-horizontal">
-                                        <dt>Número de Oficio</dt>
-                                        <dd> Perro </dd>
-                                        <dt>Fecha de solicitud</dt>
-                                        <dd> Pastor Malinoins Belga </dd>
-                                        <dt>Institución destinataria</dt>
-                                        <dd> Rambo </dd>
-                                        <dt>Documentacion solicitada</dt>
-                                        <dd> 3 años </dd>
-                                    </dl>
-                                </div>
-                            </div>
+                            <table class="table table-hover table-bordered">
+                                <caption class="text-center bg-gray"> <b>ACTUACIONES (OFICIOS GENERADOS).</b> </caption>
+                                <thead>
+                                    <tr class="bg-gray">
+                                        <th class="text-center">Número de Oficio</th>
+                                        <th class="text-center">Fecha de solicitud</th>
+                                        <th class="text-center">Institución destinataria</th>
+                                        <th class="text-center">Documentación solicitada</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div> 
                     
@@ -275,7 +286,7 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                             <div class="table-responsive">
                                 <table class="table table-condesed table-hover">
                             <thead>
-                                <tr class="bg-info">
+                                <tr class="bg-gray">
                                     <th>#</th>
                                     <th>Expediente</th>
                                 </tr>
@@ -296,19 +307,16 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h1> <center>Documentos del expediente</center> </h1>
-                        </div>
-                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6">
                             <div class="table-responsive">
                                 <table class="table table-hover table-condensed table-bordered">
+                                    <caption class="text-center bg-gray"><center>Documentos del expediente</center></caption>
                                     <thead>
                                         <tr>
                                             <th width="30%">Nombre de documento</th>
-                                            <th width="60%">Descripcion del documento</th>
+                                            <th width="60%">Descripción del documento</th>
                                             <!-- <th width="10%" class="text-center"><i class="fa fa-trash"></i></th> -->
                                         </tr>
                                     </thead>
@@ -340,7 +348,96 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                         </div>
                         
                     </div>
-                     <h2 class="bg-gray"> <center> <u>Dirección de Responsabilidades</u> </center> </h2>
+                    <h2 class="bg-gray"> <center> <u>Dirección de Responsabilidades en Asuntos Internos</u> </center> </h2>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <caption class="text-center bg-gray ">
+                                    <b>LISTADO DE SANCIONES</b>
+                                </caption>
+                                <thead>
+                                    <tr class="bg-gray">
+                                        <th width="30%">Datos del responsable</th>
+                                        <th>Número de oficio</th>
+                                        <th>Fecha de determinación</th>
+                                        <th>Sanción</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <?php if (count($san) > 0): ?>
+                                    <?php foreach ($san as $key => $s): ?>
+                                        <tr>
+                                            <td>
+                                                <ul>
+                                                    <li><label>Nombre:</label><?=$s->nombre_pr ?></li>
+                                                    <li><label>Adscripción: </label><?=$s->adscripcion ?></li>
+                                                    <li><label>RFC:</label><?=$s->rfc ?></li>
+                                                    <li><label>CURP:</label><?=$s->curp ?></li>
+                                                    <li><label>CUIP:</label><?=$s->cuip ?></li>
+                                                </ul>
+                                            </td>
+                                            <td><?=$s->oficio ?></td>
+                                            <td><?=$s->f_determina ?></td>
+                                            <td><?=$s->castigo ?> </td>
+                                            <td>
+                                                <p class="text-justify"><?=$s->comentario ?></p>
+                                            </td>
+                                            
+                                        </tr>
+                                    <?php endforeach ?>
+                                <?php else: ?>
+                                    <tr class="text-center">
+                                        <td colspan="5">
+                                            NO HAY RESULTADOS
+                                        </td>
+                                    </tr>
+                                <?php endif ?>
+                                
+                                </tbody>
+                            </table>
+                         </div>
+                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <caption class="text-center bg-gray ">
+                                    <b>VERIFICACIONES DE CUMPLIMIENTO </b>
+                                </caption>
+                                <thead>
+                                    <tr class="bg-gray">
+                                        <th>Verificación para</th>
+                                        <th>Notificacion al ser. pub.</th>
+                                        <th>Notificación a R.H.</th>
+                                        <th>Captura en RNPSP</th>
+                                        <th>Fecha de ejecución</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (count($ver) > 0): ?>
+                                        <?php foreach ($ver as $key => $v): ?>
+                                            <tr>
+                                                <td><?=$v->nombre_pr ?></td>
+                                                <td>
+                                                    <?=$v->f_not_sp ?>
+                                                </td>
+                                                <td><?=$v->f_not_rh ?></td>
+                                                <td><?=$v->f_cpt_rnpsp ?></td>
+                                                <td><?=$v->f_ejec ?></td>
+                                                
+                                                <td>
+                                                    <p class="text-justify"><?=$s->comentario ?></p>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach ?>
+                                    <?php endif ?>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
                      <div class="row">
                          <div class="col-md-6">
                              <div class="row">
@@ -352,20 +449,24 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                  <div class="col-md-12">
                                      <table class="table table-hover table-bordered">
                                          <thead>
-                                             <tr class="bg-info">
+                                             <tr class="bg-gray">
                                                  <th>Fecha de observación</th>
                                                  <th>Abogado analista.</th>
                                                  <th>Comentario</th>
                                              </tr>
                                          </thead>
                                          <tbody>
-                                             <?php foreach ($data['opiniones'] as $key => $opinion): ?>
-                                             <tr class="bg-gray">
-                                                 <td><?=$opinion->created_at?></td>
-                                                 <td><?=$opinion->abogado?></td>
-                                                 <td><?=$opinion->comentario?></td>
-                                             </tr>
-                                             <?php endforeach ?>
+                                            
+                                            <?php if (  gettype($data['opiniones']) == 'array' || gettype($data['opiniones']) == 'object' ): ?>
+                                                <?php foreach ($data['opiniones'] as $key => $opinion): ?>
+                                                <tr class="bg-gray">
+                                                    <td><?=$opinion->created_at?></td>
+                                                    <td><?=$opinion->abogado?></td>
+                                                    <td><?=$opinion->comentario?></td>
+                                                </tr>
+                                                <?php endforeach ?>    
+                                            <?php endif ?>
+                                             
                                          </tbody>
                                      </table>
                                  </div>
@@ -381,7 +482,7 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                  <div class="col-md-12">
                                      <table class="table table-condesed">
                                          <thead>
-                                             <tr class="bg-info">
+                                             <tr class="bg-gray">
                                                  <th>FECHA</th>
                                                  <th>OFICIO</th>
                                                  <th>MOTIVO</th>
@@ -408,7 +509,41 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$data['queja']->f_hechos);
                                  </div>
                              </div>
                          </div>
-                     </div>       
+                     </div>    
+                        <div class="row">
+                            <div class="col-md-8">
+                                <table class="table table-hover table-bordered">
+                                    <caption class="bg-gray text-center">
+                                        Documentos de asignación de la Subdirección de Análisis y Procedimientos Administrativos.
+                                    </caption>
+                                    <thead>
+                                        <tr class="bg-gray">
+                                            <th width="25%">Número de oficio</th>
+                                            <th width="15%">Fecha del oficio</th>
+                                            <th width="15%">Fecha del acuse</th>
+                                            <th width="45%">Comentario</th>
+                                            <th width="45%">Origen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if ( isset($documentos['doc_sapa']) ): ?>
+                                            <?php foreach ($documentos['doc_sapa'] as $key => $doc): ?>
+                                                <tr>
+                                                    <td>
+                                                        <a href="controller/puente.php?option=17&doc=<?=$doc->id?>&tbl=documentos_turno" target="_blank"><?=$doc->oficio?></a>
+                                                    </td>
+                                                    <td><?=$doc->f_oficio?></td>
+                                                    <td><?=$doc->f_acuse?></td>
+                                                    <td><?=$doc->comentario?></td>
+                                                    <td>Subdirección de Análisis y Procedimientos Administrativos</td>
+                                                </tr>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>   
                 </div>
             </div>
         </div>

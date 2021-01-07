@@ -16,6 +16,7 @@ $clave = $q->getClave($queja_id);
                 	<div id="apersonamiento"></div>
                 	<form id="frm_apersonamiento" action="#" >
                 		<input type="hidden" name="option" value="97">
+                        <input type="hidden" name="queja_id" value="<?=$queja_id?>">
                 		<div class="row">
                 			<div class="col-md-3">
                 				<div class="form-group">

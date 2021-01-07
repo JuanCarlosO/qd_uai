@@ -1,4 +1,6 @@
-
+<style type="text/css" media="screen">
+	ul.ui-autocomplete.ui-menu { z-index:2147483647; }
+</style>
 <div class="modal fade" id="modal_add_apersonamiento">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
@@ -13,22 +15,42 @@
 				<form id="frm_add_apersonamiento" action="#">
 					<input type="hidden" name="option" value="91">
 					<input type="hidden" id="demanda_id" name="demanda_id" value="">
+					<input type="hidden" id="queja_id" name="queja_id" value="<?=$_GET['exp']?>">
 					<div class="row">
-						<div class="col-md-4">
-							<div class="form-group">
-								<label> Fecha del apersonamiento </label>
-								<input type="date" id="f_aperson" name="f_aperson" value="" class="form-control" required="">
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12">
-							<div class="form-group">
-								<label>Descripción</label>
-								<textarea name="comentario" id="comentario" class="form-control" style="resize: vertical;"></textarea>
-							</div>
-						</div>
-					</div>
+	        			<div class="col-md-3">
+	        				<div class="form-group">
+	        					<label>Oficio</label>
+	        					<input type="text" id="oficioa" name="oficioa" value="" class="form-control">
+	        					<input type="hidden" id="oficioa_id" name="oficioa_id" value="" class="form-control">
+	        				</div>
+	        			</div>
+	        			<div class="col-md-3">
+	        				<div class="form-group">
+	        					<label>Fecha del oficio</label>
+	        					<input type="date" name="f_oficio" value="" class="form-control" required="">
+	        				</div>
+	        			</div>
+	        			<div class="col-md-3">
+	        				<div class="form-group">
+	        					<label>Fecha del acuse</label>
+	        					<input type="date" name="f_acuse" value="" class="form-control">
+	        				</div>
+	        			</div>
+	        			<div class="col-md-3">
+	        				<div class="form-group">
+	        					<label>Fecha del apersonamiento</label>
+	        					<input type="date" name="f_apersonamiento" value="" class="form-control">
+	        				</div>
+	        			</div>
+	        		</div>
+	        		<div class="row">
+	        			<div class="col-md-12">
+	        				<div class="form-group">
+	        					<label>Observaciones</label>
+	        					<textarea name="comentario" class="form-control" style="resize: vertical;max-height: 200px;"></textarea>
+	        				</div>
+	        			</div>
+	        		</div>
 					<div class="row">
 						<div class="col-md-4"></div>
 						<div class="col-md-4">

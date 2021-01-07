@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Listado 
+		UAI - ACTAS
 		<small>Reservas y acciones</small>
 	</h1>
 	<ol class="breadcrumb">

@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Módulo de reportes 
+		UAI - ACTAS
 		<small>Conteos y listado</small>
 	</h1>
 	<ol class="breadcrumb">

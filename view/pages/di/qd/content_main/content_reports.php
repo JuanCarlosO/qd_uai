@@ -12,13 +12,21 @@
                 		<input type="hidden" id="option" name="option" value="29">
                 		<div class="row">
 							<div class="col-md-3">
-								<div class="form-group">
-									<label>TIPO DE ASUNTO</label>
-									<select name="t_asunto" class="form-control">
-										<option value="">...</option>
-										<option value="1">POLICIAL</option>
-										<option value="2">NO POLICIAL</option>
-									</select>
+								<div class="form-group" >
+									
+									<?php if ( $_SESSION['nivel'] == 'SUBDIRECTOR' ): ?>
+
+										<input type="hidden"  name="t_asunto" value="<?=($_SESSION['perfil'] == 'QDP') ? '1' : '2' ;?>" placeholder="">
+										
+									<?php else: ?>
+										<label>Tipo de asunto</label>
+										<select name="t_asunto" class="form-control">
+											<option value="">...</option>
+											<option value="1">POLICIAL</option>
+											<option value="2">ESPECIAL</option>
+										</select>
+									<?php endif ?>
+									
 								</div>
 							</div>
 						</div>
@@ -40,7 +48,7 @@
                 			</div>
                 		</fieldset>
 						
-						<fieldset>
+						<!-- <fieldset>
 						    <legend>DATOS DE LA REFERENCIA</legend>
 						    <div class="row">
 						        <div class="col-md-4">
@@ -52,11 +60,11 @@
 						            </div>
 						        </div>
 						    </div>
-						</fieldset>
+						</fieldset> -->
 						<fieldset>
 						    <legend>DATOS DEL EXPEDIENTE</legend>
 						    <div class="row">
-						        <div class="col-md-2">
+						        <!-- <div class="col-md-2">
 						            <div class="form-group">
 						                <label>Prioridad</label>
 						                <select id="prioridad" name="prioridad" class="form-control" >
@@ -65,7 +73,7 @@
 						                    <option value="2">Urgente</option>
 						                </select>
 						            </div>
-						        </div>
+						        </div> -->
 						        <div class="col-md-2">
 						            <div class="form-group">
 						                <label for="estado">Estado guarda</label>
@@ -110,7 +118,7 @@
 						    <div class="row">
 						        <div class="col-md-2">
 						            <div class="form-group">
-						                <label for="genero">Género</label>
+						                <label for="genero">Género del afectada (o)</label>
 						                <select id="genero" name="genero" class="form-control" >
 						                    <option value="">...</option>
 						                    <option value="1">MASCULINO</option>
@@ -120,7 +128,7 @@
 						        </div>
 						        <div class="col-md-3">
 						            <div class="form-group">
-						                <label for="t_afecta">Tipo de afectado</label>
+						                <label for="t_afecta">Tipo de afectada (o)</label>
 						                <select id="t_afecta" name="t_afecta" class="form-control" >
 						                    <option value="">...</option>
 						                    <option value="1">QUEJOSO</option>
@@ -131,7 +139,7 @@
 						        </div>
 						        <div class="col-md-3">
 						            <div class="form-group">
-						                <label for="categoria">Categoria</label>
+						                <label for="categoria">Categoría</label>
 						                <select id="categoria" name="categoria" class="form-control" >
 						                    <option value="">...</option>
 						                    <option value="1">CIUDADANO</option>
@@ -173,7 +181,7 @@
 						    <div class="row">
 						        <div class="col-md-12">
 						            <div class="form-group">
-						                <label>Vias de recepción</label>
+						                <label>Vías de recepción</label>
 						                <select id="vias_r" name="vias_r[]" class="form-control select2"  multiple>
 						                    <option value="">...</option>
 						                </select>
@@ -205,7 +213,7 @@
 					        </div>
 						    <div class="col-md-6"></div>
 						</div>
-						<div class="row">
+						<!-- <div class="row">
 							<div class="col-md-12">
 								<div class="box box-success box-solid collapsed-box">
 									<div class="box-header with-border">
@@ -219,19 +227,19 @@
 										<div class="row">
 											<div class="col-md-4">
 												<div class="form-group">
-													<label>Buscar por unidad</label>
+													<label>Matrícula vehicular</label>
 													<input type="text" id="" name="" value="" class="form-control" placeholder="">
 												</div>
 											</div>
 											<div class="col-md-4">
 												<div class="form-group">
-													<label>Buscar por presunto responsable</label>
+													<label>Nombre del presunto responsable</label>
 													<input type="text" id="" name="" value="" class="form-control" placeholder="">
 												</div>
 											</div>
 											<div class="col-md-4">
 												<div class="form-group">
-													<label> Buscar por quejoso</label>
+													<label> Nombre del quejoso</label>
 													<input type="text" id="" name="" value="" class="form-control" placeholder="">
 												</div>
 											</div>
@@ -239,21 +247,31 @@
 										<div class="row">
 											<div class="col-md-4">
 												<div class="form-group">
-													<label>Buscar por arma</label>
+													<label>Arma</label>
 													<input type="text" id="" name="" value="" class="form-control" placeholder="">
 												</div>
 											</div>
 											<div class="col-md-4">
 												<div class="form-group">
-													<label>Buscar por animales</label>
+													<label>Animales</label>
 													<input type="text" id="" name="" value="" class="form-control" placeholder="">
+												</div>
+											</div>
+											<div class="col-md-4">
+												<div class="form-group">
+													<label>Género del presunto</label>
+													<select name="genero" id="genero" class="form-control">
+														<option value="">...</option>
+														<option value="1">MASCULINO</option>
+														<option value="2">FEMENINO</option>
+													</select>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
 							</div>
-						</div>
+						</div> -->
 						<div class="row">
 						    <div class="col-md-4"></div>
 						    <div class="col-md-4">
@@ -296,9 +314,10 @@
 											<th>No. Expediente</th>
 											<th>Estado</th>
 											<th>Fecha/Hora de hechos</th>
-											<th>Infraccion(es)</th>
+											<th>Infracción(es)</th>
 											<th>Municipio</th>
 											<th>Procedencia</th>
+											<th>Descripción de los hechos</th>
 										</tr>
 									</thead>
 									<tbody></tbody>

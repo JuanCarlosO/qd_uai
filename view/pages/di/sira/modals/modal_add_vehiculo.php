@@ -1,6 +1,6 @@
 <form action="#" id="frm_add_vehiculo" method="post" >
 	<input type="hidden" name="option" value="39">
-	<input type="hidden" name="acta_id" value="<?=$_GET['acta']?>">
+	<input type="hidden" name="acciones_id" value="<?=$_GET['ac']?>">
 	<div class="modal fade" id="modal_add_vehiculo">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -28,7 +28,7 @@
 									<option value="">...</option>
 									<option value="1">MOTOCICLETA</option>
 									<option value="2">CAMIONETA</option>
-									<option value="3">AUTOMOVIL</option>
+									<option value="3">AUTOMÓVIL</option>
 									<option value="4">CAMIÓN</option>
 								</select>
 							</div>
@@ -69,9 +69,13 @@
 							<input type="text" class="form-control" id="inv" name="inv">
 						</div>
 						<div class="col-md-4">
-							<label>Corporación *</label>
+							<label>Procedencia *</label>
 							<select id="corporacion" name="corporacion" class="form-control">
 								<option value="">...</option>
+								<option value="1">CPRS</option>
+								<option value="2">SECRETARÍA DE SEGURIDAD</option>
+								<!--<option value="3">CPRS-ADMINISTRATIVO</option>
+								<option value="4">SECRETARIA DE SEGURIDAD-ADMINISTRATIVO</option>-->
 							</select>
 						</div>
 					</div>

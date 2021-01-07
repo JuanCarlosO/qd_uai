@@ -8,6 +8,25 @@
                 </div>
                 <div class="box-body">
                     <div id="div_reportes"></div>
+                    <!-- <div class="row">
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table id="tbl_sc" class="table table-hover table-bordered">
+                                    <caption class="bg-gray text-center">
+                                        SUBDIRECCIÓN DE LO CONTENCIOSO.
+                                    </caption>
+                                    <thead>
+                                        <tr class="bg-gray">
+                                            <th class="text-center"> ESTADO </th>
+                                            <th class="text-center"> CANTIDAD </th>
+                                            <th class="text-center"> MOSTRAR </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div> -->
                     <form id="frm_reporte" action="#">
                         <input type="hidden" name="option" value="68">
                         <div class="row">
@@ -49,6 +68,8 @@
                                             <option value="">...</option>
                                             <option value="10">RESERVA</option>
                                             <option value="11">IMPROCEDENCIA</option>
+                                            <option value="2">ARCHIVO</option>
+                                            <option value="3">INCOMPETENCIA</option>
                                         </select>
                                     </div>
                                 </div>
@@ -104,8 +125,8 @@
                                             <label>Tipo de demanda</label>
                                             <select name="t_demanda" id="t_demanda" class="form-control">
                                                 <option value="">...</option>
-                                                <option value="1">PRIMER DEMANDA</option>
-                                                <option value="2">RECURSO DE REVISIÓN</option>
+                                                <option value="1">IMPUGNACIÓN SALA REGIONAL</option>
+                                                <option value="2">IMPUGNACIÓN SALA SUPERIOR</option>
                                             </select>
                                         </div>
                                     </div>
@@ -114,8 +135,8 @@
                                             <label>Resultado de demanda</label>
                                             <select name="r_dem" id="r_dem" class="form-control">
                                                 <option value="">...</option>
-                                                <option value="1">SATISFACTORIO</option>
-                                                <option value="2">NO SATISFACTORIO</option>
+                                                <option value="1">VALIDEZ</option>
+                                                <option value="2">INVALIDEZ</option>
                                             </select>
                                         </div>
                                     </div>
@@ -141,7 +162,7 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Estado de la resolución</label>
-                                            <select name="edo_rde" id="edo_res" class="form-control">
+                                            <select name="edo_res" id="edo_res" class="form-control">
                                                 <option value="">...</option>
                                                 <option value="1">SATISFACTORIA</option>
                                                 <option value="2">INSATISFACTORIA</option>

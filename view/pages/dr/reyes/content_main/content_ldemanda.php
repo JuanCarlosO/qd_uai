@@ -27,7 +27,7 @@ if (isset($_GET['exp'])) {
                     					<tr class="bg-gray">
                     						<th class="text-center" width="10%">Demanda</th>
                     						<th class="text-center" width="10%">Oficio</th>
-                    						<th class="text-center" width="10%">Dependencia</th>
+                    						<th class="text-center" width="10%">Autoridad</th>
                     						<th class="text-center" width="35%">Descripción</th>
                     						<th class="text-center" width="35%"> Resolver </th>
                     					</tr>

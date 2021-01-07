@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Guarda acuse de expedientes
+		UAI - ACTAS
 		<small></small>
 	</h1>
 	<ol class="breadcrumb">

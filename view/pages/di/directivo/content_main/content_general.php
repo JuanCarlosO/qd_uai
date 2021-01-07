@@ -12,7 +12,7 @@
                             <div class="table-responsive">
                                 <table id="tbl_edos" class="table table-hover table-bordered">
                                     <caption class="bg-gray text-center">
-                                        ESTADOS DE LOS EXPEDIENTE
+                                        ESTADOS DE LOS EXPEDIENTES
                                     </caption>
                                     <thead>
                                         <tr class="bg-gray">
@@ -34,6 +34,7 @@
                                     <thead>
                                         <tr class="bg-gray">
                                             <th class="text-center"> ABOGADO </th>
+                                            <th class="text-center"> ADSCRIPCIÓN </th>
                                             <th class="text-center"> CANTIDAD </th>
                                             <th class="text-center"> MOSTRAR </th>
                                         </tr>
@@ -47,7 +48,7 @@
                         <div class="col-md-6">
                             <div class="table-responsive">
                                 <table id="tbl_ordenes" class="table table-hover table-bordered">
-                                    <caption class="bg-gray text-center">CONTADOR DE ORDENES DE TRABAJO</caption>
+                                    <caption class="bg-gray text-center">CONTADOR DE ÓRDENES DE TRABAJO</caption>
                                     <thead>
                                         <tr class="bg-gray">
                                             <th class="text-center">TIPO DE ORDEN</th>
@@ -83,7 +84,7 @@
                                     <thead class="bg-gray">
                                         <tr>
                                             <th>#</th>
-                                            <th>CLAVE EXP.</th>
+                                            <th>No. EXPEDIENTE</th>
                                             <th>ESTADO</th>
                                             <th>PROCEDENCIA</th>
                                             <th>TIPO DE ASUNTO </th>

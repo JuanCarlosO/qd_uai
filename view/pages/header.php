@@ -1,10 +1,18 @@
 <header class="main-header">
     <!-- Logo -->
     <a href="index.php?menu=general" class="logo">
+      <?php if ( $_SESSION['perfil'] == 'SIRA' ): ?>
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>SIQD</b></span>
+      <span class="logo-mini"><b>UAI</b></span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>SIQD</b>UAI</span>
+      <span class="logo-lg"><b>UAI </b></span>
+      <?php else: ?>
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>UAI</b></span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg"><b>UAI</b></span>
+      <?php endif ?>
+      
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">
@@ -28,7 +36,12 @@
 
                 <p>
                   <label class="name-person"> <?=$_SESSION['n_completo']?> </label>
+                  <?php if ( $_SESSION['perfil'] == 'SIRA' ): ?>
+                  <small>Perfil: SIS</small>
+                  <?php else: ?>
                   <small>Perfil: <?=mb_strtoupper($_SESSION['perfil'],'utf-8');?></small>
+                  <?php endif ?>
+                  
                 </p>
               </li>
               <li class="user-footer">

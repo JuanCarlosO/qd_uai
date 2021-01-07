@@ -1,6 +1,6 @@
 <form action="#" id="frm_add_pr" method="post" >
 	<input type="hidden" name="option" value="33">
-	<input type="hidden" name="acta_id" value="<?=$_GET['acta']?>">
+	<input type="hidden" name="acciones_id" value="<?=$_GET['ac']?>">
 	<div class="modal fade" id="modal_add_pr">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -34,7 +34,7 @@
 					</div>
 					<div class="row">
 						<div class="col-md-3">
-							<label>Genero * </label>
+							<label>Género * </label>
 							<select id="genero" name="genero" class="form-control" required>
 								<option value="">...</option>
 								<option value="1">Hombre</option>
@@ -51,17 +51,19 @@
 						</div>
 						<div class="col-md-3">
 							<label>Procedencia *</label>
-							<select id="procedencia" name="procedencia" class="form-control" required>
+							<select id="procedencia" name="procedencia" class="form-control">
 								<option value="">...</option>
-								<option value="1">Secretaría de Seguridad</option>
-								<option value="2">CPRS</option>
+								<option value="1">CPRS</option>
+								<option value="2">SECRETARIA DE SEGURIDAD</option>
+								<!--<option value="3">CPRS-ADMINISTRATIVO</option>
+								<option value="4">SECRETARIA DE SEGURIDAD-ADMINISTRATIVO</option>-->
 							</select>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
-								<label>Media filiciación</label>
+								<label>Media filiación</label>
 								<textarea id="media_f" name="media_f" class="form-control" style="resize: vertical; max-height: 300px;"></textarea>
 							</div>
 						</div>

@@ -1,6 +1,6 @@
 <form action="#" id="frm_add_arma" method="post" >
 	<input type="hidden" name="option" value="47">
-	<input type="hidden" name="acta_id" value="<?=$_GET['acta'];?>">
+	<input type="hidden" name="acciones_id" value="<?=$_GET['ac']?>">
 	<div class="modal fade" id="modal_add_arma">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -89,9 +89,13 @@
 							<input type="text" name="color" value="" class="form-control">
 						</div>
 						<div class="col-md-6">
-							<label>Corporacion</label>
+							<label>Procedencia</label>
 							<select name="corp" class="form-control">
 								<option value="">...</option>
+								<option value="1">CPRS</option>
+								<option value="2">SECRETARÍA DE SEGURIDAD</option>
+								<!--<option value="3">CPRS-ADMINISTRATIVO</option>
+								<option value="4">SECRETARIA DE SEGURIDAD-ADMINISTRATIVO</option>-->
 							</select>
 						</div>
 					</div>

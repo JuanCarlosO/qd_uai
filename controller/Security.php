@@ -46,7 +46,7 @@ class Security
 	{
 		try {
 			$sql = "SELECT u.*,p.nombre AS name, CONCAT(p.nombre, ' ',p.ap_pat,' ',p.ap_mat) AS n_completo, a.nombre AS n_area, a.id AS area_id FROM usuarios AS u 
-			INNER JOIN personal AS p ON p.id = u.person_id
+			INNER JOIN personal AS p ON p.id = u.personal_id
 			INNER JOIN areas AS a ON a.id = p.area_id
 			WHERE  u.nick = ? AND u.estado = 1 LIMIT 1";
 			$stmt = $this->pdo->prepare($sql);
@@ -104,8 +104,8 @@ class Security
 	}
 
 }
-/*
-$o = new Security;
-echo $o->encrypt_pass('james2019');
-*/
+
+/*$o = new Security;
+echo $o->encrypt_pass('james2020');*/
+
 

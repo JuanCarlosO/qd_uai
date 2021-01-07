@@ -1,7 +1,7 @@
 <section class="content-header">
 	<h1>
-		Ordenes de trabajo (OT)
-		<small>Nuevo</small>
+		SISTEMA DE INSPECCIONES Y SUPERVISIONES
+		<small>Órdenes de trabajo (OT)</small>
 	</h1>
 	<ol class="breadcrumb">
 		<li><a href="#"><i class="fa fa-dashboard"></i> Inicio</a></li>

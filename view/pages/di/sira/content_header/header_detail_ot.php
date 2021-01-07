@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Ordenes de trabajo
+		SISTEMA DE INSPECCIONES Y SUPERVISIONES
 		<small> Detalle de la orden de trabajo</small>
 	</h1>
 	<ol class="breadcrumb">

@@ -34,7 +34,7 @@
 														<tr>
 															<th>#</th>
 															<th>NOMBRE COMPLETO</th>
-															<th>CORPORACIÓN</th>
+															<th>GENERO</th>
 															<th>
 																<i class="fa fa-trash text-red"></i>
 															</th>
@@ -93,7 +93,7 @@
 						<div class="col-md-6">
 							<div class="box box-success box-solid ">
 								<div class="box-header with-border">
-									<h3 class="box-title">Vehiculos implicados</h3>
+									<h3 class="box-title">Vehículos implicados</h3>
 									<div class="box-tools pull-right">
 										<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
 										</button>
@@ -115,7 +115,7 @@
 													<thead>
 														<tr>
 															<th>#</th>
-															<th>CARACTERISTICAS</th>
+															<th>CARACTERÍSTICAS</th>
 															<th>DATOS DEL VEHÍCULO</th>
 															<th>
 																<i class="fa fa-trash text-red"></i>
@@ -133,7 +133,7 @@
 						<div class="col-md-6">
 							<div class="box box-success box-solid ">
 								<div class="box-header with-border">
-									<h3 class="box-title">Animales</h3>
+									<h3 class="box-title">Semovientes</h3>
 									<div class="box-tools pull-right">
 										<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
 										</button>
@@ -143,7 +143,7 @@
 									<div class="row">
 										<div class="col-md-4 pull-right">
 											<button class="btn btn-info btn-flat btn-block " data-toggle="modal" data-target="#modal_add_animal">
-												<i class="fa fa-plus"></i> Agregar animal
+												<i class="fa fa-plus"></i> Agregar semoviente
 											</button>
 										</div>
 									</div>
@@ -155,8 +155,8 @@
 													<thead>
 														<tr>
 															<th>#</th>
-															<th>CARACTERISTICAS</th>
-															<th>DATOS DEL ANINMAL</th>
+															<th>CARACTERÍSTICAS</th>
+															<th>DATOS DEL SEMOVIENTE</th>
 															<th>
 																<i class="fa fa-trash text-red"></i>
 															</th>

@@ -8,10 +8,16 @@ $(document).ready(function() {
 function getURL(url) {
 	if ( url == '?menu=general' ) {
 		$('#option_1').addClass('active');
+
 		getExpedientes();
-		autocomplete_input('jefe','jefe_id',3);
-		autocomplete_input('oficio_a','oficio_a_id',10);
 		frm_add_responsable();
+		autocomplete_input('jefe','jefe_id',3);
+		autocomplete_input('analista','analista_id',3);
+		//para las sanciones 
+		autocomplete_input('oficio_sa','oficio_sa_id',10);
+		frm_add_sancion();
+		frm_add_verificacion();
+
 	}
 	if ( url == '?menu=resolver' ) {
 		$('#option_1').addClass('active');
@@ -26,6 +32,7 @@ function getURL(url) {
 	if ( url == '?menu=list_demandas' ) {
 		$('#option_1').addClass('active');
 		autocomplete_input('oficio','oficio_id',10);
+		autocomplete_input('oficioa','oficioa_id',10);
 		frm_resolver_demanda();
 		frm_add_apersonamiento();
 	}
@@ -37,6 +44,15 @@ function getURL(url) {
 	if ( url == '?menu=improcedencia' ) {
 		$('#option_1').addClass('active');
 		frm_acuerdo_improcedencia();
+		$('#motivo').change(function(event) {
+			event.preventDefault();
+			var edo = "";
+			if ($(this).val() == "ARCHIVO") {edo = 2;}
+			if ($(this).val() == "IMPROCEDENCIA") {edo = 11;}
+			if ($(this).val() == "INCOMPETENCIA") {edo = 3;}
+			if ($(this).val() == "RESERVA") {edo = 10;}
+			$('#estado_exp').val(edo);
+		});
 	}
 	if ( url == '?menu=list_reservas' ) {
 		$('#option_1').addClass('active');
@@ -46,12 +62,27 @@ function getURL(url) {
 	}
 	if ( url == '?menu=reportes' ) {
 		$('#option_2').addClass('active');
+		tablero_ctrl();		
 		acciones_frm();
 		frm_reporte();
+	}
+	if ( url == '?menu=tablero' ) {
+		$('#option_3').addClass('active');
+		tablero_sc();	
 	}
 	if ( url == '?menu=apersonamiento' ) {
 		autocomplete_input('oficio','oficio_id',10);
 		frm_apersonamiento();
+	}
+	if ( url == '?menu=add_acuse' ) {
+		$('#option_1').addClass('active');
+		frm_add_acuse();
+		autocomplete_input('oficio','oficio_id',10);
+		autocomplete_input('queja','queja_id',12);
+	}
+	if ( url == '?menu=modificar' ) {
+		$('#option_1').addClass('active');
+		frm_edit_sv();
 	}
 	
 	return false; 
@@ -64,80 +95,54 @@ function getExpedientes() {
 	    	{ leyenda: 'Acciones', style: 'width:10px;', columna: '' },
 	    	{ leyenda: 'ID'},
 	        { leyenda: 'Cve. Expediente', filtro:true, columna:'q.cve_exp'},
-	        { leyenda: 'No. Oficio'},
-	        { leyenda: 'Fojas'},
-	        { leyenda: 'Remitente', columna:''},
+	        { leyenda: 'Equipo de trabajo'},
 	        { leyenda: 'Procedencia'},	        
-	        { leyenda: 'Presunto(s)',columna:''},	        
-	        { leyenda: 'Abogado responsable', filtro:false, columna:''},	        
-	        { leyenda: 'Motivo', filtro:false, columna:''},	        
-	        { leyenda: 'Dias trabajados', filtro:false, columna:''},	        
+	        { leyenda: 'Presunto(s)',columna:''},          
+	        { leyenda: 'Días trabajados', filtro:false, columna:''},	        
 	    ],
 	    modelo: [
-	    	
 	    	{ class:'',formato: function(tr, obj, valor){
-	    		var ruta = "", demanda = { href: "#", contenido: '<i class="fa fa-edit"></i> ------' };
-	    		ruta ="index.php?menu=resolver&exp="+obj.id;
-	    		
-	    		if(nivel == 'ANALISTA' ){
-	    			links = [
-	    				{ href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-archive"></i>Acuerdo de improcedencia' },
-	    				{ href: "index.php?menu=reserva&exp="+obj.queja_id, contenido: '<i class="fa fa-pause"></i>Poner en reserva' },
-	    				{ href: "index.php?menu=list_reservas&exp="+obj.queja_id, contenido: '<i class="fa fa-eye"></i>Acuerdos de reserva' },
-	    			];
+	    		var ruta = "", actions = [];
+	    		if (obj.autoridad == null){
+	    			actions.push({ href:"javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-users"></i> Asignar equipo de trabajo' });
 	    		}else{
-	    			if(obj.estado == '10'){
-		    			links = [
-				            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
-				            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
-				            { href: "index.php?menu=reserva&exp="+obj.queja_id, contenido: '<i class="fa fa-pause"></i>Poner en reserva' },
-				            { href: "index.php?menu=list_reservas&exp="+obj.queja_id, contenido: '<i class="fa fa-eye"></i>Listar reserva' },
-				            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demandas' },
-				            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
-				        ];
-	    			}else if( obj.estado == '11' ){
-		    			links = [
-				            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
-				            { href: ruta, contenido: '<i class="fa fa-edit"></i> Registrar resolucion de la Comisión' },
-				            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
-				            { href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-book"></i>Acuerdo de improcedencia' },
-				            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
-				            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demandas' }
-				        ];
-	    			}else{
-	    				if ( obj.autoridad == 'SC' ) {
-			    			links = [
-					            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
-					            { href: "index.php?menu=apersonamiento&queja_id="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Registrar seguimiento presencial' },
-					            { href: ruta, contenido: '<i class="fa fa-edit"></i> Registrar resolucion de la Comisión' },
-					            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demanda' },
-					            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
-					            { href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-book"></i>Acuerdo de improcedencia' },
-					            { href: "index.php?menu=reserva&exp="+obj.queja_id, contenido: '<i class="fa fa-pause"></i>Poner en reserva' },
-					            { href: "index.php?menu=list_reservas&exp="+obj.queja_id, contenido: '<i class="fa fa-eye"></i>Listar reserva' },
-					            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
-					        ];
-	    				}else{
-	    					links = [
-					            { href: "javascript:open_modal('modal_add_responsable',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-user"></i>Asignar responsable' },
-					            { href: "index.php?menu=apersonamiento&queja_id="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Registrar seguimiento presencial' },
-					            { href: ruta, contenido: '<i class="fa fa-edit"></i> Registrar resolucion' },
-					            { href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-edit"></i> Registrar demanda' },
-					            { href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' },
-					            { href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' },
-					        ];
-	    				}
-	    			}
-	    			
-	    		}
+					actions.push({ href: "index.php?menu=modificar&queja_id="+obj.queja_id, contenido: '<i class="fa fa-edit"></i>Modificar' });
+					actions.push({ href:"index.php?menu=resolver&exp="+obj.id, contenido: '<i class="fa fa-pencil"></i> Registrar resolución de la Comisión' });
+					actions.push({ href: "index.php?menu=reserva&exp="+obj.queja_id, contenido: '<i class="fa fa-pause"></i>Poner en reserva' });
+					actions.push({ href: "index.php?menu=list_reservas&exp="+obj.queja_id, contenido: '<i class="fa fa-eye"></i>Listar reserva' });
+					//actions.push({ href: "index.php?menu=apersonamiento&queja_id="+obj.queja_id, contenido: '<i class="fa fa-edit"></i> Registrar seguimiento presencial' });
+					actions.push({ href: "index.php?menu=demandar&exp="+obj.id, contenido: '<i class="fa fa-pencil"></i> Registrar demanda' });
+					actions.push({ href: "index.php?menu=list_demandas&exp="+obj.id, contenido: '<i class="fa fa-list"></i> Listado de demandas' });
+					actions.push({ href: "index.php?menu=cedula&exp="+obj.id, contenido: '<i class="fa fa-eye"></i>Cédula' });
+					actions.push({ href: "index.php?menu=improcedencia&exp="+obj.queja_id, contenido: '<i class="fa fa-book"></i> Concluir expediente' });
+					actions.push({ href: "javascript:open_modal('modal_add_sancion',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-plus"></i> Registrar sanción' });
+					actions.push({ href: "javascript:open_modal('modal_add_verificacion',"+obj.queja_id+",'queja_id');", contenido: '<i class="fa fa-plus"></i> Registrar verificación' });
+	    		}																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
 	            return anexGrid_dropdown({
                     contenido: '<i class="glyphicon glyphicon-cog"></i>',
                     class: 'btn btn-primary ',
-                    target: '_blank',
-                    data: links
+                    data: actions
                 });
 	        }},
 	        { formato: function(tr, obj, valor){
+	        	if (obj.estado == 2){
+	        		
+	        		if (obj.edo_tr == 'SI') {
+        				tr.addClass('bg-light-blue-active');
+        			}else{
+        				tr.addClass('bg-light-blue-active');
+        				tr.addClass('disabled');
+        			}
+	        	}
+	        	if (obj.estado == 3){
+	        		
+	        		if (obj.edo_tr == 'SI') {
+        				tr.addClass('bg-purple-active');
+        			}else{
+        				tr.addClass('bg-purple-active');
+        				tr.addClass('disabled');
+        			}
+	        	}
 	        	if (obj.estado == 10) {
 	        			if (obj.edo_tr == 'SI') {
 	        				tr.addClass('bg-orange-active');
@@ -162,13 +167,17 @@ function getExpedientes() {
             	return obj.id;
         	}},
 	        { propiedad: 'cve_exp' },
-	        { propiedad: 'sapa.oficio' },
 	        { formato: function(tr, obj, valor){
-            	return obj.sapa.fojas;
+	        	var lista = "";
+	        	lista += "<ul>";
+		        	lista += "<li>"+obj.jefe+"</li>";
+		        	lista += "<li>"+obj.abogado+"</li>";
+	        	lista += "</ul>";
+            	return lista;
         	}},
-	        { propiedad: 'sapa.remitente'},
-	        { formato:function(tr,obj,valor){
-	        	return 'ANÁLISIS E INTEGRACIÓN';
+	        { formato: function(tr, obj, valor){
+	        	if ( obj.procedencia == 'SS' ) {return 'SECRETARÍA DE SEGURIDAD';}
+	        	if ( obj.procedencia == 'CPRS' ) {return obj.procedencia;}
 	        }},
 	        { formato: function(tr, obj, valor){
 	        	var lista = "";
@@ -179,23 +188,7 @@ function getExpedientes() {
 	        	lista += '</ul>';
 	        	return lista;
 	        }},
-	        { formato: function(tr, obj, valor){
-	        	if( obj.a_responsable == '' ){
-	        		return 'AÚN SIN ASIGNAR';
-	        	}else{
-	        		return obj.a_responsable;
-	        	}
-	        }},
-	        { formato: function(tr, obj, valor){
-	        	if ( obj.motivo == null || obj.motivo == '') {
-	        		return 'SIN MOTIVO';
-	        	}else{
-	        		return obj.motivo;
-	        	}
-	        }},
-	        { formato: function(tr, obj, valor){
-	        	return obj.f_cierre;
-	        }},
+	        { propiedad: 'f_cierre' },
 	    ],
 	    url: 'controller/puente.php?option=11',
 	    filtrable: true,
@@ -208,7 +201,7 @@ function getExpedientes() {
 function frm_add_responsable() {
 	$('#frm_add_responsable').submit(function(e) {
 		e.preventDefault();
-		var dataForm = new FormData(document.getElementById("frm_add_responsable"));
+		var dataForm = $(this).serialize();
 		$.ajax({
 			url: 'controller/puente.php',
 			type: 'POST',
@@ -216,8 +209,6 @@ function frm_add_responsable() {
 			data: dataForm,
 			async:false,
 			cache:false,
-			processData: false,
-            contentType: false,
 		})
 		.done(function(response) {
 			document.getElementById('frm_add_responsable').reset();
@@ -225,7 +216,6 @@ function frm_add_responsable() {
 		})
 		.fail(function(jqXHR,textStatus,errorThrow) {
 			document.getElementById('frm_add_responsable').reset();
-			$('#sp_id').val("");
 			alerta('div_responsable','error',jqXHR.responseText,'modal_add_responsable');
 		});
 	});
@@ -265,6 +255,12 @@ function open_modal( modal, val, name){
 	}
 	if (name == 'queja_id') {
 		getClave(val,modal);
+	}
+	if (modal == 'modal_situacion') {
+		situacion_sc(val);
+	}
+	if (modal == 'modal_add_verificacion') {
+		load_catalogo('sanciones','select','1X');
 	}
 	$('#'+modal).modal('show');
 	return false;
@@ -490,6 +486,7 @@ function frm_reporte() {
 }
 function load_catalogo(element,type,option){
 	var result;
+
 	if( element == 'conductas' ){
 		var data = $('#t_ley').val();
 	}else{
@@ -498,6 +495,7 @@ function load_catalogo(element,type,option){
 	if ( element != '' ) {
 		$('#'+element).html('');
 	}
+	if ( element == 'sanciones' ) { data = $('#v_queja_id').val(); }
 	$.ajax({
 		url: 'controller/puente.php',
 		type: 'POST',
@@ -666,4 +664,440 @@ function acciones_frm() {
 		}
 	});
 	return false;
+}
+function tablero_ctrl() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '78'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		//Agregar contenido a la SC
+		//if (response.sc.primer == '0' || typeof response.sc === undefined) {
+		if (typeof response.sc.primer === 'undefined') {
+			var des = 'disabled';
+		}else{ var desactiva = ''; }
+		$('#tbl_sc tbody').append('<tr class="text-center">'+
+			'<td>EXPEDIENTES CON UNA DEMANDA</td>'+
+			'<td>'+response.sc.primer+'</td>'+
+			'<td>'+
+				'<button type="button" onclick="verExpedientes(2);" class="btn btn-success btn-flat" '+des+'> <i class="fa fa-eye"></i> </button>'+
+			'</td>'+
+		'</tr>');
+		if (response.sc.rec_rev == '0') {
+			var desactiva = 'disabled';
+		}else{ var desactiva = ''; }
+		$('#tbl_sc tbody').append('<tr class="text-center">'+
+			'<td>EXPEDIENTES EN RECURSO DE REVISIÓN</td>'+
+			'<td>'+response.sc.rec_rev+'</td>'+
+			'<td>'+
+				'<button type="button" onclick="verExpedientes(1);" class="btn btn-success btn-flat"'+desactiva+'> <i class="fa fa-eye"></i> </button>'+
+			'</td>'+
+		'</tr>');
+		/*************EXPEDIENTES EN ARCHIVO IMPROCEDENCIA, RESERVA E INCOMPETENCIA **************/
+		$.each(response.q_estados, function(i, val) {
+			var fila = "";
+			fila += "<tr class='text-center'>";
+				fila += "<td>"+val.nombre+"</td>";
+				fila += "<td>"+val.cuenta+"</td>";
+				fila += "<td>";
+					fila += "<button class='btn btn-success btn-flat' onclick='open_modal("+'"modal_situacion"'+","+val.estado+","+'"estado"'+");'><i class='fa fa-legal'></i></button>";
+				fila +="</td>";
+			fila += "</tr>";
+			$('#tbl_sc tbody').append(fila);
+		});
+		
+	})
+	.fail(function(jqXHR,textStatus,errorThrow) {
+		console.log("Error: "+jqXHR.responseText);
+	});
+	
+	return false;
+}
+function situacion_sc(estado) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option:'104',edo: estado},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#td_con').text(response.acuerdos_con);
+		$('#td_sin').text(response.acuerdos_sin);
+		//resoluciones
+		var sum_san = 0;
+		$.each(response.sanciones, function(i, val) {
+			if (val.sancion == 'SANCIONADO') {
+				sum_san = sum_san + parseInt(val.cuenta);
+				$('#con_sancion').text(val.cuenta);
+			}else{
+				sum_san = sum_san + parseInt(val.cuenta);
+				$('#sin_sancion').text(val.cuenta);
+			}
+			console.log(sum_san);
+		});
+		$('#suma_res').text(sum_san);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	
+	return false;
+}
+///Tablero de control
+function tablero_sc() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '105'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#cuenta_chyj').text(response.cuenta);
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	return false;
+}
+function cargarTablas() {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '78'},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#por_demanda tbody').html('');
+		$('#res_prim_dem tbody').html('');
+		$('#res_rr_dem tbody').html('');
+		$.each(response.demandas, function(i, val) {
+			var t_demanda = val.t_demanda;
+			if (t_demanda == 'RECURSO DE REVISION') {
+				t_demanda = 'RECURSO DE REVISIÓN';
+			}
+			$('#por_demanda').append(
+				'<tr class="text-center">'+
+					'<td>'+t_demanda+'</td>'+
+					'<td>'+val.cuenta+'</td>'+
+					'<td>'+
+						'<button class="btn btn-success btn-flat" onclick="verExpByDemanda('+"'"+val.t_demanda+"'"+');">'+
+							'<i class="fa fa-eye"></i>'+
+						'</button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+		$.each(response.res_primer_d, function(i, val) {
+			$('#res_prim_dem').append(
+				'<tr class="text-center">'+
+					'<td>'+val.resultado+'</td>'+
+					'<td>'+val.cuenta+'</td>'+
+					'<td>'+
+						'<button type="button" onclick="verExpByEdoDem('+"'"+val.resultado+"', 1"+');" class="btn btn-success btn-flat"> <i class="fa fa-eye"></i> </button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+		$.each(response.res_rr_d, function(i, val) {
+			$('#res_rr_dem').append(
+				'<tr class="text-center">'+
+					'<td>'+val.resultado+'</td>'+
+					'<td>'+val.cuenta+'</td>'+
+					'<td>'+
+						'<button type="button" onclick="verExpByEdoDem('+"'"+val.resultado+"', 2"+');" class="btn btn-success btn-flat"> <i class="fa fa-eye"></i> </button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+		$.each(response.res_chyj, function(i, val) {
+			$('#tbl_res_chyj').append(
+				'<tr class="text-center">'+
+					'<td>'+val.sancion+'</td>'+
+					'<td>'+val.cuenta+'</td>'+
+					'<td>'+
+						'<button type="button" onclick="verExpByResCom('+"'"+val.sancion+"'"+');" class="btn btn-success btn-flat"> <i class="fa fa-eye"></i> </button>'+
+					'</td>'+
+				'</tr>'
+			);
+		});
+		
+		$('#cuenta_apersona').text(response.apersona.cuenta);
+		
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	
+	return false;
+}
+function verExpByResCom(res) {
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '107', r:res},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_global tbody').html('');
+		var fila = "";
+		$.each(response, function(index, val) {
+			var jefe = "";
+			if (val.name_jefe !== null) {
+				jefe = val.name_jefe;
+			}else{
+				jefe = "NO ASIGNADO";
+			}
+			fila += "<tr>";
+				fila += "<td>"+val.id+"</td>";
+				fila += "<td><a href='index.php?menu=cedula&exp="+val.id+"'>"+val.cve_exp+"</a></td>";
+				fila += "<td>"+( val.f_chyj == null ? 'NO SE REGISTRÓ' : val.f_chyj )+"</td>";
+				fila += "<td>"+( val.f_trijaem == null ? 'NO SE REGISTRÓ' : val.f_trijaem )+"</td>";
+				fila += "<td>"+jefe+"</td>";
+				fila += "<td>"+val.name_abogado+"</td>";
+				fila += "<td>"+val.u_oficio+"</td>";
+				fila += "<td>"+( val.f_acuerdo == null ? 'NO SE REGISTRÓ' : val.f_acuerdo )+"</td>";
+				fila += "<td>"+( val.asunto == null ? 'NO SE REGISTRÓ' : val.asunto )+"</td>";
+				fila += "<td>";
+				if (typeof val.apersona == 'object') {
+					fila += "<ol>";
+					$.each(val.apersona, function(ii, value) {
+						fila += "<li >";
+							fila += "<ul type='none'>";
+								fila += "<li><b>Oficio: </b> "+value.oficio+"</li>";
+								fila += "<li><b>Fecha Of: </b> "+value.f_oficio+"</li>";
+								fila += "<li><b>Fecha aper: </b> "+( value.f_apersonamiento == null ? 'NO SE REGISTRÓ' : value.f_apersonamiento )+"</li>";
+							fila += "</ul>";
+						fila +="</li>";
+					});
+					fila += "</ol>";
+				}else{
+					fila += "SIN APERSONAMIENTOS ";
+				}
+				
+				fila += "</td>";
+			fila += "</tr>";
+			$('#tbl_global').append(fila);
+		});
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	return false;
+}
+function verExpByDemanda(t_demanda) {
+	var td ;
+	if (t_demanda == 'PRIMER DEMANDA') {td = 1;}
+	if (t_demanda == 'RECURSO DE REVISION') {td = 2;}
+	
+	$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '106', td:td},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_global tbody').html('');
+		var fila = "";
+		$.each(response, function(index, val) {
+			var jefe = "";
+			if (val.name_jefe !== null) {
+				jefe = val.name_jefe;
+			}else{
+				jefe = "NO ASIGNADO";
+			}
+			fila += "<tr>";
+				fila += "<td>"+val.id+"</td>";
+				fila += "<td><a href='index.php?menu=cedula&exp="+val.id+"'>"+val.cve_exp+"</a></td>";
+				fila += "<td>"+( val.f_chyj == null ? 'NO SE REGISTRÓ' : val.f_chyj )+"</td>";
+				fila += "<td>"+( val.f_trijaem == null ? 'NO SE REGISTRÓ' : val.f_trijaem )+"</td>";
+				fila += "<td>"+jefe+"</td>";
+				fila += "<td>"+val.name_abogado+"</td>";
+				fila += "<td>"+val.u_oficio+"</td>";
+				fila += "<td>"+( val.f_acuerdo == null ? 'NO SE REGISTRÓ' : val.f_acuerdo )+"</td>";
+				fila += "<td>"+( val.asunto == null ? 'NO SE REGISTRÓ' : val.asunto )+"</td>";
+				fila += "<td>";
+				if (typeof val.apersona == 'object') {
+					fila += "<ol>";
+					$.each(val.apersona, function(ii, value) {
+						fila += "<li >";
+							fila += "<ul type='none'>";
+								fila += "<li><b>Oficio: </b> "+value.oficio+"</li>";
+								fila += "<li><b>Fecha Of: </b> "+value.f_oficio+"</li>";
+								fila += "<li><b>Fecha aper: </b> "+( value.f_apersonamiento == null ? 'NO SE REGISTRÓ' : value.f_apersonamiento )+"</li>";
+							fila += "</ul>";
+						fila +="</li>";
+					});
+					fila += "</ol>";
+				}else{
+					fila += "SIN APERSONAMIENTOS ";
+				}
+				
+				fila += "</td>";
+			fila += "</tr>";
+			$('#tbl_global').append(fila);
+		});
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	return false;
+}
+function verExpByEdoDem(tipo,dema) {
+		$.ajax({
+		url: 'controller/puente.php',
+		type: 'POST',
+		dataType: 'json',
+		data: {option: '108', edo:tipo, d:dema},
+		async:false,
+		cache:false,
+	})
+	.done(function(response) {
+		$('#tbl_global tbody').html('');
+		var fila = "";
+		$.each(response, function(index, val) {
+			var jefe = "";
+			if (val.name_jefe !== null) {
+				jefe = val.name_jefe;
+			}else{
+				jefe = "NO ASIGNADO";
+			}
+			fila += "<tr>";
+				fila += "<td>"+val.id+"</td>";
+				fila += "<td><a href='index.php?menu=cedula&exp="+val.id+"'>"+val.cve_exp+"</a></td>";
+				fila += "<td>"+( val.f_chyj == null ? 'NO SE REGISTRÓ' : val.f_chyj )+"</td>";
+				fila += "<td>"+( val.f_trijaem == null ? 'NO SE REGISTRÓ' : val.f_trijaem )+"</td>";
+				fila += "<td>"+jefe+"</td>";
+				fila += "<td>"+val.name_abogado+"</td>";
+				fila += "<td>"+val.u_oficio+"</td>";
+				fila += "<td>"+( val.f_acuerdo == null ? 'NO SE REGISTRÓ' : val.f_acuerdo )+"</td>";
+				fila += "<td>"+( val.asunto == null ? 'NO SE REGISTRÓ' : val.asunto )+"</td>";
+				fila += "<td>";
+				if (typeof val.apersona == 'object') {
+					fila += "<ol>";
+					$.each(val.apersona, function(ii, value) {
+						fila += "<li >";
+							fila += "<ul type='none'>";
+								fila += "<li><b>Oficio: </b> "+value.oficio+"</li>";
+								fila += "<li><b>Fecha Of: </b> "+value.f_oficio+"</li>";
+								fila += "<li><b>Fecha aper: </b> "+( value.f_apersonamiento == null ? 'NO SE REGISTRÓ' : value.f_apersonamiento )+"</li>";
+							fila += "</ul>";
+						fila +="</li>";
+					});
+					fila += "</ol>";
+				}else{
+					fila += "SIN APERSONAMIENTOS ";
+				}
+				
+				fila += "</td>";
+			fila += "</tr>";
+			$('#tbl_global').append(fila);
+		});
+	})
+	.fail(function(jqXHR,textStatus,errorThrown) {
+		console.log("error");
+	});
+	return false;
+}
+function frm_add_acuse() {
+	
+	$('#frm_add_acuse').submit(function(e) {
+		e.preventDefault();
+		var dataForm = new FormData(document.getElementById("frm_add_acuse"));
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+			processData: false,
+            contentType: false,
+		})
+		.done(function(response) {
+			alerta('div_acuse',response.status,response.message,'');
+		})
+		.fail(function(jqXHR,textStatus,errorThrown) {
+			alerta('div_acuse','error',jqXHR.responseText,'');
+		});
+	});
+}
+function frm_add_sancion() {
+	$('#frm_add_sancion').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('a_sancion',response.status,response.message,'modal_add_sancion');
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			alerta('a_sancion','error',jqXHR.responseText,'modal_add_sancion');
+		});
+		
+	});
+}
+function frm_edit_sv() {
+	$('#frm_edit_sv').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('san_ver',response.status,response.message,'');
+			setTimeout(function (argument) {
+				location.reload();
+			},5000);
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			alerta('san_ver','error',jqXHR.responseText,'');
+		});
+		
+	});
+}
+function frm_add_verificacion() {
+	$('#frm_add_verificacion').submit(function(e) {
+		e.preventDefault();
+		var dataForm = $(this).serialize();
+		$.ajax({
+			url: 'controller/puente.php',
+			type: 'POST',
+			dataType: 'json',
+			data: dataForm,
+			async:false,
+			cache:false,
+		})
+		.done(function(response) {
+			alerta('a_verificacion',response.status,response.message,'modal_add_verificacion');
+		})
+		.fail(function(jqXHR,textStatus,errorThrow) {
+			alerta('a_verificacion','error',jqXHR.responseText,'modal_add_verificacion');
+		});
+		
+	});
 }

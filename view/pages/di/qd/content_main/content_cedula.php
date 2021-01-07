@@ -1,10 +1,11 @@
 <?php
+#error_reporting(0);
 require_once 'model/Connection.php';
 require_once 'model/QDModel.php';
 $queja_id = $_GET['queja'];
-
 $q = new QDModel;
-$r = $q->getQDOnly($queja_id);
+$r = (object)$q->getQDOnly($queja_id)[0];
+#echo "<pre>";print_r($r->f_apertura);echo "</pre>";#exit;
 #Historial de asiganciones
 $as = $q->getAsignaciones($queja_id);
 
@@ -12,8 +13,9 @@ $as = $q->getAsignaciones($queja_id);
 $q->readExp($queja_id);
 #echo "<pre>";print_r($r);echo "</pre>";
 $hoy = date('Y-m-d');
-$c_apertura     = $q->operacionesFechas('-',$hoy,$r[0]['f_apertura']);
-$c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
+$c_apertura     = $q->operacionesFechas('-',$hoy,$r->f_apertura);
+$c_hechos       = $q->operacionesFechas('-',$hoy,$r->f_hechos);
+
 ?>
 <section class="content container-fluid">
     
@@ -28,22 +30,28 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                         <div class="col-md-12">
                             <h1> 
                                 <center>
-                                    Expediente con número: <u> <?=$r[0]['cve_exp'] ?> </u>
+                                    Expediente con número: <u> <?=$r->cve_exp ?> </u>
                                 </center> 
                             </h1>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-12">
                             <table class="table table-hover table-bordered">
                                 <thead>
                                     <tr class="text-center">
-                                        <th class="bg-gray">Días transcurridos desde la fecha de hechos</th>
+                                        <th class="bg-gray">Días transcurridos desde la fecha de apertura</th>
                                         <td class="bg-info"><?=$c_apertura->resta?></td>
+                                        <th class="bg-gray">Días transcurridos desde la fecha de hechos</th>
+                                        <?php if ( $r->f_hechos != '0000-00-00'): ?>
+                                        <td class="bg-info"><?=$c_hechos->resta?></td>    
+                                        <?php else: ?>
+                                            <TD class="bg-info">NO SE REGISTRO FECHA DE HECHOS</TD>
+                                        <?php endif ?>
+                                        
                                     </tr>
                                     <tr class="text-center">
-                                        <th class="bg-gray">Días transcurridos desde la fecha de hechos</th>
-                                        <td class="bg-info"><?=$c_hechos->resta?></td>
+                                        
                                     </tr>
                                 </thead>
                             </table>
@@ -53,45 +61,60 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                         <div class="col-md-12">
                             <dl class="dl-horizontal">
                                 <dt>Fecha y hora de hechos: </dt>
-                                <dd> <?=$r[0]['f_hechos']." y ".$r[0]['h_hechos'] ?> </dd>
+                                <dd> <?=$r->f_hechos." y ".$r->h_hechos ?> </dd>
 
                                 <dt>Tipo de trámite</dt>
-                                <dd><?=$r[0]['n_tramite'];?></dd>
+                                <dd><?=$r->n_tramite;?></dd>
 
                                 <dt>Presuntas conductas</dt>
                                 <dd>
-                                	<ol>
-                                		<?php
-                                        foreach ($r[0]['conductas'] as $key => $conducta) {
-                                            echo '<li>'.$conducta->nombre.'</li>';
+                                    <?php
+                                    
+                                    if ( count($r->conductas) == 0 ){
+                                        echo "<li>CONDUCTA NO ESPECIFICADA EN LA LEY DE SEGURIDAD</li>";
+                                    }else{
+                                        echo "<ol>";
+                                        foreach ($r->conductas as $key => $conducta) {
+                                            echo '<li>'.mb_strtoupper($conducta->nombre).'</li>';
                                         }
-                                		?>
-                                	</ol>
+                                        echo "</ol>";
+                                    }
+                                    ?>  
                                 </dd>
 
                                 <dt>Ley aplicada</dt>
-                                <dd> <?=$r[0]['conductas'][0]->n_ley?> </dd>
+                                <?php if ( count($r->conductas) == 0): ?>
+                                    <dd><a href='index.php?menu=cedula_old&cve_exp=<?=$r[0]['cve_exp']?>' target="__blank">LEY DE RESPONSABILIDADES ADMINISTRATIVAS DEL ESTADO DE MÉXICO Y MUNICIPIOS </a> </dd>
+                                <?php else: ?>
+                                    <dd> <?=$r->conductas[0]->n_ley?> </dd>
+                                <?php endif ?>
+                                
 
-                                <dt>Via(s) de recepcion</dt>
+                                <dt>Vía(s) de recepción</dt>
                                 <?php
-                                for ($i=0; $i < count($r[0]['vias']) ; $i++) { 
-                                	echo '<dd> '.$r[0]['vias'][$i]->via. '</dd>';
+                                if (count($r->vias) > 0 ) {
+                                    for ($i=0; $i < count($r->vias) ; $i++) { 
+                                        echo '<dd> '.$r->vias[$i]->via. '</dd>';
+                                    }
+                                }else{
+                                    echo '<dd> NO REGISTRADO </dd>';
                                 }
+                                
                                 ?>
-                                <dt>Descripcion de los hechos</dt>
-                                <dd class="text-justify"> <?=$r[0]['descripcion']?> </dd>
+                                <dt>Descripción de los hechos</dt>
+                                <dd class="text-justify"> <?=$r->descripcion?> </dd>
 
                                 <dt>Estado del expediente</dt>
-                                <dd>  <?=mb_strtoupper($r[0]['n_estado'])?> </dd>
+                                <dd>  <?=mb_strtoupper($r->n_estado)?> </dd>
 
                                 <dt>Prioridad</dt>
-                                <dd> <?=mb_strtoupper($r[0]['prioridad'])?>  </dd>
+                                <dd> <?=mb_strtoupper($r->prioridad)?>  </dd>
                             </dl>
                         </div>
                     </div> 
                     <div class="row">
                         <div class="col-md-9">
-                            <table id="tbl_asignaciones" class="table table-hover table-bordered">
+                            <table id="tbl_asignaciones" class="table table-hover table-bordered borde" >
                                 <caption class="bg-gray text-center"> <B>HISTORIAL DE ASIGNACIONES</B> </caption>
                                 <thead>
                                     <tr class="bg-gray">
@@ -101,25 +124,26 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($as as $key => $asi): ?>
+                                    <?php if ( count($as) > 0 ): ?>
+                                        <?php foreach ($as as $key => $asi): ?>
+                                            <tr>
+                                               <td ><?=$asi->turnado_a?></td> 
+                                               <td><?=$asi->f_turno?></td>
+                                                <?php if ($asi->estado == 'VENCIDO'): ?>
+                                                    <td>TERMINDADO</td>      
+                                                <?php else: ?> 
+                                                    <td>EN PROCESO</td>   
+                                                <?php endif ?> 
+                                               
+                                            </tr>
+                                        <?php endforeach ?>
+                                    <?php else: ?>
                                         <tr>
-                                           <td><?=$asi->turnado_a?></td> 
-                                           <td><?=$asi->f_turno?></td>
-                                            <?php if ($asi->estado == 'VENCIDO'): ?>
-                                                <td>TERMINDADO</td>      
-                                            <?php else: ?> 
-                                                <td>EN PROCESO</td>   
-                                            <?php endif ?> 
-                                           
+                                            <td colspan="3" class="text-center bg-red"> NO EXISTEN ASIGNACIONES </td>
                                         </tr>
-                                    <?php endforeach ?>
+                                    <?php endif ?>
+                                    
                                 </tbody>
-                                <tfoot>
-                                    <tr class="bg-gray">
-                                        <th class="text-right" colspan="2">TOTAL: </th>
-                                        <th class="text-center"></th>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -138,22 +162,20 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                                         <th>Calle principal</th>
                                         <th>Entre calle</th>
                                         <th> Y calle</th>
-                                        <th>Edificacion y número</th>
+                                        <th>Colonia y número</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td> <?=mb_strtoupper($r[0]['ubicacion']->n_municipio)?>  </td>
-                                        <td> <?=mb_strtoupper($r[0]['ubicacion']->calle)?> </td>
-                                        <td> <?=mb_strtoupper($r[0]['ubicacion']->e_calle)?>  </td>
-                                        <td> <?=mb_strtoupper($r[0]['ubicacion']->y_calle)?>  </td>
+                                        <td> <?=mb_strtoupper($r->ubicacion->n_municipio)?>  </td>
+                                        <td> <?=( $r->ubicacion->calle != '0' ) ? mb_strtoupper($r->ubicacion->calle) : 'SIN CALLE';?> </td>
+                                        <td> <?=( $r->ubicacion->e_calle != '0' ) ? mb_strtoupper($r->ubicacion->e_calle) : 'SIN CALLE';?>  </td>
+                                        <td> <?=( $r->ubicacion->y_calle != '0' ) ? mb_strtoupper($r->ubicacion->y_calle) : 'SIN CALLE';?>  </td>
                                         <td> 
                                             <ol>
-                                                <ul><?=mb_strtoupper($r[0]['ubicacion']->edificacion)?>  </ul>
-                                                <ul><?=mb_strtoupper($r[0]['ubicacion']->numero)?></ul>
+                                                <li><label>Colonia:</label><?=( $r->ubicacion->colonia != '0' ) ? mb_strtoupper($r->ubicacion->colonia) : ' SIN COLONIA';?>  </li>
+                                                <li><label>Número:</label><?=( $r->ubicacion->numero != '0' ) ? mb_strtoupper($r->ubicacion->numero) : ' SIN NÚMERO';?></li>
                                             </ol>
-                                            
-                                            
                                         </td>
                                     </tr>
                                 </tbody>
@@ -177,23 +199,30 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($r[0]['quejosos'] as $quejoso): ?>
+                                    <?php if (count($r->quejosos) > 0): ?>
+                                        <?php foreach ($r->quejosos as $quejoso): ?>
+                                            <tr>
+                                                <td> <?=mb_strtoupper($quejoso->nombre)?> </td>
+                                                <td> <?=mb_strtoupper($quejoso->genero)?> </td>
+                                                <td> <?=mb_strtoupper($quejoso->telefono)?> </td>
+                                                <td><a href="mailto:<?=mb_strtoupper($quejoso->email)?>"><?=mb_strtoupper($quejoso->email)?></a></td>
+                                                <td>
+                                                    <ol>
+                                                        <ul> <?=mb_strtoupper($quejoso->n_municipio)?> </ul>
+                                                        <ul> <label>Número Interior: </label> <?=mb_strtoupper($quejoso->n_int)?> 
+                                                        </ul>
+                                                        <ul> <label>Número Exterior: </label> <?=mb_strtoupper($quejoso->n_ext)?> 
+                                                        </ul>
+                                                    </ol>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach ?>    
+                                    <?php else: ?>
                                         <tr>
-                                            <td> <?=mb_strtoupper($quejoso->nombre)?> </td>
-                                            <td> <?=mb_strtoupper($quejoso->genero)?> </td>
-                                            <td> <?=mb_strtoupper($quejoso->telefono)?> </td>
-                                            <td><a href="mailto:<?=mb_strtoupper($quejoso->email)?>"><?=mb_strtoupper($quejoso->email)?></a></td>
-                                            <td>
-                                                <ol>
-                                                    <ul> <?=mb_strtoupper($quejoso->n_municipio)?> </ul>
-                                                    <ul> <label>Númmero Interior: </label> <?=mb_strtoupper($quejoso->n_int)?> 
-                                                    </ul>
-                                                    <ul> <label>Númmero Exterior: </label> <?=mb_strtoupper($quejoso->n_ext)?> 
-                                                    </ul>
-                                                </ol>
-                                            </td>
+                                            <td colspan="5" class="text-center bg-red"> NO EXISTEN QUEJOSOS </td>
                                         </tr>
-                                    <?php endforeach ?>
+                                    <?php endif ?>
+                                    
                                 </tbody>
                             </table>
                         </div>
@@ -207,21 +236,28 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                                     </caption>
                                     <thead>
                                         <tr class="bg-gray">
-                                            <th>Nombre completo</th>
-                                            <th>Procedencia</th>
-                                            <th>Municipio</th>
-                                            <th>Nivel/Rango </th>
+                                            <th>ID</th>
+                                            <th>NOMBRE COMPLETO</th>
+                                            <th>SEXO </th>
+                                            <th>PROCEDENCIA</th>
+                                            <th>MEDIA FILIACIÓN</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($r[0]['presuntos'] as $presunto): ?>
-                                            <tr>
-                                                <td> <?=mb_strtoupper($presunto->nombre)?> </td>
-                                                <td><?=mb_strtoupper($presunto->procedencia)?></td>  
-                                                <td><?=mb_strtoupper($presunto->n_municipio)?></td>   
-                                                <td><?=mb_strtoupper($presunto->cargo_id)?></td> 
+                                        
+                                            <tr id="tr_pres_<?=$r->presuntos->id?>">
+                                                <td><?=$r->presuntos->id?></td>
+                                                <td><?=$r->presuntos->nombre?></td>
+                                                <td>
+                                                    <?php if ($r->presuntos->genero == 'M'): ?>
+                                                    HOMBRE
+                                                    <?php elseif ($r->presuntos->genero == 'F') : ?>
+                                                    MUJER
+                                                    <?php endif ?>
+                                                </td>
+                                                <td><?=$r->presuntos->n_procedencia?></td>
+                                                <td><?=$r->presuntos->comentarios?></td>
                                             </tr>
-                                        <?php endforeach ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -229,93 +265,98 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                     </div>
                     <div class="row">
                     	<div class="col-md-6">
-                    		<div class="row">
-                    		    <div class="col-md-12">
-                    		        <h1> <center>Datos de las unidades</center> </h1>
-                    		    </div>
-                    		</div>
-                    		<?php foreach ($r[0]['unidades'] as  $unidad): ?>
-                    			<div class="row">
-                    			    <div class="col-md-12">
-                    			        <dl class="dl-horizontal">
-                    			            <dt>Procedencia</dt>
-                    			            <dd> <?=$unidad->procedencia?> </dd>
-                    			            <dt>Tipo de vehículo</dt>
-                    			            <dd> <?=$unidad->t_vehiculo?> </dd>
-                    			            <dt>Número económico</dt>
-                    			            <dd> <?=$unidad->n_eco?>  </dd>
-                    			            <dt>Placas</dt>
-                    			            <dd> <?=mb_strtoupper($unidad->placas,'utf-8')?> </dd>
-                    			        </dl>
-                    			    </div>
-                    			</div>
-                    		<?php endforeach ?>
-                    	</div>
+                            <table class="table table-hover table-bordered">
+                                <caption class="text-center bg-gray"> <b>DATOS DE LAS UNIDADES.</b> </caption>
+                                <thead>
+                                    <tr class="bg-gray">
+                                        <th class="text-center">Procedencia</th>
+                                        <th class="text-center">Tipo de vehículo</th>
+                                        <th class="text-center">Número económico</th>
+                                        <th class="text-center">Placas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($r->unidades as  $unidad): ?>
+                                        <td> <?=$unidad->procedencia?> </td>
+                                        <td> <?=$unidad->t_vehiculo?> </td>
+                                        <td> <?=$unidad->n_eco?>  </td>
+                                        <td> <?=mb_strtoupper($unidad->placas,'utf-8')?> </td>
+                                    <?php endforeach ?>
+                                </tbody>
+                            </table>
+                        </div>
                     	<div class="col-md-6">
-                    		<div class="row">
-                    		    <div class="col-md-12">
-                    		        <h1> <center>Actuaciones (Oficios generados).</center> </h1>
-                    		    </div>
-                    		</div>
-                    		<div class="row">
-                    		    <div class="col-md-12">
-                    		        <dl class="dl-horizontal">
-                    		            <dt>Número de Oficio</dt>
-                    		            <dd> Perro </dd>
-                    		            <dt>Fecha de solicitud</dt>
-                    		            <dd> Pastor Malinoins Belga </dd>
-                    		            <dt>Institución destinataria</dt>
-                    		            <dd> Rambo </dd>
-                    		            <dt>Documentacion solicitada</dt>
-                    		            <dd> 3 años </dd>
-                    		        </dl>
-                    		    </div>
-                    		</div>
+                            <table class="table table-hover table-bordered">
+                                <caption class="text-center bg-gray"> <b>ACTUACIONES (OFICIOS GENERADOS).</b> </caption>
+                                <thead>
+                                    <tr class="bg-gray">
+                                        <th class="text-center">Número de Oficio</th>
+                                        <th class="text-center">Fecha de solicitud</th>
+                                        <th class="text-center">Institución destinataria</th>
+                                        <th class="text-center">Documentación solicitada</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                     	</div>
                     </div> 
                     <div class="row">
                     	<div class="col-md-6">
-                    		<div class="row">
-                    		    <div class="col-md-12">
-                    		        <h1> <center>Respuestas (Oficios generados).</center> </h1>
-                    		    </div>
-                    		</div>
-                    		<div class="row">
-                    		    <div class="col-md-12">
-                    		        <dl class="dl-horizontal">
-                    		            <dt>Oficio</dt>
-                    		            <dd> Perro </dd>
-                    		            <dt>Oficio de respuesta</dt>
-                    		            <dd> Pastor Malinoins Belga </dd>
-                    		            <dt>Fecha de respuesta</dt>
-                    		            <dd> Rambo </dd>
-                    		            <dt># de entrada</dt>
-                    		            <dd> 3 años </dd>
-                    		        </dl>
-                    		    </div>
-                    		</div>
+                            <table class="table table-hover table-bordered">
+                                <caption class="text-center bg-gray"> <b>RESPUESTAS (OFICIOS GENERADOS).</b> </caption>
+                                <thead>
+                                    <tr class="bg-gray">
+                                        <th class="text-center">Oficio</th>
+                                        <th class="text-center">Oficio de respuesta</th>
+                                        <th class="text-center">Fecha oficio</th>
+                                        <th class="text-center">Fecha de respuesta</th>
+                                        <th class="text-center">Descripción</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                     	</div>
-                    	<div class="col-md-6">
-                    		<div class="row">
-                    		    <div class="col-md-12">
-                    		        <h1> <center>Devoluciones.</center> </h1>
-                    		    </div>
-                    		</div>
-                    		<div class="row">
-                    		    <div class="col-md-12">
-                    		        <dl class="dl-horizontal">
-                    		            <dt>Fecha</dt>
-                    		            <dd> Perro </dd>
-                    		            <dt>Motivo</dt>
-                    		            <dd> Pastor Malinoins Belga </dd>
-                    		            <dt>Registrado por </dt>
-                    		            <dd> Rambo </dd>
-                    		            <dt>Oficio</dt>
-                    		            <dd> 3 años </dd>
-                    		        </dl>
-                    		    </div>
-                    		</div>
-                    	</div>
+                        <div class="col-md-6">
+                            <table class="table table-condesed">
+                                <caption class="bg-gray text-center">
+                                    <b>LISTADO DE DEVOLUCIONES</b>
+                                </caption>
+                                        <thead>
+                                            <tr class="bg-gray">
+                                                <th>FECHA</th>
+                                                <th>OFICIO</th>
+                                                <th>MOTIVO</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if ( isset($r->devoluciones) ): ?>
+                                                <?php foreach ($r->devoluciones as   $key => $devuelto): ?>
+                                                    <tr class="bg-gray">
+                                                        <td><?=$devuelto->f_acuse?></td>
+                                                        <td><?=$devuelto->oficio?></td>
+                                                        <td><?=$devuelto->motivo?></td>
+                                                    </tr>
+                                                <?php endforeach ?>   
+                                            <?php endif ?>
+
+                                        </tbody>
+                                    </table>
+                        </div>
+                    	<!-- <div class="col-md-6">
+                            <table class="table table-hover table-bordered">
+                                <caption class="text-center bg-gray"> <b>LISTADO DE DEVOLUCIONES</b> </caption>
+                                <thead>
+                                    <tr class="bg-gray">
+                                        <th class="text-center">Oficio</th>
+                                        <th class="text-center">Fecha oficio</th>
+                                        <th class="text-center">Fecha devolución</th>
+                                        <th class="text-center">Motivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div> -->
                     </div>
                     
                     <div class="row">
@@ -334,11 +375,11 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php $i = 1; foreach ($r[0]['acumuladas'] as   $key => $acumulado): ?>
+                                        <?php $i = 1; foreach ($r->acumuladas as $key => $acumulado): ?>
                                             <tr class="bg-gray">
                                                 <td> <?=$i;$i++;?> </td>
                                                 <td>
-                                                    <a href="index.php?menu=cedula&exp_id=<?=$acumulado->acumulado_id?>" target="_blank">
+                                                    <a href="index.php?menu=cedula&queja=<?=$acumulado->acumulado_id?>" target="_blank">
                                                         <?=$acumulado->acumulado?>
                                                     </a>
                                                 </td>
@@ -348,22 +389,47 @@ $c_hechos       = $q->operacionesFechas('-',$hoy,$r[0]['f_hechos']);
                                 </table>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-condesed table-hover">
+                                    <caption class="bg-gray text-center"> <b>OPINIONES DE ABOGADOS ANALISTAS (D.I.)</b> </caption>
+                                    <thead>
+                                        <tr class="bg-gray">
+                                            <th>#</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if ( isset($r->opiniones) ): ?>
+                                            <?php $ii = 1; foreach ($r[0]['opiniones'] as $key => $opt): ?>
+                                                <tr class="bg-gray">
+                                                    <td> <?=$ii;$ii++;?> </td>
+                                                    <td>
+                                                        <?=$opt->comentario;?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                             <div class="col-md-6">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-condensed table-bordered">
                                         <caption class="bg-gray">
                                             <center>
-                                                <b>LISTADO DE EXPEDIENTES ACUMULADOS</b>
+                                                <b>LISTADO DE DOCUMENTOS</b>
                                             </center> 
                                         </caption>
                                         <thead>
                                             <tr class="bg-gray">
                                                 <th width="30%">Nombre de documento</th>
-                                                <th width="60%">Descripcion del documento</th>
+                                                <th width="60%">Descripción del documento</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                        <?php foreach ($r[0]['archivos'] as $file): ?>
+                                        <?php foreach ($r->archivos as $file): ?>
                                             <tr id="file_<?=$file->id?>" class="info">
                                                 <td>
                                                     <a href="controller/puente.php?option=4&file=<?=$file->id?>" target="__blank">

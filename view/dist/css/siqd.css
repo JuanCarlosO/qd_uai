@@ -1,0 +1,28 @@
+.link { color: #FFFFFF; } /* CSS link color (red) */
+.link:hover { color: rgb(0,0,0); } /* CSS link hover (green) */
+.caption:{
+	color: rgb(0,0,0);
+}
+.ajuste-h {
+	display:flex;
+	margin: 0 auto;
+}
+.border-table>table,
+.border-table>thead>tr>th, 
+.border-table>tbody>tr>th, 
+.border-table>tfoot>tr>th, 
+.border-table>thead>tr>td, 
+.border-table>tbody>tr>td, 
+.border-table>tfoot>tr>td{
+	border: 1px solid #101010;
+}
+
+.borde-blanco>table,
+.borde-blanco>thead>tr>th, 
+.borde-blanco>tbody>tr>th, 
+.borde-blanco>tfoot>tr>th, 
+.borde-blanco>thead>tr>td, 
+.borde-blanco>tbody>tr>td, 
+.borde-blanco>tfoot>tr>td{
+	border: rgb(255,255,255) 1px solid;
+}

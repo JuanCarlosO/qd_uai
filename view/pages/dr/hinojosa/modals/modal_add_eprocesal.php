@@ -22,14 +22,12 @@
 								<select name="e_procesal" id="e_procesal" class="form-control">
 									<option value="">...</option>
 									<option value="3">Devolver a D.I.</option> 
-									<option value="5">Con proyecto elaborado</option>
-									<option value="4">En firma</option>
-									<option value="1">Enviado a</option>
-									<!--<option value="2">Trámite(quitar)</option> Esta implicito cuando lo turna a un abogado  -->
+									<option value="1">Enviar a</option>
+									<option value="4">Resuelto</option>
 								</select>
 							</div>
 						</div>
-						<div class="col-md-6">
+						<div id="div_auto" class="col-md-6 hidden">
 							<div class="form-group">
 								<label>Autoridad destinataria</label>
 								<select name="autoridad" id="autoridad" class="form-control">
@@ -83,17 +81,12 @@
 								</div>
 							</div>
 							<div class="col-md-4">
-								<div id="div_conducta" class="form-group hidden">
+								<!-- <div id="div_conducta" class="form-group hidden">
 									<label>Seleccione una conducta</label>
-									<div  class="input-group">
-										<select id="conducta" name="conducta"  class="form-control">
+									<select id="conducta" name="conducta"  class="form-control col-md-12">
 											<option value="">...</option>
 										</select>
-										<span class="input-group-btn">
-											<button type="button" class="btn btn-success btn-flat" onclick="add_conducta();"><i class="fa fa-plus"></i></button>
-										</span>
-									</div>
-								</div>
+								</div> -->
 								<div id="div_motivo" class="form-group hidden">
 									<label>Motivo del envio</label>
 									<select id="motivo" name="motivo"  class="form-control">
@@ -108,7 +101,129 @@
 							</div>
 						</div>
 					</fieldset>
-					
+					<div id="div_normatividad" class="hidden">
+						<div class="row">
+						    <div class="col-md-3">
+						        <div class="form-group">
+						            <label for="t_ley"> Normatividad aplicable<i class="fa fa-asterisk text-red"></i></label>
+						            <select id="t_ley" name="t_ley" class="form-control" required>
+						                <option value="">...</option>
+						            </select>
+						        </div>
+						    </div>
+						    <div class="col-md-3">
+						        <div class="form-group">
+						            <label>Capítulo</label>
+						            <select id="capitulos" name="capitulo" class="form-control">
+						                <option value="">...</option>
+						            </select>
+						        </div>
+						    </div>
+						</div>
+						<div class="row">
+						    
+						    <div class="col-md-3">
+						        <div class="form-group">
+						            <label for="art">Número de artículo <i class="fa fa-asterisk text-red"></i></label>
+						            <select id="art" name="art" class="form-control">
+						                <option value="">...</option>
+						            </select>
+						        </div>
+						    </div>
+						    <div class="col-md-3">
+						        <div class="form-group">
+						            <label for="art">Secciones disponibles <i class="fa fa-asterisk text-red"></i></label>
+						            <select id="secciones" name="secciones" class="form-control">
+						                <option value="">...</option>
+						            </select>
+						        </div>
+						    </div>
+						    <div class="col-md-3">
+						        <div class="form-group">
+						            <label for="art">Fracciones disponibles <i class="fa fa-asterisk text-red"></i></label>
+						            <select id="fracciones" name="fracciones" class="form-control">
+						                <option value="">...</option>
+						            </select>
+						        </div>
+						    </div>
+						    
+						</div>
+						<div class="row">
+						    <div class="col-md-12">
+						        <div class="form-group">
+						            <label for="conductas">Presunta conducta <i class="fa fa-asterisk text-red"></i></label>
+						            <select id="conducta" name="conducta" class="form-control" data-placeholder="Selecciona una conducta" required>
+						                <option value="">...</option>
+						            </select>
+						        </div>
+						    </div>
+						</div>
+					</div>
+					<div id="resuelto" class="hidden">
+						<div class="row">
+							<div class="col-md-4">
+								<div class="form-group">
+									<label>Fecha de sesion</label>
+									<input type="date" name="f_sesion" value="" class="form-control">
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group">
+									<label>Fecha de notificación</label>
+									<input type="date" name="f_notifica" value="" class="form-control">
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group">
+									<label>Fecha de resolución</label>
+									<input type="date" name="f_resulucion" value="" class="form-control">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-4">
+								<div class="form-group">
+									<label>Sanción</label>
+									<select name="castigo" id="castigos" class="form-control">
+										<option value="">...</option>
+										<option value="1">Amonestación</option>
+										<option value="2">Inexistencia</option>
+										<option value="3">Supensión</option>
+										<option value="4">Remoción del cargo</option>
+										<option value="5">Separación del servicio.</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group">
+									<label>Días de suspensión </label>
+									<select name="dias_s" id="dias_s" class="form-control">
+										<option value="">...</option>
+										<option value="1">1</option>
+										<option value="2">2</option>
+										<option value="3">3</option>
+										<option value="4">4</option>
+										<option value="5">5</option>
+										<option value="6">6</option>
+										<option value="7">7</option>
+										<option value="8">8</option>
+										<option value="9">9</option>
+										<option value="10">10</option>
+										<option value="11">11</option>
+										<option value="12">12</option>
+										<option value="13">13</option>
+										<option value="14">14</option>
+										<option value="15">15</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group">
+									<label></label>
+								</div>
+							</div>
+						</div>
+					</div>
 					<div class="row">
 						<div class="col-md-12">
 							<div class="form-group">
@@ -120,7 +235,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="submit" class="btn btn-success btn-flat pull-right ">
-						Guardar información <i class="fa fa-floppy-o"></i>
+						<i class="fa fa-floppy-o"></i> Guardar información
 					</button>
 				</div>
 			</div>

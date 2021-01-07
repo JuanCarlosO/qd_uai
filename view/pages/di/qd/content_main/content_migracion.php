@@ -55,13 +55,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Fecha de: </label>
-                                        <input type="date" name="f_ini" value="" class="form-control">
+                                        <input type="date" name="f_ini" value="" class="form-control" min='2019-07-01' max="<?=date('Y-m-d')?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Fecha hasta: </label>
-                                        <input type="date" name="f_fin" value="" class="form-control">
+                                        <input type="date" name="f_fin" value="" class="form-control" min='2019-07-01' max="<?=date('Y-m-d')?>">
                                     </div>
                                 </div>
                             </div>

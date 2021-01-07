@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Documentos
+		SISTEMA DE INSPECCIONES Y SUPERVISIONES
 		<small>Manual de usuario</small>
 	</h1>
 	<ol class="breadcrumb">

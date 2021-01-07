@@ -9,7 +9,7 @@ session_destroy();
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="shortcut icon" href="view/dist/img/qd_1.png"/>
-  <title>SIQD | UAI</title>
+  <title>.:UAI:.</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.7 -->
@@ -28,7 +28,8 @@ session_destroy();
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
-    <a href="login.php"><b>SIQD - </b>UAI</a>
+    
+    <a href="login.php">UNIDAD DE ASUNTOS INTERNOS</a>
   </div>
   <div class="login-box-body">
     <p class="login-box-msg">Ingrese su nombre de usuario y contraseña.</p>

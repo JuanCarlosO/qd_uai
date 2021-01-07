@@ -9,12 +9,14 @@ $clave = $q->getClave($queja_id);
 <form action="#" id="frm_acuerdo_improcedencia">
     <input type="hidden" name="option" value="66">
     <input type="hidden" name="queja_id" value="<?=$_GET['exp']?>">
+    <input type="hidden" id="estado_exp" name="estado_exp" value="">
+
     <section class="content container-fluid">
         <div class="row">
             <div class="col-md-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Registro de acuerdo de improcedencia <u><?=$clave?></u></h3>
+                        <h3 class="box-title">Registro de acuerdo  <u><?=$clave?></u></h3>
                     </div>
                     <div class="box-body">
                         <div id="div_acuerdo"></div>
@@ -35,7 +37,28 @@ $clave = $q->getClave($queja_id);
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>Acuerdo</label>
-                                    <input type="file" name="file" value="" class="form-control" required>
+                                    <input type="file" name="file" value="" class="form-control" required accept=".pdf">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Motivo del cierre</label>
+                                    <select name="motivo" id="motivo" class="form-control">
+                                        <option value="">...</option>
+                                        <option value="INCOMPETENCIA">INCOMPETENCIA</option>
+                                        <option value="ARCHIVO">ARCHIVO</option>
+                                        <option value="IMPROCEDENCIA">IMPROCEDENCIA</option>
+                                        <option value="RESERVA">RESERVA</option>
+                                        <option value="CIERRE">CIERRE DE EXPEDIENTE</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Asunto</label>
+                                    <input type="text" name="asunto" value="" placeholder="Ej:Asunto del documento" class="form-control" required="" maxlength="255">
                                 </div>
                             </div>
                         </div>  

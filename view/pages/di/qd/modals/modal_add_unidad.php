@@ -1,3 +1,6 @@
+<?php
+
+?>
 <form action="#" method="post" id="frm_add_unidad">
 	<input type="hidden" name="option" value="16">
 	<input type="hidden" name="queja_id" value="<?=$r[0]['id']?>">
@@ -18,8 +21,10 @@
 								<label>Procedencia</label>
 								<select id="procedencia" name="procedencia" class="form-control">
 									<option value="">...</option>
-									<option value="1">ESTATAL</option>
-									<option value="2">CPRS</option>
+									<option value="1">CPRS-OPERATIVO</option>
+									<option value="2">SECRETARIA DE SEGURIDAD</option>
+									<option value="3">CPRS-ADMINISTRATIVO</option>
+									<option value="4">SECRETARIA DE SEGURIDAD-ADMINISTRATIVO</option>
 								</select>
 							</div>
 						</div>
@@ -51,7 +56,7 @@
 					<div class="row">
 						<div class="col-md-4">
 							<div class="form-group">
-								<label>Número economico</label>
+								<label>Número económico</label>
 								<input type="text" id="n_eco" name="n_eco" class="form-control" value="" placeholder="Ej: 123-S">
 							</div>
 						</div>

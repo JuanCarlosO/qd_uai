@@ -3,10 +3,9 @@ require_once 'model/Connection.php';
 require_once 'model/QDModel.php';
 require_once 'model/DRModel.php';
 require_once 'model/UAIModel.php';
-$queja_id = $_GET['exp_id'];
 
-if(!empty($_GET['exp_id'])){
-    $queja_id = $_GET['exp_id'];
+if(!empty($_GET['exp'])){
+    $queja_id = $_GET['exp'];
     $q = new QDModel;
     $m = new DRModel;
     $uai = new UAIModel;
@@ -14,7 +13,9 @@ if(!empty($_GET['exp_id'])){
     $data = $m->getCedula($queja_id);
     $tbl_ctrl = $uai->getContadores($queja_id);
     $demandas = $uai->getDataSC($queja_id);
-    #print_r($demandas);
+    $documentos = $m->getDocumentos($queja_id);
+    #Historial de asiganciones
+    $as = $q->getAsignaciones($queja_id);    
 }
 
 ?>
@@ -41,24 +42,32 @@ if(!empty($_GET['exp_id'])){
                                     <tr>
                                         <th class="text-right" width="35%">Estado del expediente: </th>
                                         <td class="text-center" colspan="2">
-                                            <?=$tbl_ctrl['estado'] ?>
+                                            <?=(empty($tbl_ctrl['estado'])) ? 'SIN INFORMACIÓN' : $tbl_ctrl['estado'] ; ?>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-right" width="35%">Dias trancurridos desde la apertura:</th>
+                                        <th class="text-right" width="35%">Días transcurridos desde la apertura:</th>
                                         <td class="text-center">
-                                            <?=$tbl_ctrl['d_apertura'] ?>
+                                            <?=$tbl_ctrl['d_apertura']; ?>
+                                            
                                         </td>
                                         <th class="text-left" width="35%">Días trabajados por la Dirección de Investigación: </th>
                                         <td class="text-center">
-                                            <?=$tbl_ctrl['d_hechos'] ?>
+                                            <?=(empty($tbl_ctrl['d_hechos'])) ? 'SIN INFORMACIÓN' : $tbl_ctrl['d_apertura'] ; ?>
+                                            
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="text-left" width="35%">Dias trancurridos desde fecha de hechos:</th>
-                                        <td class="text-center"><?=$tbl_ctrl['d_hechos'] ?></td>
-                                        <th class="text-left" width="35%">Días trabajados por la Dirección de Responsabilides: </th>
-                                        <td class="text-center"><?=$tbl_ctrl['d_dr'] ?></td>
+                                        <th class="text-right" width="35%">Días transcurridos desde fecha de hechos:</th>
+                                        <td class="text-center">
+                                            
+                                                <?=(empty($tbl_ctrl['d_hechos'] )) ? 'SIN INFORMACIÓN' : $tbl_ctrl['d_hechos']  ; ?>
+                                            </td>
+                                        <th class="text-left" width="35%">Días trabajados por la Dirección de Responsabilidades en A. I.: </th>
+                                        <td class="text-center">
+                                            <?=(empty($tbl_ctrl['d_dr'] )) ? 'SIN INFORMACIÓN' : $tbl_ctrl['d_dr']  ; ?>
+                                            
+                                        </td>
                                     </tr>
                                     
                                 </thead>
@@ -70,14 +79,15 @@ if(!empty($_GET['exp_id'])){
                         <div class="row">
                             <div class="col-md-12">
                                 <table class="table table-bordered">
+                                    <tr class="bg-gray">
+                                        <th class="text-center">Subdirección</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center">Descripción de la resolución</th>
+                                    </tr>
                                     <?php foreach ($demandas as $key => $demanda): ?>
-                                        <tr class="bg-gray">
-                                            <th>Subdirección</th>
-                                            <th>Estado</th>
-                                            <th>Descripción de la resolución</th>
-                                        </tr>
+                                        
                                         <tr>
-                                            <th class="bg-gray" rowspan="2">Subdirección de lo Contencioso</th>
+                                            <th class="bg-gray">Subdirección de lo Contencioso</th>
                                             <td><?=$demanda->estado?></td>
                                             <td><?=$demanda->comentario?></td>
                                         </tr>
@@ -89,8 +99,8 @@ if(!empty($_GET['exp_id'])){
                     <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs pull-right">
                             <li class="active"><a href="#di" data-toggle="tab">Dirección de Investigación</a></li>
-                            <li><a href="#dr" data-toggle="tab">Dirección de Responsabilidades</a></li>                 
-                            <li class="pull-left header"><i class="fa fa-th"></i> Panel Integral de Cédulas Generales Por Dirección</li>
+                            <li><a href="#dr" data-toggle="tab">Dirección de Responsabilidades en A. I.</a></li>                 
+                            <li class="pull-left header"><i class="fa fa-th"></i> Panel Integral de Cédulas Generales por Dirección</li>
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="di">
@@ -104,7 +114,7 @@ if(!empty($_GET['exp_id'])){
                                             <tr class="bg-gray">
                                                 <thead>
                                                     <tr>
-                                                        <th>Tipo de Tramite</th>
+                                                        <th>Tipo de Trámite</th>
                                                         <th>Fecha/Hora de hechos</th>
                                                         <th>Estado del expediente</th>
                                                         <th>Prioridad </th>
@@ -126,7 +136,17 @@ if(!empty($_GET['exp_id'])){
                                                             <?=mb_strtoupper($r[0]['prioridad'])?>
                                                         </td>
                                                         <td>
-                                                            <?=$r[0]['conductas'][0]->n_ley?>
+                                                            <?php if ( isset($r[0]['conductas'][0]->n_ley) ): ?>
+                                                                <?php if ( empty($r[0]['conductas'][0]->n_ley)): ?>
+                                                                    LEY NO APLICABLE
+                                                                <?php else: ?>
+                                                                    <?=$r[0]['conductas'][0]->n_ley?>  
+                                                                <?php endif ?>
+                                                                  
+                                                            <?php else: ?>
+                                                                <a href='index.php?menu=cedula_old&cve_exp=<?=$r[0]['cve_exp'] ?>' target="__blank">LEY DE RESPONSABILIDADES ADMINISTRATIVAS DEL ESTADO DE MÉXICO Y MUNICIPIOS </a>
+                                                            <?php endif ?>
+                                                            
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -135,47 +155,92 @@ if(!empty($_GET['exp_id'])){
                                     </div>
                                 </div>
                                 <div class="row">
+                                    <div class="col-md-9">
+                                        <table id="tbl_asignaciones" class="table table-hover table-bordered">
+                                            <caption class="bg-gray text-center"> <B>HISTORIAL DE ASIGNACIONES</B> </caption>
+                                            <thead>
+                                                <tr class="bg-gray">
+                                                    <th>NOMBRE COMPLETO </th>
+                                                    <th>FECHA DE ASIGNACIÓN</th>                       
+                                                    <th>ESTADO </th>                       
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($as as $key => $asi): ?>
+                                                    <tr>
+                                                       <td><?=$asi->turnado_a?></td> 
+                                                       <td><?=$asi->f_turno?></td>
+                                                        <?php if ($asi->estado == 'VENCIDO'): ?>
+                                                            <td>TERMINDADO</td>      
+                                                        <?php else: ?> 
+                                                            <td>EN PROCESO</td>   
+                                                        <?php endif ?> 
+                                                       
+                                                    </tr>
+                                                <?php endforeach ?>
+                                            </tbody>
+                                           <!--  <tfoot>
+                                               <tr class="bg-gray">
+                                                   <th class="text-right" colspan="2">TOTAL: </th>
+                                                   <th class="text-center"></th>
+                                               </tr> -->
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
                                     <div class="col-md-6">
                                         <table class="table table-bordered table-hover">
                                             <caption class="bg-gray text-center">Presuntas conductas</caption>
                                             <thead>
                                                 <tr class="bg-gray">
                                                     <th>#</th>
-                                                    <th>Conducta completa</th>
+                                                    <th>Conducta</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                
+                                            <?php if (count($r[0]['conductas']) > 0): ?>
                                                 <?php
-                                                foreach ($r[0]['conductas'] as $key => $conducta) {
-                                                    echo '<tr>';
-                                                        echo '<td>'.(++$key).'</td>';
-                                                        echo '<td>'.mb_strtoupper($conducta->nombre,'utf-8').'</td>';
-                                                    echo '</tr>';
-                                                }
+                                                    foreach ($r[0]['conductas'] as $key => $conducta) {
+                                                        echo '<tr>';
+                                                            echo '<td>'.(++$key).'</td>';
+                                                            echo '<td>'.mb_strtoupper($conducta->nombre,'utf-8').'</td>';
+                                                        echo '</tr>';
+                                                    }
                                                 ?>
+                                            <?php else: ?>
+                                                <tr class="text-center">
+                                                    <td colspan="2">CONDUCTA NO ESPECIFICADA EN LA LEY DE SEGURIDAD
+                                                   </td>
+                                                </tr>
+                                            <?php endif ?>
+                                                 
+                                                
                                             </tbody>
                                         </table>
                                     </div>
+                                    <?php print_r($r[0]);exit;?>
                                     <div class="col-md-6">
                                         <table class="table table-hover table-bordered">
                                             <caption class="bg-gray text-center">
-                                            Vias de recepción
+                                            Vías de recepción
                                             </caption>
                                             <thead>
                                                 <tr class="bg-gray">
                                                     <th>#</th>
-                                                    <th>Via de recepción</th>
+                                                    <th>Nombre</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
+
                                                 <?php
                                                 for ($i=0; $i < count($r[0]['vias']) ; $i++) { 
                                                     $conta = $i +1;
                                                     echo '<tr>';
                                                         echo "<td>".$conta."</td>";
                                                         echo "<td>".$r[0]['vias'][$i]->via."</td>";
-                                                    echo '</tr';
+                                                    echo '</tr>';
                                                 }
                                                 ?>
                                             </tbody>
@@ -187,7 +252,7 @@ if(!empty($_GET['exp_id'])){
                                         <div class="form-group">
                                             <label>Descripción completa de los hechos</label>
                                             <p class="text-justify">
-                                                <?=$r[0]['descripcion']?>
+                                                
                                             </p>
                                         </div>
                                     </div>
@@ -204,7 +269,7 @@ if(!empty($_GET['exp_id'])){
                                                     <th>Calle principal</th>
                                                     <th>Entre calle </th>
                                                     <th>Y Calle</th>
-                                                    <th>Edificacion</th>
+                                                    <th>Edificación</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -248,6 +313,7 @@ if(!empty($_GET['exp_id'])){
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                
                                                 <?php foreach ($r[0]['quejosos'] as $quejoso): ?>
                                                     <tr>
                                                         <td>
@@ -290,7 +356,7 @@ if(!empty($_GET['exp_id'])){
                                                             <?=mb_strtoupper($presunto->nombre)?>
                                                         </td>
                                                         <td>
-                                                            <?=mb_strtoupper($presunto->procedencia)?>
+                                                            <?=mb_strtoupper($presunto->n_procedencia)?>
                                                         </td>
                                                         <td>
                                                             <?=mb_strtoupper($presunto->n_municipio)?>
@@ -317,14 +383,18 @@ if(!empty($_GET['exp_id'])){
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php foreach ($r[0]['unidades'] as  $unidad): ?>
-                                                <tr>
-                                                    <td> <?=$unidad->procedencia?> </td>
-                                                    <td> <?=$unidad->t_vehiculo?> </td>
-                                                    <td> <?=$unidad->n_eco?>  </td>
-                                                    <td> <?=mb_strtoupper($unidad->placas,'utf-8')?> </td>
-                                                </tr>
-                                                <?php endforeach ?>
+                                                
+                                                <?php if ( gettype($r[0]['unidades']) == 'array' ): ?>
+                                                    <?php foreach ($r[0]['unidades'] as  $unidad): ?>
+                                                    <tr>
+                                                        <td> <?=$unidad->procedencia?> </td>
+                                                        <td> <?=$unidad->t_vehiculo?> </td>
+                                                        <td> <?=$unidad->n_eco?>  </td>
+                                                        <td> <?=mb_strtoupper($unidad->placas,'utf-8')?> </td>
+                                                    </tr>
+                                                    <?php endforeach ?>
+                                                <?php endif ?>
+                                                
                                             </tbody>
                                         </table>
                                         
@@ -336,10 +406,21 @@ if(!empty($_GET['exp_id'])){
                                                 <tr class="bg-gray">
                                                     <th>Número de Oficio</th>
                                                     <th>Fecha de solicitud</th>
-                                                    <th>Institución destinataria</th>
-                                                    <th>Documentacion solicitada</th>
+                                                    <th>Destino</th>
+                                                    <th>Descripción</th>
                                                 </tr>
                                             </thead>
+                                            <?php if ( count($data['oficios_generados']) > 0 ): ?>
+                                                <?php foreach ($data['oficios_generados'] as $key => $of): ?>
+                                                <tr>
+                                                    <td> <?=$of->no_oficio?> </td>
+                                                    <td> <?=$of->fecha_oficio?> </td>
+                                                    <td> <?=$of->cargo?> </td>
+                                                    <td> <?=$of->asunto?> </td>
+                                                </tr>    
+                                                <?php endforeach ?>
+                                                
+                                            <?php endif ?>
                                             <tbody></tbody>
                                         </table>
                                     </div>
@@ -348,10 +429,12 @@ if(!empty($_GET['exp_id'])){
                                     <div class="col-md-6">
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-hover">
-                                                <caption class="bg-gray text-center">Expedientes acumulados</caption>
+                                                <caption class="bg-gray text-center">
+                                                Expedientes acumulados
+                                                </caption>
 
                                                 <thead>
-                                                    <tr class="bg-info">
+                                                    <tr class="bg-gray">
                                                         <th>#</th>
                                                         <th>Expediente</th>
                                                     </tr>
@@ -361,7 +444,7 @@ if(!empty($_GET['exp_id'])){
                                                     <tr class="bg-gray">
                                                         <td> <?=$i;$i++;?> </td>
                                                         <td>
-                                                            <a href="index.php?menu=cedula&exp_id=<?=$acumulado->acumulado_id?>" target="_blank">
+                                                            <a href="index.php?menu=cedula&exp=<?=$acumulado->acumulado_id?>" target="_blank">
                                                                 <?=$acumulado->acumulado?>
                                                             </a>
                                                         </td>
@@ -379,7 +462,7 @@ if(!empty($_GET['exp_id'])){
                                     <div class="col-md-6">
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <h1> <center>Opiniones de los abogados.</center> </h1>
+                                                <h1> <center>Opiniones de los abogado(s) responsable(s).</center> </h1>
                                             </div>
                                         </div>
 
@@ -389,18 +472,20 @@ if(!empty($_GET['exp_id'])){
                                                     <thead>
                                                         <tr class="bg-info">
                                                             <th>Fecha</th>
-                                                            <th>Abogado analista.</th>
+                                                            <th>Abogado responsable.</th>
                                                             <th>Comentario</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <?php foreach ($data['opiniones'] as $key => $opinion): ?>
-                                                        <tr class="bg-gray">
-                                                            <td><?=$opinion->created_at?></td>
-                                                            <td><?=$opinion->abogado?></td>
-                                                            <td><?=$opinion->comentario?></td>
-                                                        </tr>
-                                                        <?php endforeach ?>
+                                                        <?php if ( $data['opiniones'] != 0 ): ?>
+                                                            <?php foreach ($data['opiniones'] as $key => $opinion): ?>
+                                                            <tr class="bg-gray">
+                                                                <td><?=$opinion->created_at?></td>
+                                                                <td><?=$opinion->abogado?></td>
+                                                                <td><?=$opinion->comentario?></td>
+                                                            </tr>
+                                                            <?php endforeach ?>
+                                                        <?php endif ?>
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -477,7 +562,7 @@ if(!empty($_GET['exp_id'])){
                                                             <?php foreach ($data['demandas'] as $key => $dem): ?>
                                                                     <ul>
                                                                         <li>
-                                                                            <?=$dem->t_demanda ?>
+                                                                            <?=( $dem->t_demanda == 'RECURSO DE REVISION') ?  'RECURSO DE REVISIÓN' : $dem->t_demanda ; ?>
                                                                             <ol>
                                                                                 <li> <b>OFICIO:</b> <?=$dem->oficio ?> </li>
                                                                                 <li> <b>ESTADO</b>: <?=$dem->estado ?> </li>
@@ -491,7 +576,7 @@ if(!empty($_GET['exp_id'])){
                                                         <?php endif ?>
                                                     </tr>
                                                     <tr>
-                                                        <td class="bg-gray">CONTADOR DESDE LA PRIMER RESOLUCIÓN HASTA LA PRIMER DEMANDA</td>
+                                                        <td class="bg-gray">CONTADOR DESDE LA PRIMER RESOLUCIÓN HASTA IMPUGNACIÓN SALA REGIONAL</td>
                                                         <?php if ( $data['c_res_dem'] != false ): ?>
                                                             <td><?=$data['c_res_dem']?></td>    
                                                         <?php else: ?>
@@ -500,17 +585,17 @@ if(!empty($_GET['exp_id'])){
                                                         
                                                     </tr>
                                                     <tr>
-                                                        <td class="bg-gray">CONTADOR DESDE LA RESOLUCIÓN DE LA PRIMER DEMANDA HASTA LA SEGUNDA DEMANDA</td>
-                                                        <?php if ( $data['c_rdem_dem2'] != false ): ?>
-                                                            <td><?php print_r("sex".$data['c_rdem_dem2']);?></td>
+                                                        <td class="bg-gray">CONTADOR DESDE LA RESOLUCIÓN DE LA IMPUGNACIÓN SALA REGIONAL HASTA IMPUGNACIÓN SALA SUPERIOR</td>
+                                                        <?php if ( isset($data['c_rdem_dem2']) ): ?>
+                                                            <td><?php print_r("".$data['c_rdem_dem2']);?></td>
                                                         <?php else: ?>
                                                             <td>SIN DEFINIR</td>
                                                         <?php endif ?>
                                                         
                                                     </tr>
                                                     <tr>
-                                                        <td class="bg-gray">CONTADOR DESDE LA FECHA DE LA SEGUNDA DEMANDA HASTA LA RESOLUCIÓN DE LA MISMA</td>
-                                                        <?php if ( $data['c_rdem2_res2'] != false ): ?>
+                                                        <td class="bg-gray">CONTADOR DESDE LA FECHA DE IMPUGNACIÓN SALA SUPERIOR HASTA LA RESOLUCIÓN DE LA MISMA</td>
+                                                        <?php if ( isset($data['c_rdem2_res2']) ): ?>
                                                             <td><?=$data['c_rdem2_res2']?></td>
                                                         <?php else: ?>
                                                             <td>SIN DEFINIR</td>
@@ -526,8 +611,8 @@ if(!empty($_GET['exp_id'])){
                                     <div class="col-md-6">
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-hover">
-                                                <caption class="bg-gray">
-                                                    LISTADO DE DEMANDAS 
+                                                <caption class="bg-gray text-center">
+                                                    Listado de demandas
                                                 </caption>
                                                 <thead>
                                                     <tr>
@@ -541,7 +626,7 @@ if(!empty($_GET['exp_id'])){
                                                 <tbody>
                                                     <?php foreach ($demandas as $key => $demanda): ?>
                                                     <tr>
-                                                        <td><?=$demanda->t_demanda?></td>
+                                                        <td><?=( $dem->t_demanda == 'RECURSO DE REVISION') ?  'RECURSO DE REVISIÓN' : $dem->t_demanda ; ?></td>
                                                         <td><?=$demanda->oficio?></td>
                                                         <td><?=$demanda->f_oficio?></td>
                                                         <td><?=$demanda->f_acuse?></td>
@@ -560,7 +645,7 @@ if(!empty($_GET['exp_id'])){
                                             <thead>
                                                 <tr class="bg-gray">
                                                     <th width="30%">Nombre de documento</th>
-                                                    <th width="60%">Descripcion del documento</th>
+                                                    <th width="60%">Descripción del documento</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -577,6 +662,55 @@ if(!empty($_GET['exp_id'])){
                                                 </tr>
                                                 
                                             <?php endforeach ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <table class="table table-hover table-bordered">
+                                            <caption class="bg-gray text-center">
+                                                Documentos de asignación de la Subdirección de Análisis y Procedimientos Administrativos.
+                                            </caption>
+                                            <thead>
+                                                <tr class="bg-gray">
+                                                    <th width="25%">Número de oficio</th>
+                                                    <th width="15%">Fecha del oficio</th>
+                                                    <th width="15%">Fecha del acuse</th>
+                                                    <th width="45%">Comentario</th>
+                                                    <th width="45%">Origen</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                
+                                                <?php if ( !is_null($documentos['doc_sc']) ): ?>
+                                                <?php foreach ($documentos['doc_sc'] as $key => $doc): ?>
+                                                    <tr>
+                                                        <td>
+                                                            <a href="controller/puente.php?option=17&doc=<?=$doc->id?>&tbl=documentos_sc" target="_blank"><?=$doc->oficio?></a>
+                                                        </td>
+                                                        <td><?=$doc->f_oficio?></td>
+                                                        <td><?=$doc->f_acuse?></td>
+                                                        <td><?=$doc->comentario?></td>
+                                                        <td>Subdirección de lo Contencioso</td>
+                                                    </tr>
+                                                <?php endforeach ?>    
+                                                <?php endif ?>
+                                                <?php if ( isset($documentos['doc_sapa']) ): ?>
+                                                    <?php foreach ($documentos['doc_sapa'] as $key => $doc): ?>
+                                                        <tr>
+                                                            <td>
+                                                                <a href="controller/puente.php?option=17&doc=<?=$doc->id?>&tbl=documentos_turno" target="_blank"><?=$doc->oficio?></a>
+                                                            </td>
+                                                            <td><?=$doc->f_oficio?></td>
+                                                            <td><?=$doc->f_acuse?></td>
+                                                            <td><?=$doc->comentario?></td>
+                                                            <td>Subdirección de Análisis y Procedimientos Administrativos</td>
+                                                        </tr>
+                                                    <?php endforeach ?>
+                                                <?php endif ?>
+                                                
+                                                
                                             </tbody>
                                         </table>
                                     </div>

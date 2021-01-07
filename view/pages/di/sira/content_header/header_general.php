@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		ALTA
+		SISTEMA DE INSPECCIONES Y SUPERVISIONES
 		<small>Crear una acta</small>
 	</h1>
 	<ol class="breadcrumb">

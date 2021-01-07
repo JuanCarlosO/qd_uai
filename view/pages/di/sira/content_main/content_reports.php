@@ -27,22 +27,20 @@
 									<label>Tipo de actuación:</label>
 									<select name="t_actuacion" class="form-control">
 										<option value="">...</option>
-										<option value="1">INSPECCIÓN</option>
-										<option value="2">VERIFICACIÓN</option>
+										<!----> <option value="1">INSPECCIÓN</option>
+										<option value="2">VERIFICACIÓN</option> 
 										<option value="3">SUPERVISIÓN</option>
 										<option value="4">INVESTIGACION</option>
-										<option value="5">USUARIO SIMULADO</option>
-										<option value="6">AGENTE ENCUBIERTO</option>
+										<!-- <option value="5">USUARIO SIMULADO</option>
+										<option value="6">AGENTE ENCUBIERTO</option> -->
 									</select>
 								</div>
 							</div>
-							<div class="col-md-4">
+							<div class="col-md-3">
 								<div class="form-group">
 									<label>Procedencia:</label>
-									<select name="procedencia" class="form-control">
+									<select name="procedencia" id="procedencia" class="form-control">
 										<option value="">...</option>
-										<option value="1">Secretaría de Seguridad</option>
-										<option value="2">CPRS</option>
 									</select>
 								</div>
 							</div>
@@ -77,7 +75,7 @@
 								</div>
 							</div>
 						</div>
-						<d|iv class="row">
+						<div class="row">
 						    <div class="col-md-6">
 					            <div class="form-group">
 					                <label for="">Buscar palabras clave </label>

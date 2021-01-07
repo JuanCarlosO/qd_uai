@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Detalle del expediente
+		UAI - ACTAS
 		<small>Cédula General</small>
 	</h1>
 	<ol class="breadcrumb">

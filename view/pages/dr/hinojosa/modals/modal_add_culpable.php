@@ -15,57 +15,85 @@
 				</div>
 				<div class="modal-body">
 					<div id="m_culpable"></div>
-					<div class="row">
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Nombre</label>
-								<input type="text" name="nombre" value="" class="form-control" required>
-							</div>
-						</div>
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Apellido paterno</label>
-								<input type="text" name="ap_pat" value="" class="form-control" required>
-							</div>
-						</div>
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Apellido materno</label>
-								<input type="text" name="ap_mat" value="" class="form-control" required>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Género</label>
-								<select name="genero" id="genero" required class="form-control">
-									<option value="">...</option>
-									<option value="1">Hombre</option>
-									<option value="2">Mujer</option>
-								</select>
-							</div>
-						</div>
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Cargo que ocupa</label>
-								<select name="cargo" id="cargo" class="form-control"></select>
-							</div>
-						</div>
-						<div class="col-md-4">
-							<div class="form-group">
-								<label>Adscripción</label>
-								<select name="adscripcion" id="adscripcion" class="form-control">
-									<option value="">...</option>
-									<option value="1">Secretaría de Seguridad</option>
-									<option value="2">CPRS</option>
-								</select>
-							</div>
-						</div>
-					</div>					
+				    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nombre completo</label>
+                                <input type="text" class="form-control" name="name_presunto" value="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">                                                                
+                                <label>RFC</label>
+                                <input type="text" class="form-control" name="rfc" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">                                            
+                                <label>CURP</label>
+                                <input type="text" class="form-control" name="curp" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">                                                                
+                                <label>CUIP</label>
+                                <input type="text" class="form-control" name="cuip" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">                                                                
+                                <label>TIPO DE PUESTO</label>
+                                <select class="form-control" name="t_puesto">
+                                    <option value="">...</option>
+                                    <option value="1" >Administrativo</option>
+                                    <option value="2" >Operativo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Seleccionar cargo</label>
+                                <select class="form-control cargos" id="cargo" name="cargo">
+                                    <option value="">...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Género</label>
+                                <select class="form-control" id="ge" name="genero">
+                                    <option value="">...</option>
+                                    <option value="1">Hombre</option>
+                                    <option value="2">Mujer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Procedencia</label>
+                                <select class="form-control" name="procedencia">
+                                    <option value="">...</option>
+                                    <option value="1">CPRS</option>
+                                    <option value="2">SECRETARÍA DE SEGURIDAD</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Media filiación</label>
+                                <textarea class="form-control" id="media" name="media" style="resize: vertical; max-height: 250px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
 				</div>
 				<div class="modal-footer">
-					<button type="submit" class="btn btn-success btn-flat pull-right">Guardar turno</button>
+					<button type="submit" class="btn btn-success btn-flat pull-right">Guardar responsable</button>
 				</div>
 			</div>
 		</div>

@@ -1,28 +1,12 @@
 <!-- Main content -->
 <section class="content container-fluid">
+    <!--<div class="row">
+        <div class="col-md-12">
+            <h3 class="text-center">PERÍODO: 1-07-2019 AL DÍA <?=date('d-m-Y');?></h3>
+        </div>
+    </div>-->
+    <br><br><br>
     <div class="row">
-        <div class="col-md-3 col-xs-6">
-            <div class="info-box">
-                <span class="info-box-icon bg-aqua">
-                    <i class="fa fa-search"></i>
-                </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">INSPECCIONES</span>
-                    <span class="info-box-number" id="c_ins">0</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-xs-6">
-            <div class="info-box">
-                <span class="info-box-icon bg-aqua">
-                    <i class="fa fa-check"></i>
-                </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">VERIFICACIONES</span>
-                    <span class="info-box-number" id="c_ver">0</span>
-                </div>
-            </div>
-        </div>
         <div class="col-md-3 col-xs-6">
             <div class="info-box">
                 <span class="info-box-icon bg-aqua">
@@ -45,8 +29,31 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-3 col-xs-6">
+            <div class="info-box">
+                <span class="info-box-icon bg-aqua">
+                    <i class="fa fa-search"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">INSPECCIONES</span>
+                    <span class="info-box-number" id="c_ins">0</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-xs-6">
+            <div class="info-box">
+                <span class="info-box-icon bg-aqua">
+                    <i class="fa fa-check"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">VERIFICACIONES</span>
+                    <span class="info-box-number" id="c_ver">0</span>
+                </div>
+            </div>
+        </div>
+        
     </div>
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-md-3 col-xs-6">
             <div class="info-box">
                 <span class="info-box-icon bg-aqua">
@@ -69,7 +76,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </section>
 
 <section class="content container-fluid">

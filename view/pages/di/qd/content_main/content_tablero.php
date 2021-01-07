@@ -7,19 +7,21 @@
                     <h3 class="box-title"></h3>
                 </div>
                 <div class="box-body">
-                    <?php if ( ($_SESSION['perfil'] == 'DI' AND $_SESSION['nivel'] == 'DIRECTOR') || ($_SESSION['perfil'] == 'QDP' AND $_SESSION['nivel'] == 'SUBDIRECTOR') ): ?>
+                    <?php if ( ($_SESSION['perfil'] == 'DI' AND $_SESSION['nivel'] == 'DIRECTOR') || ($_SESSION['perfil'] == 'QDP' AND $_SESSION['nivel'] == 'SUBDIRECTOR') || ($_SESSION['perfil'] == 'ESPECIAL' AND $_SESSION['nivel'] == 'SUBDIRECTOR') ): ?>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="table-responsive">
                                     <table id="tbl_edos" class="table table-hover table-bordered">
                                         <caption class="bg-gray text-center">
-                                            ESTADOS DE LOS EXPEDIENTE
+                                            ESTADOS DE LOS EXPEDIENTES
                                         </caption>
                                         <thead>
                                             <tr class="bg-gray">
                                                 <th class="text-center"> ESTADO </th>
                                                 <th class="text-center"> CANTIDAD </th>
-                                                <th class="text-center"> MOSTRAR </th>
+                                                <?php if ($_SESSION['perfil'] != "SIRA"): ?>
+                                                    <th class="text-center"> MOSTRAR </th>
+                                                <?php endif ?>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -35,6 +37,7 @@
                                         <thead>
                                             <tr class="bg-gray">
                                                 <th class="text-center"> ABOGADO </th>
+                                                <th class="text-center"> ADSCRIPCIÓN </th>
                                                 <th class="text-center"> CANTIDAD </th>
                                                 <th class="text-center"> MOSTRAR </th>
                                             </tr>
@@ -45,17 +48,19 @@
                             </div>
                         </div>
                     <?php endif ?>
-                    <?php if (($_SESSION['perfil'] == 'DI' AND $_SESSION['nivel'] == 'DIRECTOR') || ($_SESSION['perfil'] == 'QDNP' AND $_SESSION['nivel'] == 'SUBDIRECTOR')): ?>
+                    <?php if (($_SESSION['perfil'] == 'DI' AND $_SESSION['nivel'] == 'DIRECTOR') || ($_SESSION['perfil'] == 'SIRA')): ?>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="table-responsive">
                                     <table id="tbl_ordenes" class="table table-hover table-bordered">
-                                        <caption class="bg-gray text-center">CONTADOR DE ORDENES DE TRABAJO</caption>
+                                        <caption class="bg-gray text-center">CONTADOR DE ÓRDENES DE TRABAJO</caption>
                                         <thead>
                                             <tr class="bg-gray">
                                                 <th class="text-center">TIPO DE ORDEN</th>
                                                 <th class="text-center">TOTAL</th>
-                                                <th class="text-center">MOSTRAR</th>
+                                                <?php if ($_SESSION['perfil'] != "SIRA"): ?>
+                                                    <th class="text-center"> MOSTRAR </th>
+                                                <?php endif ?>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -70,7 +75,9 @@
                                             <tr class="bg-gray">
                                                 <th class="text-center">TIPO ACTUACIÓN</th>
                                                 <th class="text-center">TOTAL</th>
-                                                <th class="text-center">MOSTRAR</th>
+                                                <?php if ($_SESSION['perfil'] != "SIRA"): ?>
+                                                    <th class="text-center"> MOSTRAR </th>
+                                                <?php endif ?>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -80,25 +87,27 @@
                         </div>
                     <?php endif ?>
                      
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="table-responsive">
-                                <table id="tbl_general" class="table table-hover table-bordered">
-                                    <caption class="bg-gray"></caption>
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>CLAVE EXP.</th>
-                                            <th>ESTADO</th>
-                                            <th>PROCEDENCIA</th>
-                                            <th>TIPO DE ASUNTO </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
+                    <?php if ($_SESSION['perfil'] != 'SIRA'): ?>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table id="tbl_general" class="table table-hover table-bordered">
+                                        <caption class="bg-gray"></caption>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>No. EXPEDIENTE</th>
+                                                <th>ESTADO</th>
+                                                <th>PROCEDENCIA</th>
+                                                <th>TIPO DE ASUNTO </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>                   	
+                    <?php endif ?>                   	
                 </div>
             </div>
         </div>

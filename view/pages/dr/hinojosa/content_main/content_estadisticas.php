@@ -13,21 +13,19 @@
                 		<div class="row">
                 			<div class="col-md-3">
                 				<label>Fecha de inicio</label>
-                				<input type="date" id="f_ini" name="f_ini" value="" required class="form-control">
+                				<input type="date" id="f_ini" name="f_ini" value="" required class="form-control" min="2019-07-01" max="<?=date('Y-m-d');?>">
                 			</div>
                 			<div class="col-md-3">
                 				<label>Fecha fin</label>
-                				<input type="date" id="f_fin" name="f_fin" value="" required class="form-control">
+                				<input type="date" id="f_fin" name="f_fin" value="" required class="form-control" min="2019-07-01" max="<?=date('Y-m-d');?>">
                 			</div>
                 			<div class="col-md-3">
                 				<label>Estado procesal</label>
                 				<select name="e_procesal" id="e_procesal" class="form-control">
                 					<option value="">...</option>
                 					<option value="1">Enviado</option>
-                					<option value="2">Trámite</option>
                 					<option value="3">Devueltos a D.I.</option>
-                                    <option value="4">En firma</option>
-                                    <option value="5">Con proyecto elaborado</option>
+                                    <option value="4">Resuelto</option>
                 				</select>
                 			</div>
                 			<div class="col-md-3">
@@ -37,6 +35,8 @@
                                         <option value="">...</option>
                                         <option value="10">RESERVA</option>
                                         <option value="11">IMPROCEDENCIA</option>
+                                        <option value="3">INCOMPETENCIA</option>
+                                        <option value="2">ARCHIVO</option>
                                     </select>
                                 </div>
                             </div>
@@ -76,7 +76,7 @@
                                 <th>Estado procesal</th>
                                 <th>Autoridad destino</th>
                                 <th>Fecha de asignación S.A.P.A.</th>
-                                <th>Fecha envio S.C.</th><!-- Pendiente por agregar-->
+                                <th>Fecha envío S.C.</th><!-- Pendiente por agregar-->
                                 <th>Estado</th>
                             </tr>
                         </thead>

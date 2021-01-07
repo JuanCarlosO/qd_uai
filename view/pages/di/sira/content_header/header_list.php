@@ -1,7 +1,8 @@
 <section class="content-header">
 	<h1>
-		Listado
-		<small>Actuaciones</small>
+		SISTEMA DE INSPECCIONES Y SUPERVISIONES
+		
+		<small>Listado de actuaciones</small>
 	</h1>
 	<ol class="breadcrumb">
 		<li><a href="#"><i class="fa fa-dashboard"></i> Inicio</a></li>

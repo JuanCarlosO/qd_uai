@@ -195,6 +195,78 @@ class QDController
 	{
 		return $this->model->saveAsignar();
 	}
+	public function getArticulos()
+	{
+		return $this->model->getArticulos();
+	}
+	public function saveCargo()
+	{
+		return $this->model->saveCargo();
+	}
+	public function getProcedenciasP()
+	{
+		return $this->model->getProcedenciasP();
+	}
+	public function saveProcedenciasP()
+	{
+		return $this->model->saveProcedenciasP();
+	}
+	public function getSecciones()
+	{
+		return $this->model->getSecciones();
+	}
+	public function getFracciones()
+	{
+		return $this->model->getFracciones();
+	}
+	public function getPenales()
+	{
+		return $this->model->getPenales();
+	}
+	public function saveOpinion()
+	{
+		return $this->model->saveOpinion();
+	}
+	public function getColores()
+	{
+		return $this->model->getColores();
+	}
+	public function getExpTipo()
+	{
+		return $this->model->getExpTipo();
+	}
+	public function getListadoTipo()
+	{
+		return $this->model->getListadoTipo();
+	}
+	public function getCoordinacionesTra()
+	{
+		return $this->model->getCoordinacionesTra();
+	}
+	public function getAgrupamientosTra()
+	{
+		return $this->model->getAgrupamientosTra();
+	}	
+	public function getDireccionAdmin()
+	{
+		return $this->model->getDireccionAdmin();
+	}	
+	public function getUnidadAdmin()
+	{
+		return $this->model->getUnidadAdmin();
+	}	
+	public function getDirAreasAdmin()
+	{
+		return $this->model->getDirAreasAdmin();
+	}	
+	public function getSubdirAreasAdmin()
+	{
+		return $this->model->getSubdirAreasAdmin();
+	}	
+	public function getDepartamentosAdmin()
+	{
+		return $this->model->getDepartamentosAdmin();
+	}	
 	
 }
 ?>

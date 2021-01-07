@@ -5,7 +5,7 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
-				<h4 class="modal-title">LISTADO DE ORDENES DE TRABAJO</h4>
+				<h4 class="modal-title">LISTADO DE ÓRDENES DE TRABAJO</h4>
 			</div>
 			<div class="modal-body">
 				<div id="div_detalle"></div>

@@ -34,6 +34,27 @@ if ( isset($_GET['acta']) ) {
 }else{
     echo '<script type="text/javascript"> document.location.href = "login.php"; </script>';
 }
+##tipo de actuacion con asentos
+$t_actuacion = "";
+switch ($r['actas']->t_actuacion) {
+    case 'INSPECCION':
+        $t_actuacion = "INSPECCIÓN";
+        break;
+    case 'VERIFICACION':
+        $t_actuacion = "VERIFICACIÓN";
+        break;
+    case 'SUPERVISION':
+        $t_actuacion = "SUPERVISIÓN";
+        break;
+    case 'INVESTIGACION':
+        $t_actuacion = "INVESTIGACIÓN";
+        break;
+    
+    default:
+        # code...
+        break;
+}
+
 ?>
 
 <section class="content container-fluid">
@@ -41,12 +62,12 @@ if ( isset($_GET['acta']) ) {
         <div class="col-md-12">
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Detalle de la cédula</h3>
+                    <h3 class="box-title">Detalle de la cédula del acta </h3>
                 </div>
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Acta con número: <u><?=$r['actas']->clave?></u></center> </h1>
+                            <h2> <center>Acta con número: <u><?=$r['actas']->clave?></u></center> </h2>
                         </div>
                     </div>
                     <div class="row">
@@ -55,7 +76,7 @@ if ( isset($_GET['acta']) ) {
                                 <dt>¿Quién genera?</dt>
                                 <dd> <?=$r['actas']->n_area?> </dd>
                                 <dt>Tipo de actuación</dt>
-                                <dd><?=$r['actas']->t_actuacion?></dd>
+                                <dd><?=$t_actuacion?></dd>
                                 <dt>Número de acta</dt>
                                 <dd><?=$r['actas']->clave?></dd>
                                 <dt>Fecha del acta</dt>
@@ -67,7 +88,7 @@ if ( isset($_GET['acta']) ) {
                     </div> 
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos de la dirección</center> </h1>
+                            <h2> <center>Datos de la dirección</center> </h2>
                         </div>
                     </div>
                     <div class="row">
@@ -91,7 +112,7 @@ if ( isset($_GET['acta']) ) {
                     </div>      
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos del quejoso(s)</center> </h1>
+                            <h2> <center>Datos del quejoso(s)</center> </h2>
                         </div>
                     </div>
                     <div class="row">
@@ -126,7 +147,7 @@ if ( isset($_GET['acta']) ) {
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos del presunto(s) infractor(es)</center> </h1>
+                            <h2> <center>Datos del presunto(s) infractor(es)</center> </h2>
                         </div>
                     </div>
                     <div class="row">
@@ -140,7 +161,7 @@ if ( isset($_GET['acta']) ) {
                                             <th>Género</th>
                                             <th>Cargo</th>
                                             <th>Procedencia</th>
-                                            <th>Media filiacion</th>
+                                            <th>Media filiación</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -149,7 +170,7 @@ if ( isset($_GET['acta']) ) {
                                             <td><?=(++$key)?></td>
                                             <td><?=$quejoso->nombre;?> <?=$quejoso->ap_pat;?> <?=$quejoso->ap_mat;?></td>
                                             <td><?=$quejoso->genero?></td>
-                                            <td><?=$quejoso->cargo_id?></td>
+                                            <td><?=$quejoso->n_cargo?></td>
                                             <td><?=$quejoso->procedencia?></td>
                                             <td><?=$quejoso->media_f?></td>
                                         </tr>
@@ -161,7 +182,7 @@ if ( isset($_GET['acta']) ) {
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos de las unidades</center> </h1>
+                            <h2> <center>Datos de las unidades</center> </h2>
                         </div>
                     </div>
                     <div class="row">
@@ -171,7 +192,7 @@ if ( isset($_GET['acta']) ) {
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Caracteristicas</th>
+                                            <th>Características</th>
                                             <th>Información</th>
                                             <th>Corporación</th>
                                             
@@ -192,9 +213,9 @@ if ( isset($_GET['acta']) ) {
                                             </td>
                                             <td>
                                                 <ol>
-                                                    <li>PLACAS: <?=$u->marca?></li>
-                                                    <li>NIV: <?=$u->submarca?></li>
-                                                    <li>INVENTARIO: <?=$u->t_auto?></li>
+                                                    <li>PLACAS: <?=$u->placa?></li>
+                                                    <li>NIV: <?=$u->niv?></li>
+                                                    <li>INVENTARIO: <?=$u->n_inventario?></li>
                                                 </ol>
                                             </td>
                                             <td><?=$u->corporacion?></td>
@@ -207,7 +228,7 @@ if ( isset($_GET['acta']) ) {
                     </div>   
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos de los animales</center> </h1>
+                            <h2> <center>Datos de los semovientes</center> </h2>
                         </div>
                     </div>
                     <div class="row">
@@ -246,7 +267,7 @@ if ( isset($_GET['acta']) ) {
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <h1> <center>Datos de las armas</center> </h1>
+                            <h2> <center>Datos de las armas</center> </h2>
                         </div>
                     </div>
                     <div class="row">
@@ -257,7 +278,7 @@ if ( isset($_GET['acta']) ) {
                                         <tr>
                                             <th>#</th>
                                             <th>Tipo</th>
-                                            <th>Matricula</th>
+                                            <th>Matrícula</th>
                                             <th>Inventario</th>
                                             <th>Corporación</th>
                                         </tr>
@@ -276,10 +297,9 @@ if ( isset($_GET['acta']) ) {
                                 </table>
                             </div>
                         </div>
-                    </div>           	
+                    </div>              
                 </div>
             </div>
         </div>
     </div>
 </section>
-    

@@ -1,6 +1,6 @@
 <section class="content-header">
 	<h1>
-		Documentos
+		SISTEMA DE INSPECCIONES Y SUPERVISIONES
 		<small>Aviso de privacidad</small>
 	</h1>
 	<ol class="breadcrumb">

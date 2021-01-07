@@ -79,7 +79,7 @@ $list = $q->getExpList($quejas);
 	                                </div>
 	                            </div>
 	                            <!-- respo -->
-	                            <div id="contenedor_2" class="hidden">
+	                            <!-- <div id="contenedor_2" class="hidden">
 	                                <div class="row">
 	                                    <div class="col-md-3">
 	                                        <label>Tipo de ley</label>
@@ -91,7 +91,7 @@ $list = $q->getExpList($quejas);
 	                                            <option value="">...</option>
 	                                        </select>
 	                                    </div>
-	                                </div>
+	                                </div> -->
 	                                <div class="row">
 	                                    <div class="col-md-9">
 	                                        <label>Turnar a</label>
@@ -99,63 +99,67 @@ $list = $q->getExpList($quejas);
 	                                        <input type="hidden" id="persona_id" name="persona_id" value="">
 	                                    </div>
 	                                </div>
-	                            </div>
-	                            <!-- incompetencia -->
-	                            <div id="contenedor_3" class=" hidden">
-	                                <div class="row">
-	                                    <div class="col-md-4">
-	                                        <div class="form-group">
-	                                            <label>Nombre de la dependencia</label>
-	                                            <select id="dependencia_f" name="dependencia_f" class="form-control"></select>
-	                                        </div>
-	                                    </div>
-	                                    <div class="col-md-4">
-	                                        <div class="form-group">
-	                                            <label>Nombre del funcionario</label>
-	                                            <input type="text" id="funcionario_f" name="funcionario_f" value="" class="form-control" maxlength="100">
-	                                        </div>
-	                                    </div>
-	                                    <div class="col-md-4">
-	                                        <div class="form-group">
-	                                            <label>Número de oficio</label>
-	                                            <input type="text" id="oficio" name="oficio" value="" class="form-control">
-	                                            <input type="hidden" id="oficio_id" name="oficio_id" value="">
-	                                        </div>
-	                                    </div>
-	                                </div>
-	                            </div>
-	                            <!-- acumulado -->
-	                            <div id="contenedor_4" class="hidden">
-	                                <div class="row">
-	                                    <div class="col-md-6">
-	                                        <label>Expediente al que se le acumula</label>
-	                                        <input type="text" id="expediente" name="expediente" value="" class="form-control">
-	                                        <input type="hidden" id="expediente_id" name="expediente_id" value="">
-	                                    </div>
-	                                    <div class="col-md-6">
-	                                        <label>Servidor público</label>
-	                                        <input type="text" id="sp_uai" name="sp_uai" value="" class="form-control">
-	                                        <input type="hidden" id="sp_uai_id" name="sp_uai_id" value="" placeholder="">
-	                                    </div>
-	                                </div>
+	                                <!-- incompetencia -->
+		                            <div id="contenedor_3" class=" hidden">
+		                                <div class="row">
+		                                    <div class="col-md-4">
+		                                        <div class="form-group">
+		                                            <label>Nombre de la Autoridad</label>
+		                                            <select id="dependencia_f" name="dependencia_f" class="form-control"></select>
+		                                        </div>
+		                                    </div>
+		                                    <div class="col-md-4">
+		                                        <div class="form-group">
+		                                            <label>Nombre del funcionario</label>
+		                                            <input type="text" id="funcionario_f" name="funcionario_f" value="" class="form-control" maxlength="100">
+		                                        </div>
+		                                    </div>
+		                                    <div class="col-md-4">
+		                                        <div class="form-group">
+		                                            <label>Número de oficio</label>
+		                                            <input type="text" id="oficio" name="oficio" value="" class="form-control">
+		                                            <input type="hidden" id="oficio_id" name="oficio_id" value="">
+		                                        </div>
+		                                    </div>
+		                                </div>
+		                            </div>
+		                            <!-- acumulado -->
+		                            <div id="contenedor_4" class="hidden">
+		                                <div class="row">
+		                                    <div class="col-md-6">
+		                                        <label>Expediente al que se le acumula</label>
+		                                        <input type="text" id="expediente" name="expediente" value="" class="form-control">
+		                                        <input type="hidden" id="expediente_id" name="expediente_id" value="">
+		                                    </div>
+		                                    <div class="col-md-6">
+		                                        <label>Servidor público</label>
+		                                        <input type="text" id="sp_uai" name="sp_uai" value="" class="form-control">
+		                                        <input type="hidden" id="sp_uai_id" name="sp_uai_id" value="" placeholder="">
+		                                    </div>
+		                                </div>
+		                            </div>
+	                            
+		                            <div class="row">
+		                                <div class="col-md-12">
+		                                    <div class="form-group">
+		                                    	<label>Motivo del cambio</label>
+		                                    	<textarea name="comentario" class="form-control" style="resize: vertical;max-height: 200px;"></textarea>
+		                                    </div>
+		                                </div>
+		                            </div>
+		                            <div class="row">
+		                                <div class="col-md-4"></div>
+		                                <div class="col-md-4">
+		                                    <button id="btn_turnar" type="submit" class="btn btn-success btn-flat btn-block">
+		                                        <i class="fa fa-floppy-o"></i> Guardar turno
+		                                    </button>
+		                                </div>
+		                                <div class="col-md-4"></div>
+		                            </div>
 	                            </div>
 	                            
-	                            <div class="row">
-	                                <div class="col-md-12">
-	                                    <label>Motivo del cambio</label>
-	                                    <textarea name="comentario" class="form-control" style="resize: vertical;max-height: 200px;"></textarea>
-	                                </div>
-	                            </div>
 	                            <br>
-	                            <div class="row">
-	                                <div class="col-md-4"></div>
-	                                <div class="col-md-4">
-	                                    <button id="btn_turnar" type="submit" class="btn btn-success btn-flat btn-block">
-	                                        <i class="fa fa-floppy-o"></i> Guardar turno
-	                                    </button>
-	                                </div>
-	                                <div class="col-md-4"></div>
-	                            </div>
+	                            
 	                        </div>
 	                    </div>
 	                </div>
